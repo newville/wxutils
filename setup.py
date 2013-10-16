@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from distutils.core import setup
 
 long_desc = """A library of convenience functions for wxPython.  The aim
 here is to simplify code, reduce boiler-plate, and prevent repeating code
@@ -24,8 +24,10 @@ widgets, such as:
 
 """
 
+from lib import __version__
+
 setup(name = 'wxutils',
-      version = lmfit.__version__,
+      version = __version__,
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
@@ -36,6 +38,7 @@ setup(name = 'wxutils',
       long_description = long_desc,
       platforms = ('Windows', 'Linux', 'Mac OS X'),
       classifiers=['Programming Language :: Python'],
-      package_dir = {'lib': 'wxutils'},
+      package_dir = {'wxutils': 'lib'},
+      packages   = ['wxutils'],
       )
 

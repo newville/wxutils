@@ -143,11 +143,11 @@ class Check(wx.CheckBox):
     c = Check(parent, default=True, label=None, **kws)
     kws passed to wx.CheckBox
     """
-    def __init__(self, parent, default=True, label=None, **kws):
-        wx.CheckBox.__init__(self, parent, -1, **kws)
-        self.SetValue(default)
-        if label is not None:
-            self.SetLabel(label)
+    def __init__(self, parent, label='', default=True, action=None, **kws):
+        wx.CheckBox.__init__(self, parent, -1, label=label, **kws)
+        self.SetValue({True: 1, False:0}[default])
+        if action is not None:
+            self.Bind(wx.EVT_CHECKBOX, action)
 
 def Button(parent, label, action=None, **kws):
     """Simple button with bound action
@@ -273,6 +273,39 @@ class SimpleText(wx.StaticText):
         if bgcolour is not None:
             self.SetBackgroundColour(colour)
 
+class LabeledTextCtrl(TextCtrl):
+    """
+    simple extension of TextCtrl with a .label attribute holding a SimpleText
+    Typical usage:
+      entry = LabeledTextCtrl(self, value='22', labeltext='X:')
+      row   = wx.BoxSizer(wx.HORIZONTAL)
+      row.Add(entry.label, 1,wx.ALIGN_LEFT|wx.EXPAND)
+      row.Add(entry,    1,wx.ALIGN_LEFT|wx.EXPAND)
+    """
+    def __init__(self, parent, value, font=None, action=None,
+                 action_kws=None, act_on_losefocus=True, size=(-1, -1),
+                 bgcolour=None, colour=None, style=None,
+                 labeltext=None, labelsize=(-1, -1),
+                 labelcolour=None, labelbgcolour=None, **kws):
+
+        if labeltext is not None:
+            self.label = SimpleText(parent, labeltext, size=labelsize,
+                                    font=font, style=style,
+                                    colour=labelcolour,
+                                    bgcolour=labelbgcolour)
+
+        try:
+            value = str(value)
+        except:
+            value = ' '
+
+        TextCtrl.__init__(self, parent, value, font=font,
+                          colour=colour, bgcolour=bgcolour,
+                          style=stye, size=size,
+                          action=action, action_kws=action_kws,
+                          act_on_losefocus=act_on_losefocus, **kws)
+
+
 class HyperText(wx.StaticText):
     """HyperText is a simple extension of wx.StaticText that
 
@@ -301,3 +334,56 @@ class HyperText(wx.StaticText):
             self.action(self.GetLabel(), event=event, **action_kws)
         event.Skip()
 
+
+class EditableListBox(wx.ListBox):
+    """
+    A ListBox with pop-up menu to arrange order of
+    items and remove items from list
+    supply select_action for EVT_LISTBOX selection action
+    """
+    def __init__(self, parent, select_action, right_click=True,
+                 remove_action=None, **kws):
+        wx.ListBox.__init__(self, parent, **kws)
+
+        self.SetBackgroundColour(wx.Colour(248, 248, 235))
+        self.Bind(wx.EVT_LISTBOX,  select_action)
+        self.remove_action = remove_action
+        if right_click:
+            self.Bind(wx.EVT_RIGHT_DOWN, self.onRightClick)
+            for item in ('popup_up1', 'popup_dn1',
+                         'popup_upall', 'popup_dnall', 'popup_remove'):
+                setattr(self, item,  wx.NewId())
+                self.Bind(wx.EVT_MENU, self.onRightEvent,
+                          id=getattr(self, item))
+
+    def onRightClick(self, evt=None):
+        menu = wx.Menu()
+        menu.Append(self.popup_up1,    "Move up")
+        menu.Append(self.popup_dn1,    "Move down")
+        menu.Append(self.popup_upall,  "Move to top")
+        menu.Append(self.popup_dnall,  "Move to bottom")
+        menu.Append(self.popup_remove, "Remove from list")
+        self.PopupMenu(menu)
+        menu.Destroy()
+
+    def onRightEvent(self, event=None):
+        idx = self.GetSelection()
+        if idx < 0: # no item selected
+            return
+        wid   = event.GetId()
+        names = self.GetItems()
+        this  = names.pop(idx)
+        if wid == self.popup_up1 and idx > 0:
+            names.insert(idx-1, this)
+        elif wid == self.popup_dn1 and idx < len(names):
+            names.insert(idx+1, this)
+        elif wid == self.popup_upall:
+            names.insert(0, this)
+        elif wid == self.popup_dnall:
+            names.append(this)
+        elif wid == self.popup_remove and self.remove_action is not None:
+            self.remove_action(this)
+
+        self.Clear()
+        for name in names:
+            self.Append(name)
