@@ -177,7 +177,7 @@ def Choice(panel, choices, default=0, action=None, **kws):
     c.Bind(wx.EVT_CHOICE, action)
     return c
 
-def Popup(parent, message, title, style=None):
+def Popup(parent, message, title, style=None, **kws):
     """Simple popup message dialog
     p = Popup(parent, message, title, **kws)
     returns output of MessageDialog.ShowModal()
