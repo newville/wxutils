@@ -138,6 +138,31 @@ class YesNo(wx.Choice):
         elif choice in self.choices:
             self.SetSelection(self.choices.index(choice))
 
+class Choice(wx.Choice):
+    """Simple Choice with default and bound action
+    c = Choice(panel, choices, default=0, action=None, **kws)
+    """
+    def __init__(self, parent, choices=None, default=0,
+                 action=None, **kws):
+        if choices is None:
+            choices = []
+        wx.Choice.__init__(self, parent, -1,  choices=choices, **kws)
+        self.Select(default)
+        self.Bind(wx.EVT_CHOICE, action)
+
+    def SetChoices(self, choices):
+        index = 0
+        try:
+            current = self.GetStringSelection()
+            if current in choices:
+                index = choices.index(current)
+        except:
+            pass
+        self.Clear()
+        self.AppendItems(choices)
+        self.SetStringSelection(choices[index])
+
+
 class Check(wx.CheckBox):
     """Simple Checkbox
     c = Check(parent, default=True, label=None, **kws)
@@ -168,14 +193,6 @@ def MenuItem(parent, menu, label='', longtext='', action=None):
     if hasattr(action, '__call__'):
         wx.EVT_MENU(parent, wid, action)
 
-def Choice(panel, choices, default=0, action=None, **kws):
-    """Simple Choice with default and bound action
-    c = Choice(panel, choices, default=0, action=None, **kws)
-    """
-    c = wx.Choice(panel, -1,  choices=choices, **kws)
-    c.Select(default)
-    c.Bind(wx.EVT_CHOICE, action)
-    return c
 
 def Popup(parent, message, title, style=None, **kws):
     """Simple popup message dialog
