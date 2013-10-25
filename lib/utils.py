@@ -89,6 +89,39 @@ def OkCancel(panel, onOK=None, onCancel=None):
     return btnsizer
 
 
+class GridPanel(wx.Panel):
+    """A simple panel with a GridBagSizer
+    """
+    def __init__(self, parent, nrows=10, ncols=10, **kws):
+        wx.Panel.__init__(self, parent, **kws)
+        self.sizer = wx.GridBagSizer(nrows, ncols)
+        self.irow = 0
+        self.icol = 0
+
+    def Add(self, item, irow=None, icol=None, drow=1, dcol=1,
+            style=wx.ALIGN_CENTER, newrow=False, pad=1, **kws):
+        """add item with default values for col, row, and size"""
+        if newrow: self.NewRow()
+        if irow is None: irow = self.irow
+        if icol is None: icol = self.icol
+        self.sizer.Add(item, (irow, icol), (drow, dcol), style, pad, **kws)
+        self.icol = self.icol + dcol
+
+    def NewRow(self):
+        "advance row, set col # = 0"
+        self.irow += 1
+        self.icol = 0
+
+    def pack(self):
+        tsize = self.GetSize()
+        msize = self.GetMinSize()
+
+        self.SetSizer(self.sizer)
+        self.sizer.Fit(self)
+        nsize = (10*int(1.1*(max(msize[0], tsize[0])/10)),
+                 10*int(1.1*(max(msize[1], tsize[1])/10.)))
+        self.SetSize(nsize)
+
 class GUIColors(object):
     """a container for colour attributes
          bg
