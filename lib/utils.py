@@ -99,13 +99,20 @@ class GridPanel(wx.Panel):
         self.icol = 0
 
     def Add(self, item, irow=None, icol=None, drow=1, dcol=1,
-            style=wx.ALIGN_CENTER, newrow=False, pad=1, **kws):
+            style=wx.ALIGN_CENTER, newrow=False, pad=0, **kws):
         """add item with default values for col, row, and size"""
         if newrow: self.NewRow()
         if irow is None: irow = self.irow
         if icol is None: icol = self.icol
         self.sizer.Add(item, (irow, icol), (drow, dcol), style, pad, **kws)
         self.icol = self.icol + dcol
+
+
+    def AddMany(self, items, newrow=False, **kws):
+        """add items"""
+        if newrow: self.NewRow()
+        for item in items:
+            self.Add(item, **kws)
 
     def NewRow(self):
         "advance row, set col # = 0"
