@@ -119,6 +119,13 @@ class GridPanel(wx.Panel):
         self.irow += 1
         self.icol = 0
 
+    def AddText(self, label, newrow=False, dcol=1, style=None, **kws):
+        """add a Simple StaticText item"""
+        if style is None:
+            style = CCEN
+        self.Add(SimpleText(self, label, style=style, **kws),
+                 dcol=dcol, style=style, newrow=newrow)
+        
     def pack(self):
         tsize = self.GetSize()
         msize = self.GetMinSize()
