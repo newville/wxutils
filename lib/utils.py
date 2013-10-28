@@ -114,6 +114,12 @@ class GridPanel(wx.Panel):
         for item in items:
             self.Add(item, **kws)
 
+    def AddManyText(self, items, newrow=False, **kws):
+        """add items"""
+        if newrow: self.NewRow()
+        for item in items:
+            self.AddText(item, **kws)
+
     def NewRow(self):
         "advance row, set col # = 0"
         self.irow += 1
