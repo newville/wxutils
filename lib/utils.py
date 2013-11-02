@@ -92,21 +92,30 @@ def OkCancel(panel, onOK=None, onCancel=None):
 class GridPanel(wx.Panel):
     """A simple panel with a GridBagSizer
     """
-    def __init__(self, parent, nrows=10, ncols=10, **kws):
+    def __init__(self, parent, nrows=10, ncols=10, pad = 0,
+                 itemstyle = wx.ALIGN_CENTER, **kws):
         wx.Panel.__init__(self, parent, **kws)
         self.sizer = wx.GridBagSizer(nrows, ncols)
         self.irow = 0
         self.icol = 0
+        self.itemstyle = itemstyle
+        self.pad  = pad
 
-    def Add(self, item, irow=None, icol=None, drow=1, dcol=1,
-            style=wx.ALIGN_CENTER, newrow=False, pad=0, **kws):
+    def Add(self, item, irow=None, icol=None, drow=1, dcol=1, style=None,
+            newrow=False, pad=None, **kws):
         """add item with default values for col, row, and size"""
-        if newrow: self.NewRow()
-        if irow is None: irow = self.irow
-        if icol is None: icol = self.icol
+        if newrow:
+            self.NewRow()
+        if style is None:
+            style = self.itemstyle
+        if irow is None:
+            irow = self.irow
+        if pad is None:
+            pad = self.pad
+        if icol is None:
+            icol = self.icol
         self.sizer.Add(item, (irow, icol), (drow, dcol), style, pad, **kws)
         self.icol = self.icol + dcol
-
 
     def AddMany(self, items, newrow=False, **kws):
         """add items"""
@@ -131,7 +140,7 @@ class GridPanel(wx.Panel):
             style = CCEN
         self.Add(SimpleText(self, label, style=style, **kws),
                  dcol=dcol, style=style, newrow=newrow)
-        
+
     def pack(self):
         tsize = self.GetSize()
         msize = self.GetMinSize()
