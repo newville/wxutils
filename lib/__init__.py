@@ -11,7 +11,7 @@ from icons import get_icon
 
 from periodictable import  PeriodicTablePanel
 
-from utils import (GUIColors, YesNo, Check, GridPanel,
+from utils import (GUIColors, YesNo, Check, GridPanel, RowPanel,
                    SimpleText, TextCtrl, LabeledTextCtrl,
                    HyperText, EditableListBox, Font, SetChildrenFont,
                    HLine, HLineText, Button, MenuItem, Choice,

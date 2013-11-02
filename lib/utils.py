@@ -89,6 +89,23 @@ def OkCancel(panel, onOK=None, onCancel=None):
     return btnsizer
 
 
+class RowPanel(wx.Panel):
+    """ a simple row panel with horizontal sizer"""
+    def __init__(self, parent, **kws):
+        wx.Panel.__init__(self, parent, **kws)
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+    def Add(self, item, expand=0, style=LEFT|wx.ALIGN_BOTTOM, padding=2):
+        self.sizer.Add(item, expand, style, padding)
+
+    def AddText(self, label, expand=0, style=LEFT|wx.ALIGN_BOTTOM, 
+                padding=2, **kws):
+        self.sizer.Add(SimpleText(self, label, **kws),
+                       expand, style, padding)
+
+    def pack(self):
+        pack(self, self.sizer)
+        
 class GridPanel(wx.Panel):
     """A simple panel with a GridBagSizer
     """
