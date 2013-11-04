@@ -121,6 +121,7 @@ class GridPanel(wx.Panel):
     def Add(self, item, irow=None, icol=None, drow=1, dcol=1, style=None,
             newrow=False, pad=None, **kws):
         """add item with default values for col, row, and size"""
+        # print 'Sizer Add ', style, self.itemstyle, LEFT, item
         if newrow:
             self.NewRow()
         if style is None:
@@ -154,7 +155,7 @@ class GridPanel(wx.Panel):
     def AddText(self, label, newrow=False, dcol=1, style=None, **kws):
         """add a Simple StaticText item"""
         if style is None:
-            style = CCEN
+            style = LCEN
         self.Add(SimpleText(self, label, style=style, **kws),
                  dcol=dcol, style=style, newrow=newrow)
 
