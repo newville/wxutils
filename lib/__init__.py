@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__  = 'Matthew Newville'
+
+import sys
+if not hasattr(sys, 'frozen'):
+    try:
+        import wxversion
+        wxversion.ensureMinimal('2.8')
+    except:
+        pass
+import wx
 
 from debugtime import debugtime
 from floats import make_steps, set_float, FloatCtrl, NumericCombo
