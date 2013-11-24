@@ -6,7 +6,6 @@ especially useful for wx functionality
 """
 import os
 import wx
-from string import maketrans
 from array import array
 from functools import partial
 

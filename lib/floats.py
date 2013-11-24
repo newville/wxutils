@@ -4,7 +4,6 @@ Code for floating point controls
 """
 
 from functools import partial
-import fpformat
 import wx
 
 HAS_NUMPY = False
@@ -204,7 +203,7 @@ class FloatCtrl(wx.TextCtrl):
 
     def GetValue(self):
         if self.__prec > 0:
-            return set_float(fpformat.fix(self.__val, self.__prec))
+            return set_float("%%.%if" % (self._prec) % (self.__val))
         else:
             return int(self.__val)
 
