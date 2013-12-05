@@ -203,7 +203,7 @@ class FloatCtrl(wx.TextCtrl):
 
     def GetValue(self):
         if self.__prec > 0:
-            return set_float("%%.%if" % (self._prec) % (self.__val))
+            return set_float("%%.%if" % (self.__prec) % (self.__val))
         else:
             return int(self.__val)
 
