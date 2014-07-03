@@ -280,7 +280,7 @@ def Popup(parent, message, title, style=None, **kws):
     """
     if style is None:
         style = wx.OK|wx.ICON_INFORMATION
-    dlg = wx.MessageDialog(parent, message, title, **kws)
+    dlg = wx.MessageDialog(parent, message, title, style=style, **kws)
     ret = dlg.ShowModal()
     dlg.Destroy()
     return ret
