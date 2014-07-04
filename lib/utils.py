@@ -97,14 +97,14 @@ class RowPanel(wx.Panel):
     def Add(self, item, expand=0, style=LEFT|wx.ALIGN_BOTTOM, padding=2):
         self.sizer.Add(item, expand, style, padding)
 
-    def AddText(self, label, expand=0, style=LEFT|wx.ALIGN_BOTTOM, 
+    def AddText(self, label, expand=0, style=LEFT|wx.ALIGN_BOTTOM,
                 padding=2, **kws):
         self.sizer.Add(SimpleText(self, label, **kws),
                        expand, style, padding)
 
     def pack(self):
         pack(self, self.sizer)
-        
+
 class GridPanel(wx.Panel):
     """A simple panel with a GridBagSizer
     """
@@ -408,26 +408,27 @@ class HyperText(wx.StaticText):
        1. adds an underscore to the label to appear to be a hyperlink
        2. performs the supplied action on Left-Up button events
     """
-    def  __init__(self, parent, label, action=None,
-                  action_kws = None, colour=(50, 50, 180), **kws):
-        self.action = action
-        if action_kws is None: action_kws = {}
-        self.action_kws = action_kws
 
+    def __init__(self, parent, label, action=None, colour=(50, 50, 180),
+                  bgcolour=None, underline=True, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, **kws)
-        font  = self.GetFont()
-        try:
-            font.SetUnderlined(True)
-        except:
-            pass
-        self.SetFont(font)
         self.SetForegroundColour(colour)
+        if bg is not None:
+            self.SetBackgroundColour(bg)
+        if underline:
+            font  = self.GetFont()
+            try:
+                font.SetUnderlined(True)
+            except:
+                pass
+            self.SetFont(font)
+        self.action = action
         self.Bind(wx.EVT_LEFT_UP, self.OnSelect)
 
     def OnSelect(self, event=None):
         "Left-Up Event Handler"
         if hasattr(self.action,'__call__'):
-            self.action(self.GetLabel(), event=event, **action_kws)
+            self.action(label=self.GetLabel(), event=event)
         event.Skip()
 
 
