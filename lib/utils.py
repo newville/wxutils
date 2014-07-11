@@ -413,8 +413,8 @@ class HyperText(wx.StaticText):
                   bgcolour=None, underline=True, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, **kws)
         self.SetForegroundColour(colour)
-        if bg is not None:
-            self.SetBackgroundColour(bg)
+        if bgcolour is not None:
+            self.SetBackgroundColour(bgcolour)
         if underline:
             font  = self.GetFont()
             try:
