@@ -326,7 +326,7 @@ class TextCtrl(wx.TextCtrl):
         if colour is not None:
             self.SetForegroundColour(colour)
         if bgcolour is not None:
-            self.SetBackgroundColour(colour)
+            self.SetBackgroundColour(bgcolour)
 
         self.SetAction(action, **action_kws)
 
@@ -367,7 +367,7 @@ class SimpleText(wx.StaticText):
         if colour is not None:
             self.SetForegroundColour(colour)
         if bgcolour is not None:
-            self.SetBackgroundColour(colour)
+            self.SetBackgroundColour(bgcolour)
 
 class LabeledTextCtrl(TextCtrl):
     """
