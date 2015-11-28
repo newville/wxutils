@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __author__  = 'Matthew Newville'
 
 import sys
@@ -27,5 +27,3 @@ from .utils import (GUIColors, YesNo, Check, GridPanel, RowPanel,
                    OkCancel, set_sizer, pack, Popup, EmptyBitmap)
 
 from .utils import RIGHT, LEFT, CEN, LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE
-
-
