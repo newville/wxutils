@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from distutils.core import setup
+# from distutils.core import setup
+from setuptools import setup
 
 long_desc = """A library of convenience functions for wxPython.  The aim
 here is to simplify code, reduce boiler-plate, and prevent repeating code
@@ -32,7 +33,6 @@ setup(name = 'wxutils',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
       download_url = 'http://newville.github.com/wxutils/',
-      requires = ('wx',),
       license = 'BSD',
       description = "Utilities and convenience classes and functions for wxPython",
       long_description = long_desc,
@@ -41,4 +41,3 @@ setup(name = 'wxutils',
       package_dir = {'wxutils': 'lib'},
       packages   = ['wxutils'],
       )
-
