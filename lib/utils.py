@@ -9,6 +9,8 @@ import wx
 from array import array
 from functools import partial
 
+is_wxPhoenix = 'phoenix' in wx.PlatformInfo
+
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = wx.ALIGN_RIGHT
 LEFT  = wx.ALIGN_LEFT
@@ -268,10 +270,10 @@ def MenuItem(parent, menu, label='', longtext='', action=None):
     m = Menu(parent, menu, label, longtext, action=None)
     """
     wid = wx.NewId()
-    menu.Append(wid, label, longtext)
-    if hasattr(action, '__call__'):
-        wx.EVT_MENU(parent, wid, action)
-
+    item = menu.Append(wid, label, longtext)
+    if callable(action):
+        parent.Bind(wx.EVT_MENU, action, item)
+    return item
 
 def Popup(parent, message, title, style=None, **kws):
     """Simple popup message dialog

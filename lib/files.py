@@ -43,9 +43,9 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
     if wildcard is None:
         wildcard = 'All files (*.*)|*.*'
 
-    style = wx.OPEN|wx.CHANGE_DIR
+    style = wx.FD_OPEN|wx.FD_CHANGE_DIR
     if multiple:
-        style = style|wx.MULTIPLE
+        style = style|wx.FD_MULTIPLE
     dlg = wx.FileDialog(parent, message=message, wildcard=wildcard,
                         defaultFile=default_file,
                         defaultDir=default_dir,
@@ -69,7 +69,7 @@ def FileSave(parent, message, default_file=None,
 
     dlg = wx.FileDialog(parent, message=message, wildcard=wildcard,
                         defaultFile=default_file,
-                        style=wx.SAVE|wx.CHANGE_DIR)
+                        style=wx.FD_SAVE|wx.FD_CHANGE_DIR)
     if dlg.ShowModal() == wx.ID_OK:
         out = os.path.abspath(dlg.GetPath())
     dlg.Destroy()

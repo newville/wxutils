@@ -1,4 +1,5 @@
 import wx
+is_wxPhoenix = 'phoenix' in wx.PlatformInfo
 from wx.lib.embeddedimage import PyEmbeddedImage
 import base64
 
@@ -23,6 +24,8 @@ RAW_ICONS['downarrow'] = RAW_ICONS['ss']
 def get_icon(name):
     if name in RAW_ICONS:
         val = RAW_ICONS[name]
-        return wx.BitmapFromImage(PyEmbeddedImage(val).GetImage())
+        if is_wxPhoenix:
+            return wx.Bitmap(PyEmbeddedImage(val).GetImage())
+        else:
+            return wx.BitmapFromImage(PyEmbeddedImage(val).GetImage())
     return None
-
