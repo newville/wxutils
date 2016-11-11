@@ -62,14 +62,19 @@ class FloatCtrl(wx.TextCtrl):
     """
     def __init__(self, parent, value='', minval=None, maxval=None,
                  precision=3, bell_on_invalid = True,
-                 act_on_losefocus=False,
+                 act_on_losefocus=False, gformat=False,
                  action=None, action_kws=None, **kws):
 
-        self.__digits = '0123456789.-'
+        self.__digits = '0123456789.-e'
         self.__prec   = precision
         if precision is None:
             self.__prec = 0
         self.format   = '%%.%if' % self.__prec
+        self.gformat  = gformat
+        if gformat:
+            self.__prec = max(8, self.__prec)
+            self.format = '%%.%ig' % self.__prec
+
         self.is_valid = True
         self.__val = set_float(value)
         self.__max = set_float(maxval)
@@ -112,10 +117,16 @@ class FloatCtrl(wx.TextCtrl):
         if hasattr(action,'__call__'):
             self.__action = partial(action, **kws)
 
-    def SetPrecision(self, prec=0):
+    def SetPrecision(self, prec=0, gformat=None):
         "set precision"
         self.__prec = prec
-        self.format = '%%.%if' % prec
+        if gformat is not None:
+            self.gformat = gformat
+        if self.gformat:
+            self.__prec = max(8, self.__prec)
+            self.format = '%%.%ig' % self.__prec
+        else:
+            self.format = '%%.%if' % prec
 
     def __GetMark(self):
         " keep track of cursor position within text"
@@ -180,17 +191,22 @@ class FloatCtrl(wx.TextCtrl):
 
         # 3. check for multiple '.' and out of place '-' signs and ignore these
         #    note that chr(key) will now work due to return at #2
-
-        has_minus = '-' in entry
+        #         if len(entry) > 1:
+        #             try:
+        #                 fval = float(entry)
+        #             except:
+        #                 return
+        leading_minus = entry.startswith('-')
+        has_expon = 'e' in entry        
         ckey = chr(key)
         if ((ckey == '.' and (self.__prec == 0 or '.' in entry) ) or
-            (ckey == '-' and (has_minus or  pos[0] != 0)) or
-            (ckey != '-' and  has_minus and pos[0] == 0)):
+            (not has_expon and
+             (ckey == '-' and leading_minus and pos[0] != 0) or
+             (ckey != '-' and leading_minus and pos[0] == 0))):
             return
         # 4. allow digits, but not other characters
         if chr(key) in self.__digits:
             event.Skip()
-
 
     def OnText(self, event=None):
         "text event"
@@ -203,7 +219,7 @@ class FloatCtrl(wx.TextCtrl):
 
     def GetValue(self):
         if self.__prec > 0:
-            return set_float("%%.%if" % (self.__prec) % (self.__val))
+            return set_float("%%.%ig" % (self.__prec) % (self.__val))
         else:
             return int(self.__val)
 
