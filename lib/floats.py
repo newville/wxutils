@@ -2,7 +2,7 @@
 """
 Code for floating point controls
 """
-
+import sys
 from functools import partial
 import wx
 
@@ -61,12 +61,15 @@ class FloatCtrl(wx.TextCtrl):
 
     """
     def __init__(self, parent, value='', minval=None, maxval=None,
-                 precision=3, bell_on_invalid = True,
+                 precision=3, odd_only=False, even_only=False,
+                 bell_on_invalid = True,
                  act_on_losefocus=False, gformat=False,
                  action=None, action_kws=None, **kws):
 
         self.__digits = '0123456789.-e'
         self.__prec   = precision
+        self.odd_only = odd_only
+        self.even_only = even_only
         if precision is None:
             self.__prec = 0
         self.format   = '%%.%if' % self.__prec
@@ -174,7 +177,7 @@ class FloatCtrl(wx.TextCtrl):
         """ on Character event"""
         key   = event.GetKeyCode()
         entry = wx.TextCtrl.GetValue(self).strip()
-        pos   = wx.TextCtrl.GetSelection(self)
+        pos   = wx.TextCtrl.GetSelection(self)[0]
         # really, the order here is important:
         # 1. return sends to ValidateEntry
         if key == wx.WXK_RETURN:
@@ -191,21 +194,32 @@ class FloatCtrl(wx.TextCtrl):
 
         # 3. check for multiple '.' and out of place '-' signs and ignore these
         #    note that chr(key) will now work due to return at #2
-        #         if len(entry) > 1:
-        #             try:
-        #                 fval = float(entry)
-        #             except:
-        #                 return
-        leading_minus = entry.startswith('-')
-        has_expon = 'e' in entry        
         ckey = chr(key)
-        if ((ckey == '.' and (self.__prec == 0 or '.' in entry) ) or
-            (not has_expon and
-             (ckey == '-' and leading_minus and pos[0] != 0) or
-             (ckey != '-' and leading_minus and pos[0] == 0))):
+        if ((ckey == '.' and (self.__prec == 0 or '.' in entry)) or
+            (ckey != '-' and pos == 0 and entry.startswith('-'))):
             return
-        # 4. allow digits, but not other characters
-        if chr(key) in self.__digits:
+        if 'e' in entry:
+            if ckey == 'e':
+                return
+            ind_e = entry.index('e')
+            if (ckey == '-' and pos not in (0, ind_e+1)):
+                return
+        elif (ckey == '-' and '-' in entry):
+            return
+        # allow 'inf' and '-inf', but very restricted
+        if ckey in ('i', 'n', 'f'):
+            has_num = any([x in entry for x in self.__digits[:11]])
+            if ((ckey in entry) or has_num or
+                entry not in ('', '-', '-i', 'i', '-n', 'n', '-f', 'f',
+                              '-in', 'in', '-if', 'if',
+                             '-nf', 'nf', '-inf', 'inf')):
+                return
+        elif (ckey != '-' and ckey in self.__digits and
+              any([x in ('i', 'n', 'f') for x in entry])):
+            return
+
+        # 4. allow digits or +/-inf but not other characters
+        if ckey in self.__digits or ckey in ('i', 'n', 'f'):
             event.Skip()
 
     def OnText(self, event=None):
@@ -251,8 +265,17 @@ class FloatCtrl(wx.TextCtrl):
             if self.__max is not None and (val > self.__max):
                 self.is_valid = False
                 val = self.__max
+            if self.__prec == 0:
+                if self.odd_only and (val % 2 == 0):
+                    self.is_valid = False
+                    val = val + 1
+                elif self.even_only and (val %2 == 1):
+                    self.is_valid = False
+                    val = val + 1
+
         except:
             self.is_valid = False
+
         self.__bound_val = self.__val = val
         fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
         if not self.is_valid:
