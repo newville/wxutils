@@ -151,8 +151,9 @@ class FloatCtrl(wx.TextCtrl):
             value = wx.TextCtrl.GetValue(self).strip()
         self.__CheckValid(value)
         self.__GetMark()
+        value = set_float(value)
         if value is not None:
-            wx.TextCtrl.SetValue(self, self.format % set_float(value))
+            wx.TextCtrl.SetValue(self, self.format % value)
 
         if self.is_valid and hasattr(self.__action, '__call__') and act:
             self.__action(value=self.__val)
@@ -233,7 +234,7 @@ class FloatCtrl(wx.TextCtrl):
 
     def GetValue(self):
         if self.__prec > 0:
-            return set_float("%%.%ig" % (self.__prec) % (self.__val))
+            return set_float("%%.%if" % (self.__prec) % (self.__val))
         else:
             return int(self.__val)
 
@@ -274,8 +275,8 @@ class FloatCtrl(wx.TextCtrl):
                     val = val + 1
 
         except:
+            print(sys.exc_info)
             self.is_valid = False
-
         self.__bound_val = self.__val = val
         fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
         if not self.is_valid:
