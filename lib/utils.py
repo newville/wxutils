@@ -316,14 +316,13 @@ class TextCtrl(wx.TextCtrl):
                  action=None, action_kws=None,
                  act_on_losefocus=True, **kws):
 
-        self.id = wx.Id()
         self.act_on_losefocus = act_on_losefocus
 
         this_sty =  wx.TE_PROCESS_ENTER|wx.ALIGN_CENTRE
         if 'style' in kws:
             this_sty = this_sty | kws['style']
         kws['style'] = this_sty
-        wx.TextCtrl.__init__(self, parent, self.id, **kws)
+        wx.TextCtrl.__init__(self, parent, -1, **kws)
         self.SetValue(value)
         if font is not None:
             self.SetFont(font)
