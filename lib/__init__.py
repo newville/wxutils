@@ -14,7 +14,6 @@ from .utils import (set_sizer, pack, SetTip, Font, HLine, Check, MenuItem,
 
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
-from .colors import GUIColors
 from .dates import hms, DateTimeCtrl
 from .dialogs import (OkCancel, FileOpen, FileSave, SelectWorkdir, fix_filename)
 from .text import SimpleText, TextCtrl, LabeledTextCtrl, HyperText
