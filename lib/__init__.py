@@ -16,7 +16,7 @@ from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl
 from .dialogs import (OkCancel, FileOpen, FileSave, SelectWorkdir,
-                      SavedParamterDialog, fix_filename)
+                      SavedParameterDialog, fix_filename)
 from .text import SimpleText, TextCtrl, LabeledTextCtrl, HyperText
 from .filechecklist import FileCheckList, FileDropTarget
 from .listbox import EditableListBox

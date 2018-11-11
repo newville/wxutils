@@ -4,6 +4,7 @@ file utilities
 """
 import os
 import sys
+import time
 import wx
 from collections import namedtuple
 
