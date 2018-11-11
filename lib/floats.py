@@ -5,7 +5,9 @@ Code for floating point controls
 import sys
 from functools import partial
 import wx
-from wx.lib.agw.floatspin import FloatSpin, EVT_FLOATSPIN
+from wx.lib.agw import floatspin as fspin
+
+is_wxPhoenix = 'phoenix' in wx.PlatformInfo
 
 HAS_NUMPY = False
 try:
@@ -17,17 +19,16 @@ except ImportError:
 def FloatSpin(parent, value=None, action=None, tooltip=None,
                  size=(100, -1), digits=1, increment=1, **kws):
     """FloatSpin with action"""
-    fs = FloatSpin(parent, -1, value, size=size, digits=digits,
+    fs = fspin.FloatSpin(parent, -1, value, size=size, digits=digits,
                    increment=increment, **kws)
     if action is not None:
-        fs.Bind(wx.EVT_FLOATSPIN, action)
+        fs.Bind(fspin.EVT_FLOATSPIN, action)
     if tooltip is not None:
         if is_wxPhoenix:
             fs.SetToolTip(tooltip)
         else:
             fs.SetToolTipString(tooltip)
     return fs
-
 
 def make_steps(prec=3, tmin=0, tmax=10, base=10, steps=(1, 2, 5)):
     """make a list of 'steps' to use for a numeric ComboBox
