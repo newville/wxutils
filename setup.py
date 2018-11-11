@@ -25,10 +25,8 @@ widgets, such as:
 
 """
 
-from lib import __version__
-
 setup(name = 'wxutils',
-      version = __version__,
+      version = '0.2',
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
