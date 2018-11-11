@@ -136,7 +136,7 @@ class SavedParameterDialog(wx.Dialog):
                 with open(cfile, 'r') as fh:
                     self.configfile = configfile
                     for line in fh.readlines():
-                        line = line.strip()[:-1]
+                        line = line.strip().replace('\n','').replace('\r','')
                         if line.startswith('#') or len(line)<1:
                             continue
                         value = line
@@ -157,7 +157,7 @@ class SavedParameterDialog(wx.Dialog):
         if self.ShowModal() == wx.ID_OK:
             value = self.text.GetValue()
             ok = True
-        if self.configfile is not None:
-            tout = '# saved %s\n%s\n\n' % (time.ctime(), value)
+        if ok and self.configfile is not None:
+            tout = '# saved %s\n  %s   \n\n' % (time.ctime(), value)
             save_configfile(self.configfile, tout)
         return response(ok, value)
