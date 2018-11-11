@@ -25,3 +25,5 @@ from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
                      FloatSpin, FloatSpinWithPin)
 
 from .periodictable import  PeriodicTablePanel
+
+from .paths import platform, nativepath, get_homedir, get_configfile, save_configfile
