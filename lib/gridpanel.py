@@ -1,6 +1,6 @@
 import wx
 from .text import SimpleText
-from .utils import pack
+from .utils import pack, LEFT
 
 class RowPanel(wx.Panel):
     """ a simple row panel with horizontal sizer"""
