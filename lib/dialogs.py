@@ -130,11 +130,11 @@ class SavedParameterDialog(wx.Dialog):
         wx.Dialog.__init__(self, None, wx.ID_ANY, title=title)
 
         value = ''
+        self.configfile = configfile
         if configfile is not None:
             cfile = get_configfile(configfile)
             if cfile is not None:
                 with open(cfile, 'r') as fh:
-                    self.configfile = configfile
                     for line in fh.readlines():
                         line = line.strip().replace('\n','').replace('\r','')
                         if line.startswith('#') or len(line)<1:
