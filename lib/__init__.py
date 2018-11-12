@@ -20,7 +20,7 @@ from .dialogs import (OkCancel, FileOpen, FileSave, SelectWorkdir,
 from .text import SimpleText, TextCtrl, LabeledTextCtrl, HyperText
 from .filechecklist import FileCheckList, FileDropTarget
 from .listbox import EditableListBox
-from .gridpanel import GridPanel
+from .gridpanel import GridPanel, RowPanel
 from .icons import get_icon
 from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
                      FloatSpin, FloatSpinWithPin)
@@ -28,3 +28,4 @@ from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
 from .periodictable import  PeriodicTablePanel
 
 from .paths import platform, nativepath, get_homedir, get_configfile, save_configfile
+from .colors import GUIColors
