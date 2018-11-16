@@ -1,5 +1,6 @@
 import wx
 from functools import partial
+from .utils import LEFT
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"
@@ -34,10 +35,11 @@ class TextCtrl(wx.TextCtrl):
 
         self.act_on_losefocus = act_on_losefocus
 
-        this_sty =  wx.TE_PROCESS_ENTER|wx.ALIGN_CENTRE
+        this_sty =   wx.TE_PROCESS_ENTER | wx.TE_RIGHT
         if 'style' in kws:
             this_sty = this_sty | kws['style']
         kws['style'] = this_sty
+
         wx.TextCtrl.__init__(self, parent, -1, **kws)
         self.SetValue(value)
         if font is not None:
@@ -47,6 +49,9 @@ class TextCtrl(wx.TextCtrl):
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)
 
+        if action_kws is None:
+            action_kws = {}
+
         self.SetAction(action, **action_kws)
 
         self.Bind(wx.EVT_CHAR, self.onChar)
@@ -55,7 +60,7 @@ class TextCtrl(wx.TextCtrl):
     def SetAction(self, action, **kws):
         "set action callback"
         self.__act = None
-        if hasattr(action,'__call__'):
+        if callable(action):
             self.__act = partial(action, **kws)
 
     def onFocus(self, evt=None):
@@ -82,7 +87,7 @@ class LabeledTextCtrl(TextCtrl):
     """
     def __init__(self, parent, value, font=None, action=None,
                  action_kws=None, act_on_losefocus=True, size=(-1, -1),
-                 bgcolour=None, colour=None, style=None,
+                 bgcolour=None, colour=None, style=LEFT,
                  labeltext=None, labelsize=(-1, -1),
                  labelcolour=None, labelbgcolour=None, **kws):
 
@@ -99,7 +104,7 @@ class LabeledTextCtrl(TextCtrl):
 
         TextCtrl.__init__(self, parent, value, font=font,
                           colour=colour, bgcolour=bgcolour,
-                          style=stye, size=size,
+                          style=style, size=size,
                           action=action, action_kws=action_kws,
                           act_on_losefocus=act_on_losefocus, **kws)
 
