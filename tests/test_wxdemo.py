@@ -267,10 +267,13 @@ class DemoFrame(wx.Frame):
 
 
 def test_wxdemo():
-    app = wx.App()
-    DemoFrame().Show(True)
-    app.MainLoop()
-
+    try:
+        app = wx.App()
+        DemoFrame().Show(True)
+        app.MainLoop()
+    except SystemExit:
+        print("cannot run wx demo -- probably cannot draw to screen")
+        pass
 
 if __name__ == '__main__':
     test_wxdemo()
