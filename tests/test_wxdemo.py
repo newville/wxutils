@@ -20,6 +20,7 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      get_icon, pack, BitmapButton, ToggleButton, YesNo,
                      NumericCombo, make_steps)
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
+from wxutils.filechecklist import FileCheckList
 
 PY_FILES = "Python scripts (*.py)|*.py"
 ALL_FILES = "All files (*.*)|*.*"
@@ -93,6 +94,13 @@ class DemoFrame(wx.Frame):
                             action=self.onPTable, size=(175, -1))
 
 
+        edlist_btn = Button(panel, 'Show Editable Listbox',
+                            action=self.onEdList, size=(175, -1))
+
+        filelist_btn = Button(panel, 'Show File CheckList',
+                            action=self.onFileList, size=(175, -1))
+
+
         panel.AddText(' Name: ', style=LEFT)
 
         panel.Add(tctrl_name, dcol=2)
@@ -121,6 +129,8 @@ class DemoFrame(wx.Frame):
 
         panel.Add(browse_btn, newrow=True)
         panel.Add(ptable_btn)
+        panel.Add(edlist_btn, newrow=True)
+        panel.Add(filelist_btn)
 
         panel.Add(okcancel, newrow=True)
 
@@ -205,6 +215,40 @@ class DemoFrame(wx.Frame):
 
     def onPTable(self, event=None):
         PTableFrame(fontsize=10).Show()
+
+    def onEdList(self, event=None):
+        frame = wx.Frame(self)
+        edlist  = EditableListBox(frame, self.onEdListSelect)
+        edlist.Append(" Item 1 ")
+        edlist.Append(" Item 2 ")
+        edlist.Append(" Next ")
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(edlist, 1, wx.EXPAND|wx.ALL, 5)
+        pack(frame, sizer)
+
+        frame.Show()
+        frame.Raise()
+
+    def onEdListSelect(self, event=None, **kws):
+        self.report(" Editable List selected ", event.GetString())
+
+    def onFileList(self, event=None):
+        frame = wx.Frame(self)
+        edlist  = FileCheckList(frame, select_action=self.onFileListSelect)
+        for i in range(8):
+            edlist.Append("File.%3.3d" % (i+1))
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(edlist, 1, wx.EXPAND|wx.ALL, 5)
+        pack(frame, sizer)
+
+        frame.Show()
+        frame.Raise()
+
+    def onFileListSelect(self, event=None, **kws):
+        self.report(" File List selected ", event.GetString())
+
 
     def onFileOpen(self, event=None):
         wildcards = "%s|%s" % (PY_FILES, ALL_FILES)
