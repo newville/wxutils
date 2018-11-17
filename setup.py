@@ -26,7 +26,7 @@ widgets, such as:
 """
 
 setup(name = 'wxutils',
-      version = '0.2.1',
+      version = '0.2.2',
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
