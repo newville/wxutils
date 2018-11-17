@@ -46,7 +46,8 @@ class PeriodicTablePanel(wx.Panel):
     SEL_BG = (255, 255, 135)
 
     def __init__(self, parent, title='Select Element',
-                 onselect=None, tooltip_msg=None, size=(-1, -1), **kws):
+                 onselect=None, tooltip_msg=None, size=(-1, -1),
+                 fontsize=9, **kws):
         wx.Panel.__init__(self, parent, -1, size=size, **kws)
         self.parent = parent
         self.onselect = onselect
@@ -55,9 +56,9 @@ class PeriodicTablePanel(wx.Panel):
         self.ctrls = {}
         self.REG_BG = self.GetBackgroundColour()
         self.selected = None
-        self.elemfont  = wx.Font( 9, wx.MODERN, wx.NORMAL, wx.BOLD, 0, "")
-        self.elemfont  = wx.Font( 9, wx.SWISS, wx.NORMAL, wx.BOLD, 0, "")
-        self.titlefont = wx.Font( 9, wx.SWISS, wx.NORMAL, wx.BOLD, 0, "")
+        self.elemfont  = wx.Font(fontsize, wx.MODERN, wx.NORMAL, wx.BOLD, 0, "")
+        self.elemfont  = wx.Font(fontsize, wx.SWISS, wx.NORMAL, wx.BOLD, 0, "")
+        self.titlefont = wx.Font(fontsize, wx.SWISS, wx.NORMAL, wx.BOLD, 0, "")
         self.BuildPanel()
 
 
