@@ -4,6 +4,7 @@ import time
 import os
 import sys
 import wx
+from functools import partial
 
 is_wxPhoenix = 'phoenix' in wx.PlatformInfo
 if is_wxPhoenix:
@@ -11,12 +12,17 @@ if is_wxPhoenix:
 else:
     from wx._core import PyDeadObjectError
 
-from wxutils import (Button, CEN, Check, Choice, EditableListBox, FRAMESTYLE,
-                     FileOpen, FileSave, FloatCtrl, FloatSpin, Font, GUIColors,
-                     GridPanel, LabeledTextCtrl, HLine, HyperText, LCEN, LEFT,
-                     MenuItem, Popup, RCEN, RIGHT, RowPanel, SimpleText,
-                     TextCtrl, fix_filename, get_icon, pack)
+from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
+                     FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
+                     Font, GUIColors, GridPanel, LabeledTextCtrl, HLine,
+                     HyperText, LCEN, LEFT, MenuItem, Popup, RCEN, RIGHT,
+                     RowPanel, SimpleText, TextCtrl, fix_filename,
+                     get_icon, pack, BitmapButton, ToggleButton, YesNo,
+                     NumericCombo, make_steps)
+from wxutils.periodictable import PeriodicTablePanel, PTableFrame
 
+PY_FILES = "Python scripts (*.py)|*.py"
+ALL_FILES = "All files (*.*)|*.*"
 
 class DemoFrame(wx.Frame):
     def __init__(self):
@@ -44,24 +50,48 @@ class DemoFrame(wx.Frame):
         lctrl_addr = LabeledTextCtrl(self, value='<>', action=self.onAddr,
                                      labeltext=' Address: ', size=(250, -1))
 
-        lab3 = HyperText(panel,' Float1: ', size=(100, -1), action=self.onHyperText)
+        lab3 = HyperText(panel,' FloatCtrl: ', size=(100, -1), action=self.onHyperText)
 
         val3 = FloatCtrl(panel, '3', action=self.onFloat1, precision=2,
                          minval=0, maxval=1000, size=(250, -1))
 
 
-        lab4 = HyperText(panel,' Float2: ', size=(100, -1), action=self.onHyperText)
-
+        lab4 = HyperText(panel,' FloatSpin: ', size=(100, -1), action=self.onHyperText)
         val4 = FloatSpin(panel, '12.2', action=self.onFloatSpin, digits=2,
                          increment=0.1, size=(250, -1))
 
-        self.choice1 = Choice(panel, choices=['Apple', 'Banana', 'Cherry'],
-                          size=(200, -1),
-                         action=self.onChoice)
+        labx = HyperText(panel,' NumericCombo: ', size=(100, -1), action=self.onHyperText)
+
+        steps = make_steps(prec=1, tmin=0, tmax=100)
+        valx = NumericCombo(panel, steps, precision=1)
+
+        self.choice1 = Choice(panel, size=(200, -1),action=self.onChoice)
+        self.choice1.SetChoices(['Apple', 'Banana', 'Cherry'])
+
+        yesno = YesNo(panel)
 
         check1 = Check(panel, label='enable? ',   action=self.onCheck)
 
         btn1 = Button(panel, label='Start', size=(100, -1), action=self.onStart)
+
+        pinbtn = BitmapButton(panel, get_icon('pin'), size=(50, -1),
+                              action=partial(self.onBMButton, opt='pin1'),
+                              tooltip='use last point selected from plot')
+
+        togbtn = ToggleButton(panel, 'Press Me',
+                              action=self.onToggleButton, size=(100, -1),
+                              tooltip='do it, do it now, you will like it')
+
+
+        browse_btn = Button(panel, 'Open File',
+                            action=self.onFileOpen, size=(150, -1))
+
+
+        okcancel = OkCancel(panel, onOK=self.onOK, onCancel=self.onCancel)
+
+        ptable_btn = Button(panel, 'Show Periodic Table',
+                            action=self.onPTable, size=(175, -1))
+
 
         panel.AddText(' Name: ', style=LEFT)
 
@@ -74,12 +104,26 @@ class DemoFrame(wx.Frame):
 
         panel.Add(lab4, newrow=True)
         panel.Add(val4, dcol=3)
+
+        panel.Add(labx, newrow=True)
+        panel.Add(valx, dcol=3)
+
         panel.AddText(' Choice : ', newrow=True)
         panel.Add(check1)
         panel.Add(self.choice1)
+        panel.AddText(' Yes or No: ', newrow=True)
+        panel.Add(yesno)
         panel.Add(HLine(panel, size=(500, -1)), dcol=3, newrow=True)
 
         panel.Add(btn1, newrow=True)
+        panel.Add(pinbtn)
+        panel.Add(togbtn)
+
+        panel.Add(browse_btn, newrow=True)
+        panel.Add(ptable_btn)
+
+        panel.Add(okcancel, newrow=True)
+
 
         panel.pack()
 
@@ -90,6 +134,11 @@ class DemoFrame(wx.Frame):
         fsizer = wx.BoxSizer(wx.VERTICAL)
         fsizer.Add(panel, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER|wx.EXPAND)
         wx.CallAfter(self.init_timer)
+
+        psize = panel.GetBestSize()
+        self.SetSize((psize[0]+5, psize[1]+25))
+
+
         pack(self, fsizer)
         self.Refresh()
 
@@ -116,6 +165,12 @@ class DemoFrame(wx.Frame):
         menubar.Append(menu, "&File");
         self.SetMenuBar(menubar)
 
+    def onOK(self, event=None):
+        self.report("on OK: ", '')
+
+    def onCancel(self, event=None):
+        self.report("on Cancel: ", '')
+
     def onName(self, event=None):
         self.report("on Name: ", event)
 
@@ -139,33 +194,28 @@ class DemoFrame(wx.Frame):
 
         self.choice1.Enable(event.IsChecked())
 
-
     def onStart(self, event=None):
         self.report("on Start Button ", '')
 
-    def onBrowseScript(self, event=None):
+    def onBMButton(self, event=None, opt='xxx'):
+        self.report("on Bitmap Button ", opt)
+
+    def onToggleButton(self, event=None):
+        self.report(" on Toggle Button %s " % event.GetString(), event.IsChecked())
+
+    def onPTable(self, event=None):
+        PTableFrame(fontsize=10).Show()
+
+    def onFileOpen(self, event=None):
         wildcards = "%s|%s" % (PY_FILES, ALL_FILES)
 
-        dlg = wx.FileDialog(self, message='Select Python Script file',
+        dlg = wx.FileDialog(self, message='Select File',
                             wildcard=wildcards,
                             style=wx.FD_OPEN)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = os.path.abspath(dlg.GetPath())
-            self.txt_script.SetValue(path)
-
-            _, name = os.path.split(path)
-            name = fix_filename(name)
-            if name.endswith('.py'):
-                name = name[:-3]
-
-            txt_name = self.txt_name.GetValue().strip()
-            if len(txt_name) < 1:
-                self.txt_name.SetValue(name)
-
-            txt_desc = self.txt_desc.GetValue().strip()
-            if len(txt_desc) < 1:
-                self.txt_desc.SetValue(name)
+            self.report("file ",  path)
         dlg.Destroy()
 
     def onExit(self, event=None):
