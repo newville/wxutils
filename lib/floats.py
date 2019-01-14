@@ -298,7 +298,7 @@ def FloatSpin(parent, value=0, action=None, tooltip=None,
     fs = fspin.FloatSpin(parent, -1, size=size, value=value,
                          digits=digits, increment=increment, **kws)
     if action is not None:
-        fs.Bind(wx.EVT_TEXT, action)
+        fs.Bind(fspin.EVT_FLOATSPIN, action)
     if tooltip is not None:
         if is_wxPhoenix:
             fs.SetToolTip(tooltip)
