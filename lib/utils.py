@@ -93,15 +93,28 @@ class Check(wx.CheckBox):
         if action is not None:
             self.Bind(wx.EVT_CHECKBOX, action)
 
-
-def MenuItem(parent, menu, label='', longtext='', action=None):
+def MenuItem(parent, menu, label='', longtext='', action=None, kind='normal',
+             checked=False):
     """Add Item to a Menu, with action
-    m = Menu(parent, menu, label, longtext, action=None)
+    m = Menu(parent, menu, label, longtext, action=None, kind='normal')
     """
-    item = menu.Append(-1, label, longtext)
+    kinds_map = {'normal': wx.ITEM_NORMAL,
+                 'radio': wx.ITEM_RADIO,
+                 'check': wx.ITEM_CHECK}
+    menu_kind = wx.ITEM_NORMAL
+    if kind in kinds_map.values():
+        menu_kind = kind
+    elif kind in kinds_map:
+        menu_kind = kinds_map[kind]
+
+    item = menu.Append(-1, label, longtext, kind=menu_kind)
+    if menu_kind == wx.ITEM_CHECK and checked:
+        item.Check(True)
+
     if callable(action):
         parent.Bind(wx.EVT_MENU, action, item)
     return item
+
 
 def Popup(parent, message, title, style=None, **kws):
     """Simple popup message dialog
