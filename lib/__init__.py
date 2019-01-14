@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """
-wx widgets for Larch
+  simplified wx widgets and utilities
 """
-
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __author__  = 'Matthew Newville'
 
 from . import utils

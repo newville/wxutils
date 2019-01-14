@@ -15,17 +15,16 @@ widgets with limited but common attributes and patterns.  For example,
 
 binds a callback function (the "action") to a wx.Button, corresponding to
       b = wx.Button(parent, label=label, **kws)
-      if hasattr(action, '__call__'):
+      if callable(action):
           parent.Bind(wx.EVT_BUTTON, action, b)
 
 Yes, this can be viewed as merely a convenience, and not completely
-general.  But it is a remarkably common pattern (at least in my code) and
-replaces 3 lines with 1, hiding the ugliest parts of binding events in wx.
+general.  But it is a remarkably common pattern (at least in my code),
+replaces 3 lines with 1, and hides the ugliest parts of wxPython.
 
 There are several similar convenience widgets, including Check, Choice, and
 SimpleText (a simplified variant of StaticText), MenuItem, Font, HLine,
 OkCancel, HyperText.
-
 
 In addition, there are more complex widgets, such as:
    FloatCtrl  a wx.TextCrtl that allows numerical input only. Precision,
@@ -46,6 +45,3 @@ In addition, there are more complex widgets, such as:
 
 
 And some other miscellaneous stuff as well.  Yeah, it's sort of a motley collection.
-
-
-

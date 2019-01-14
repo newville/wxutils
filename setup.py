@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# from distutils.core import setup
+
 from setuptools import setup
 
 long_desc = """A library of convenience functions for wxPython.  The aim
@@ -11,7 +11,7 @@ These are primarily simplified widgets with common attributes, such as
 
 which attaches a callback to a wx.Button, corresponding to
       b = wx.Button(parent, label=label, **kws)
-      if hasattr(action, '__call__'):
+      if callable(action):
           parent.Bind(wx.EVT_BUTTON, action, b)
 
 Yes, this is merely a convenience, but covers a remarkably common pattern.
@@ -22,11 +22,16 @@ widgets, such as:
                 can be bound to the control.
      NumericCombo  wx.ComboBox with a FloatCtrl
      YesNo      a wx.Choice of only 'No' and 'Yes'
+     GridPanel  a Panel with a GridBagSizer that uses 'newrow' to
+                specify adding rows instead of having to handle
+                rows and column numbers.
+
+and many more convienences.
 
 """
 
 setup(name = 'wxutils',
-      version = '0.2.2',
+      version = '0.2.3',
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
