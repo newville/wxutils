@@ -298,7 +298,8 @@ def FloatSpin(parent, value=0, action=None, tooltip=None,
     fs = fspin.FloatSpin(parent, -1, size=size, value=value,
                          digits=digits, increment=increment, **kws)
     if action is not None:
-        fs.Bind(fspin.EVT_FLOATSPIN, action)
+        fs.Bind(fspin.EVT_FLOATSPIN
+                , action)
     if tooltip is not None:
         if is_wxPhoenix:
             fs.SetToolTip(tooltip)
@@ -320,32 +321,41 @@ def FloatSpinWithPin(parent, value=0, pin_action=None, **kws):
         bmbtn.SetToolTipString(tooltip)
     return fspin, bmbtn
 
-
 class NumericCombo(wx.ComboBox):
     """
     Numeric Combo: ComboBox with numeric-only choices
     """
-    def __init__(self, parent, choices, precision=3,
-                 init=0, width=80):
+    def __init__(self, parent, choices, precision=3, fmt=None,
+                 init=0, default_val=None, width=80):
 
-        self.fmt = "%%.%if" % precision
+        self.fmt = fmt
+        if fmt is None:
+            self.fmt = "%%.%if" % precision
+
         self.choices  = choices
         schoices = [self.fmt % i for i in self.choices]
         wx.ComboBox.__init__(self, parent, -1, '', (-1, -1), (width, -1),
                              schoices, wx.CB_DROPDOWN|wx.TE_PROCESS_ENTER)
 
         init = min(init, len(self.choices))
-        self.SetStringSelection(schoices[init])
+        if default_val is not None:
+            if default_val in schoices:
+                self.SetStringSelection(default_val)
+            else:
+                self.add_choice(default_val, select=True)
+        else:
+            self.SetStringSelection(schoices[init])
         self.Bind(wx.EVT_TEXT_ENTER, self.OnEnter)
 
     def OnEnter(self, event=None):
-        "text enter event handler"
-        thisval = float(event.GetString())
+        self.add_choice(float(event.GetString()))
 
-        if thisval not in self.choices:
-            self.choices.append(thisval)
+    def add_choice(self, val, select=True):
+        if val not in self.choices:
+            self.choices.append(val)
             self.choices.sort()
-
+        self.choices.reverse()
         self.Clear()
-        self.AppendItems([self.fmt % i for i in self.choices])
-        self.SetSelection(self.choices.index(thisval))
+        self.AppendItems([self.fmt % x for x in self.choices])
+        if select:
+            self.SetSelection(self.choices.index(val))
