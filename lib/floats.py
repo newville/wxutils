@@ -298,8 +298,7 @@ def FloatSpin(parent, value=0, action=None, tooltip=None,
     fs = fspin.FloatSpin(parent, -1, size=size, value=value,
                          digits=digits, increment=increment, **kws)
     if action is not None:
-        fs.Bind(fspin.EVT_FLOATSPIN
-                , action)
+        fs.Bind(fspin.EVT_FLOATSPIN, action)
     if tooltip is not None:
         if is_wxPhoenix:
             fs.SetToolTip(tooltip)
@@ -307,9 +306,9 @@ def FloatSpin(parent, value=0, action=None, tooltip=None,
             fs.SetToolTipString(tooltip)
     return fs
 
-def FloatSpinWithPin(parent, value=0, pin_action=None, **kws):
+def FloatSpinWithPin(parent, value=0, pin_action=None,
+                     tooltip='use last point selected from plot', **kws):
     """create a FloatSpin with Pin button with action"""
-    tooltip = 'use last point selected from plot'
     fspin = FloatSpin(parent, value=value, **kws)
     bmbtn = wx.BitmapButton(parent, id=-1, bitmap=get_icon('pin'),
                             size=(25, 25))
