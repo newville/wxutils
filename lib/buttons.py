@@ -8,7 +8,7 @@ def Button(parent, label, action=None, **kws):
 
     """
     thisb = wx.Button(parent, label=label, **kws)
-    if hasattr(action, '__call__'):
+    if callable(action):
         parent.Bind(wx.EVT_BUTTON, action, thisb)
     return thisb
 

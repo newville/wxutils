@@ -9,12 +9,9 @@ import wx
 is_wxPhoenix = 'phoenix' in wx.PlatformInfo
 
 # some common abbrevs for wx ALIGNMENT styles
-RIGHT = wx.ALIGN_RIGHT
-LEFT  = wx.ALIGN_LEFT
-CEN   = wx.ALIGN_CENTER
-LCEN  = wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT
-RCEN  = wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT
-CCEN  = wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER
+RIGHT = RCEN = wx.ALIGN_RIGHT
+LEFT  = LCEN = wx.ALIGN_LEFT
+CEN   = CCEN = wx.ALIGN_CENTER
 LTEXT = wx.ST_NO_AUTORESIZE|wx.ALIGN_CENTER
 FRAMESTYLE = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL
 
@@ -77,8 +74,8 @@ def HLineText(panel, text, colour='#222288'):
     """
     p = wx.Panel(panel)
     s = wx.BoxSizer(wx.HORIZONTAL)
-    s.Add(wx.StaticLine(p, size=(50, 5), style=wx.LI_HORIZONTAL), 0, LCEN, 5)
-    s.Add(SimpleText(p, text,  **kws),  0, LCEN, 5)
+    s.Add(wx.StaticLine(p, size=(50, 5), style=wx.LI_HORIZONTAL), 0, LEFT, 5)
+    s.Add(SimpleText(p, text,  **kws),  0, LEFT, 5)
     pack(p, s)
     return p
 

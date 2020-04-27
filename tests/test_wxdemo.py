@@ -15,10 +15,10 @@ else:
 from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
                      Font, GUIColors, GridPanel, LabeledTextCtrl, HLine,
-                     HyperText, LCEN, LEFT, MenuItem, Popup, RCEN, RIGHT,
-                     RowPanel, SimpleText, TextCtrl, fix_filename,
-                     get_icon, pack, BitmapButton, ToggleButton, YesNo,
-                     NumericCombo, make_steps)
+                     HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
+                     SimpleText, TextCtrl, fix_filename, get_icon, pack,
+                     BitmapButton, ToggleButton, YesNo, NumericCombo,
+                     make_steps)
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
 from wxutils.filechecklist import FileCheckList
 
@@ -142,12 +142,11 @@ class DemoFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
 
         fsizer = wx.BoxSizer(wx.VERTICAL)
-        fsizer.Add(panel, 0, wx.ALIGN_LEFT|wx.ALIGN_CENTER|wx.EXPAND)
+        fsizer.Add(panel, 0, LEFT|wx.EXPAND)
         wx.CallAfter(self.init_timer)
 
         psize = panel.GetBestSize()
         self.SetSize((psize[0]+5, psize[1]+25))
-
 
         pack(self, fsizer)
         self.Refresh()

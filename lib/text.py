@@ -1,14 +1,15 @@
 import wx
 from functools import partial
-from .utils import LEFT
+from .utils import LEFT, CEN
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"
     def __init__(self, parent, label, minsize=None, font=None, colour=None,
-                 bgcolour=None, style=wx.ALIGN_CENTRE, **kws):
-
+                 bgcolour=None, style=CEN, tooltip=None, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, style=style,
                                **kws)
+        # if tooltip is not None:
+        #     self.SetTooltip(tooltip)
         if minsize is not None:
             self.SetMinSize(minsize)
         if font is not None:
@@ -17,7 +18,6 @@ class SimpleText(wx.StaticText):
             self.SetForegroundColour(colour)
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)
-
 
 class TextCtrl(wx.TextCtrl):
     """simple TextCtrl
@@ -31,11 +31,11 @@ class TextCtrl(wx.TextCtrl):
     def __init__(self, parent, value, font=None,
                  colour=None, bgcolour=None,
                  action=None, action_kws=None,
-                 act_on_losefocus=True, **kws):
+                 act_on_losefocus=True, tooltip=None, **kws):
 
         self.act_on_losefocus = act_on_losefocus
 
-        this_sty =   wx.TE_PROCESS_ENTER | wx.TE_RIGHT
+        this_sty =   wx.TE_PROCESS_ENTER
         if 'style' in kws:
             this_sty = this_sty | kws['style']
         kws['style'] = this_sty
@@ -48,7 +48,8 @@ class TextCtrl(wx.TextCtrl):
             self.SetForegroundColour(colour)
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)
-
+        if tooltip is not None:
+            self.SetTooltip(tooltip)
         if action_kws is None:
             action_kws = {}
 

@@ -36,9 +36,8 @@ class DateTimeCtrl(object):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.datectrl, 0, wx.ALIGN_CENTER)
         sizer.Add(self.timectrl, 0, wx.ALIGN_CENTER)
-        sizer.Add(spinner, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+        sizer.Add(spinner, 0,  wx.ALIGN_LEFT)
         panel.SetSizer(sizer)
         sizer.Fit(panel)
         if use_now:
             self.timectrl.SetValue(wx.DateTime_Now())
-

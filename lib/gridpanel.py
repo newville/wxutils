@@ -1,6 +1,6 @@
 import wx
 from .text import SimpleText
-from .utils import pack, LEFT, LCEN
+from .utils import pack, LEFT
 
 class RowPanel(wx.Panel):
     """ a simple row panel with horizontal sizer"""
@@ -8,10 +8,10 @@ class RowPanel(wx.Panel):
         wx.Panel.__init__(self, parent, **kws)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-    def Add(self, item, expand=0, style=LEFT|wx.ALIGN_BOTTOM, padding=2):
+    def Add(self, item, expand=0, style=LEFT, padding=2):
         self.sizer.Add(item, expand, style, padding)
 
-    def AddText(self, label, expand=0, style=LEFT|wx.ALIGN_BOTTOM,
+    def AddText(self, label, expand=0, style=LEFT,
                 padding=2, **kws):
         self.sizer.Add(SimpleText(self, label, **kws),
                        expand, style, padding)
@@ -71,7 +71,7 @@ class GridPanel(wx.Panel):
     def AddText(self, label, newrow=False, dcol=1, style=None, **kws):
         """add a Simple StaticText item"""
         if style is None:
-            style = LCEN
+            style = LEFT
         self.Add(SimpleText(self, label, style=style, **kws),
                  dcol=dcol, style=style, newrow=newrow)
 
