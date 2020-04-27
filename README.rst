@@ -27,24 +27,22 @@ There are several similar convenience widgets, including Check, Choice, and
 SimpleText (a simplified variant of StaticText), MenuItem, Font, HLine,
 OkCancel, HyperText.
 
-In addition, there are more complex widgets, such as:
+In addition, there are more complex widgets, such as
 
+* ``FloatCtrl`` a wx.TextCrtl that allows numerical input only. Precision,
+  upper bound, and lower bound can be set, and a callback can be bound to
+  the control.
 
- * FloatCtrl  a wx.TextCrtl that allows numerical input only. Precision,
-              upper bound, and lower bound can be set, and a callback
-              can be bound to the control.
+* ``NumericCombo`` wx.ComboBox with a FloatCtrl
 
- * NumericCombo  wx.ComboBox with a FloatCtrl
+* ``EditableListBox`` a list box with a built-in popup menu to arrange order of
+  the items with "move up/down, to top, to bottom"
 
- * EditableListBox a list box with a built-in popup menu to arrange order of
-              the items with "move up/down, to top, to bottom"
+* ``YesNo`` a wx.Choice of only 'No' and 'Yes'
 
- *  YesNo      a wx.Choice of only 'No' and 'Yes'
+* ``GridPanel`` a combined GridBagSizer and Panel that simplifies adding
+  widgets to a GridBagSizer.
 
- * GridPanel  a combined GridBagSizer and Panel that simplifies adding
-              widgets to a GridBagSizer.
-
- *  FileOpen / FileSave  wrappers (supporting wildcards) to FileDialog.
-
+* ``FileOpen``, ``FileSave`` wrappers (supporting wildcards) to FileDialog.
 
 And some other miscellaneous stuff as well.  Yeah, it's sort of a motley collection.
