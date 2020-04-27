@@ -31,7 +31,7 @@ and many more convienences.
 """
 
 setup(name = 'wxutils',
-      version = '0.2.3',
+      version = '0.2.4',
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url          = 'http://newville.github.com/wxutils/',
