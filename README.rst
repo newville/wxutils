@@ -9,14 +9,15 @@ The aim is to simplify code, reduce boiler-plate, make wxPython coding a
 bit more python-like, and prevent repeating code across several projects.
 
 The largest share of classes in wxutils are simplified versions of wxPython
-widgets with limited but common attributes and patterns.  For example,
+widgets with limited but common attributes and patterns.  For example::
 
-      btn = wxutils.Button(parent, label, action=action, **kws)
+   btn = wxutils.Button(parent, label, action=action, **kws)
 
-binds a callback function (the "action") to a wx.Button, corresponding to
-      b = wx.Button(parent, label=label, **kws)
-      if callable(action):
-          parent.Bind(wx.EVT_BUTTON, action, b)
+binds a callback function (the "action") to a wx.Button, corresponding to::
+
+   b = wx.Button(parent, label=label, **kws)
+   if callable(action):
+       parent.Bind(wx.EVT_BUTTON, action, b)
 
 Yes, this can be viewed as merely a convenience, and not completely
 general.  But it is a remarkably common pattern (at least in my code),
