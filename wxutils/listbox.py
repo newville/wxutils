@@ -10,7 +10,7 @@ class EditableListBox(wx.ListBox):
                  remove_action=None, **kws):
         wx.ListBox.__init__(self, parent, **kws)
         self.SetBackgroundColour(wx.Colour(245, 245, 235))
-        self.SetForegroundColour(wx.Colour(  5,   5,   5))
+        self.SetForegroundColour(wx.Colour(5, 5, 5))
         self.Bind(wx.EVT_LISTBOX,  select_action)
         self.remove_action = remove_action
         if right_click:
