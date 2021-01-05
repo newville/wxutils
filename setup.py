@@ -63,6 +63,6 @@ setup(name = 'wxutils',
       long_description = long_desc,
       platforms = ('Windows', 'Linux', 'Mac OS X'),
       classifiers=['Programming Language :: Python'],
-      package_dir = {'wxutils': 'lib'},
+      package_dir = {'wxutils': 'wxutils'},
       packages   = ['wxutils'],
       )
