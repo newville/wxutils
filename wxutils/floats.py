@@ -7,7 +7,6 @@ from functools import partial
 import wx
 from wx.lib.agw import floatspin as fspin
 
-is_wxPhoenix = 'phoenix' in wx.PlatformInfo
 is_gtk3  = 'gtk3' in wx.PlatformInfo
 
 HAS_NUMPY = False
@@ -306,10 +305,7 @@ def FloatSpin(parent, value=0, action=None, tooltip=None,
     if action is not None:
         fs.Bind(fspin.EVT_FLOATSPIN, action)
     if tooltip is not None:
-        if is_wxPhoenix:
-            fs.SetToolTip(tooltip)
-        else:
-            fs.SetToolTipString(tooltip)
+        fs.SetToolTip(tooltip)
     return fs
 
 def FloatSpinWithPin(parent, value=0, pin_action=None,
@@ -320,10 +316,7 @@ def FloatSpinWithPin(parent, value=0, pin_action=None,
                             size=(25, 25))
     if pin_action is not None:
         parent.Bind(wx.EVT_BUTTON, pin_action, bmbtn)
-    if is_wxPhoenix:
-        bmbtn.SetToolTip(tooltip)
-    else:
-        bmbtn.SetToolTipString(tooltip)
+    bmbtn.SetToolTip(tooltip)
     return fspin, bmbtn
 
 class NumericCombo(wx.ComboBox):

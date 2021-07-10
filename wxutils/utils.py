@@ -6,7 +6,7 @@ mostly simplified wrappers around existing widgets.
 """
 import wx
 
-is_wxPhoenix = 'phoenix' in wx.PlatformInfo
+is_wxPhoenix = True
 
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = RCEN = wx.ALIGN_RIGHT
@@ -16,10 +16,7 @@ LTEXT = wx.ST_NO_AUTORESIZE|wx.ALIGN_CENTER
 FRAMESTYLE = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL
 
 def SetTip(wid, tip=''):
-    if is_wxPhoenix:
-        wid.SetToolTip(tip)
-    else:
-        wid.SetToolTipString(tip)
+    wid.SetToolTip(tip)
 
 def set_sizer(panel, sizer=None, style=wx.VERTICAL, fit=False):
     """ utility for setting wx Sizer  """

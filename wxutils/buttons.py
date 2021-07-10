@@ -1,7 +1,5 @@
 import wx
 
-is_wxPhoenix = 'phoenix' in wx.PlatformInfo
-
 def Button(parent, label, action=None, **kws):
     """Simple button with bound action
     b = Button(parent, label, action=None, **kws)
@@ -17,10 +15,7 @@ def BitmapButton(parent, bmp, action=None, tooltip=None, size=(20, 20), **kws):
     if action is not None:
         parent.Bind(wx.EVT_BUTTON, action, b)
     if tooltip is not None:
-        if is_wxPhoenix:
-            b.SetToolTip(tooltip)
-        else:
-            b.SetToolTipString(tooltip)
+        b.SetToolTip(tooltip)
     return b
 
 def ToggleButton(parent, label, action=None, tooltip=None,
@@ -29,8 +24,5 @@ def ToggleButton(parent, label, action=None, tooltip=None,
     if action is not None:
         b.Bind(wx.EVT_TOGGLEBUTTON, action)
     if tooltip is not None:
-        if is_wxPhoenix:
-            b.SetToolTip(tooltip)
-        else:
-            b.SetToolTipString(tooltip)
+        b.SetToolTip(tooltip)
     return b
