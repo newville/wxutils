@@ -12,30 +12,17 @@ from .text import SimpleText
 from .gridpanel import GridPanel
 from .paths import get_configfile, save_configfile
 
-if sys.version[0] == '2':
-    from string import maketrans
-    def fix_filename(fname):
-        """
-        fix string to be a 'good' filename. This may be a more
-        restrictive than the OS, but avoids nasty cases.
-        """
-        badchars = ' <>:"\'\\\t\r\n/|?*!%$'
-        out = fname.translate(maketrans(badchars, '_'*len(badchars)))
-        if out[0] in '-,;[]{}()~`@#':
-            out = '_%s' % out
-        return out
-elif sys.version[0] == '3':
-    def fix_filename(s):
-        """fix string to be a 'good' filename.
-        This may be a more restrictive than the OS, but
-        avoids nasty cases."""
-        badchars = ' <>:"\'\\\t\r\n/|?*!%$'
-        t = s.translate(s.maketrans(badchars, '_'*len(badchars)))
-        if t.count('.') > 1:
-            for i in range(t.count('.') - 1):
-                idot = t.find('.')
-                t = "%s_%s" % (t[:idot], t[idot+1:])
-        return t
+def fix_filename(s):
+    """fix string to be a 'good' filename.
+    This may be a more restrictive than the OS, but
+    avoids nasty cases."""
+    badchars = ' <>:"\'\\\t\r\n/|?*!%$'
+    t = s.translate(s.maketrans(badchars, '_'*len(badchars)))
+    if t.count('.') > 1:
+        for i in range(t.count('.') - 1):
+            idot = t.find('.')
+            t = "%s_%s" % (t[:idot], t[idot+1:])
+    return t
 
 
 def FileOpen(parent, message, default_dir=None, default_file=None,
@@ -45,7 +32,10 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
     """
     out = None
     if default_dir is None:
-        default_dir = os.getcwd()
+        try:
+            default_dir = os.getcwd()
+        except:
+            pass
     if wildcard is None:
         wildcard = 'All files (*.*)|*.*'
 
@@ -71,7 +61,10 @@ def FileSave(parent, message, default_file=None,
         wildcard = 'All files (*.*)|*.*'
 
     if default_dir is None:
-        default_dir = os.getcwd()
+        try:
+            default_dir = os.getcwd()
+        except:
+            pass
 
     dlg = wx.FileDialog(parent, message=message, wildcard=wildcard,
                         defaultFile=default_file,
