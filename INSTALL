@@ -1,12 +1,3 @@
-Installation instructions 
-=========================
-
 To install, use::
 
-   python setup.py build
-   python setup.py install
-
-Of course, wxPython is required.
-
-Matt Newville <newville@cars.uchicago.edu>
-Last Update:  12-Oct-2013
+   pip install .
