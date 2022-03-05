@@ -6,11 +6,23 @@ class EditableListBox(wx.ListBox):
     items and remove items from list
     supply select_action for EVT_LISTBOX selection action
     """
+
     def __init__(self, parent, select_action, right_click=True,
-                 remove_action=None, **kws):
+                 remove_action=None, color=(10, 10, 20),
+                 bgcolor=(240, 240, 230), **kws):
+
         wx.ListBox.__init__(self, parent, **kws)
-        self.SetBackgroundColour(wx.Colour(245, 245, 235))
-        self.SetForegroundColour(wx.Colour(5, 5, 5))
+
+        if isinstange(bgcolor, (tuple, list)):
+            bgcolor = wx.Colour(bgcolor)
+        if isinstange(gcolor, (tuple, list)):
+            color = wx.Colour(color)
+
+        self.SetBackgroundColour(bgcolor)
+        self.SetOwnBackgroundColour(bgcolor)
+        self.SetForegroundColour(color)
+        self.SetOwnForegroundColour(color)
+
         self.Bind(wx.EVT_LISTBOX,  select_action)
         self.remove_action = remove_action
         if right_click:
