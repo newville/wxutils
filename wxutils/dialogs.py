@@ -10,7 +10,7 @@ from collections import namedtuple
 
 from .text import SimpleText
 from .gridpanel import GridPanel
-from .paths import get_configfile, save_configfile
+from .paths import get_configfile, save_configfile, get_cwd
 
 def fix_filename(s):
     """fix string to be a 'good' filename.
@@ -25,6 +25,7 @@ def fix_filename(s):
     return t
 
 
+
 def FileOpen(parent, message, default_dir=None, default_file=None,
              multiple=False, wildcard=None):
     """File Open dialog wrapper.
@@ -33,7 +34,7 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
     out = None
     if default_dir is None:
         try:
-            default_dir = os.getcwd()
+            default_dir = get_cwd()
         except:
             pass
     if wildcard is None:
@@ -62,7 +63,7 @@ def FileSave(parent, message, default_file=None,
 
     if default_dir is None:
         try:
-            default_dir = os.getcwd()
+            default_dir = get_cwd()
         except:
             pass
 
