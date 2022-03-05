@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 HAS_PWD = True
 try:
     import pwd
@@ -27,11 +28,6 @@ def winpath(d):
 nativepath = unixpath
 if platform == 'win':
     nativepath = winpath
-
-# bindir = location of local binaries
-nbits = platform.architecture()[0].replace('bit', '')
-topdir = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
-bindir = os.path.abspath(os.path.join(topdir, 'bin', '%s%s' % (uname, nbits)))
 
 
 def get_homedir():
