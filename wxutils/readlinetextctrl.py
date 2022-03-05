@@ -6,7 +6,6 @@ import wx
 import os
 import time
 
-DEFAULT_HISTORYFILE = '.wxapp_hist'
 MAX_HISTORY = 5000
 
 class ReadlineTextCtrl(wx.TextCtrl):
@@ -14,16 +13,22 @@ class ReadlineTextCtrl(wx.TextCtrl):
     TextCtrl with a readline-like interaction and text history
     that can be persisted between sessions.
     """
-    def __init__(self, parent=None, id=-1, size=(400,-1), historyfile=None,
-                 style=wx.ALIGN_LEFT|wx.TE_PROCESS_ENTER, **kws):
+    def __init__(self, parent=None, value='', size=(400,-1), historyfile=None,
+                 style=wx.ALIGN_LEFT|wx.TE_PROCESS_ENTER,
+                 appname='wxapp', **kws):
 
-        wx.TextCtrl.__init__(self, parent, id, value=value,
+        wx.TextCtrl.__init__(self, parent, -1, value=value,
                              size=size, style=style, **kws)
+
+        self._val = value
+        self.appname = appname
+
         self.historyfile = historyfile
         self.hist_buff = []
         if self.historyfile is None:
             self.historyfile= os.path.join(os.environ.get('HOME','.'),
-                                         DEFAULT_HISTORYFILE)
+                                           '.%s_hist' % appname)
+
         self.LoadHistory()
         self.hist_mark = len(self.hist_buff)
         self.hist_sessionstart = self.hist_mark
@@ -54,13 +59,9 @@ class ReadlineTextCtrl(wx.TextCtrl):
 
     def onKillFocus(self, event=None):
         self.__GetMark()
-        if event is not None:
-            event.Skip()
 
     def onSetFocus(self, event=None):
         self.__SetMark()
-        if event is not None:
-            event.Skip()
 
     def onChar(self, event):
         """ on Character event"""
@@ -148,8 +149,6 @@ class ReadlineTextCtrl(wx.TextCtrl):
         elif ctrl:
             pass
         self.Refresh()
-        if do_skip:
-            event.Skip()
         return
 
     def AddToHistory(self, text=''):
@@ -165,7 +164,7 @@ class ReadlineTextCtrl(wx.TextCtrl):
         except IOError:
             print( 'Cannot save history ', filename)
 
-        fout.write("# wxapp history saved %s\n\n" % time.ctime())
+        fout.write("# %s history saved %s\n\n" % (self.appname, time.ctime()))
         start_entry = -MAX_HISTORY
         if session_only:
             start_entry = self.hist_sessionstart
