@@ -76,6 +76,24 @@ def get_homedir():
         home = os.path.abspath('.')
     return nativepath(home)
 
+def get_cwd():
+    """get current working directory
+    Note: os.getcwd() can fail with permission error.
+
+    when that happens, this changes to the users `HOME` directory
+    and returns that directory so that it always returns an existing
+    and readable directory.
+    """
+    try:
+        return os.getcwd()
+    except:
+        home = get_homedir()
+        os.chdir(home)
+        return home
+
+
+
+
 def get_configfile(configfile):
     """get configuration file from home dir"""
     cfile = os.path.join(get_homedir(), configfile)
