@@ -2,13 +2,13 @@
 """
   simplified wx widgets and utilities
 """
-__version__ = '0.2.3'
+from pyshortcuts.version import version as __version__
 __author__  = 'Matthew Newville'
 
 from . import utils
 
 from .utils import (set_sizer, pack, SetTip, Font, HLine, Check, MenuItem,
-                    Popup, is_wxPhoenix, RIGHT, LEFT, CEN , LCEN, RCEN,
+                    Popup, RIGHT, LEFT, CEN , LCEN, RCEN,
                     CCEN, LTEXT, FRAMESTYLE)
 
 from .buttons import Button, ToggleButton, BitmapButton
@@ -26,5 +26,7 @@ from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
 
 from .periodictable import  PeriodicTablePanel
 
-from .paths import platform, nativepath, get_homedir, get_configfile, save_configfile
+from .paths import (platform, nativepath, get_homedir, get_configfile,
+                    save_configfile, get_cwd)
+
 from .colors import GUIColors

@@ -91,9 +91,6 @@ def get_cwd():
         os.chdir(home)
         return home
 
-
-
-
 def get_configfile(configfile):
     """get configuration file from home dir"""
     cfile = os.path.join(get_homedir(), configfile)
