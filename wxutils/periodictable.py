@@ -256,10 +256,11 @@ class PeriodicTablePanel(wx.Panel):
         self.subtitle[index].SetLabel(label)
 
 class PTableFrame(wx.Frame):
-    def __init__(self, size=(-1, -1)):
+    def __init__(self, size=(-1, -1), fontsize=10):
         wx.Frame.__init__(self, parent=None, size=size)
         ptab  = PeriodicTablePanel(self, title='Periodic Table',
                                    tooltip_msg='Select Element',
+                                   fontsize=fontsize,
                                    onselect=self.onElement)
         sx, sy = ptab.GetBestSize()
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -271,4 +272,3 @@ class PTableFrame(wx.Frame):
 
     def onElement(self, elem=None, event=None):
         print( 'Element Selected:  ', elem)
-
