@@ -1,6 +1,12 @@
 import os
 import sys
 
+HAS_PWD = True
+try:
+    import pwd
+except ImportError:
+    HAS_PWD = False
+
 platform = sys.platform
 if os.name == 'nt':
     platform = 'win'
@@ -22,11 +28,11 @@ nativepath = unixpath
 if platform == 'win':
     nativepath = winpath
 
-HAS_PWD = True
-try:
-    import pwd
-except ImportError:
-    HAS_PWD = False
+# bindir = location of local binaries
+nbits = platform.architecture()[0].replace('bit', '')
+topdir = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+bindir = os.path.abspath(os.path.join(topdir, 'bin', '%s%s' % (uname, nbits)))
+
 
 def get_homedir():
     "determine home directory of current user"
@@ -42,12 +48,13 @@ def get_homedir():
 
     # for Unixes, allow for sudo case
     susername = os.environ.get("SUDO_USER", None)
-    if HAS_PWD and susername is not None and home is None:
+    if home is None and HAS_PWD and susername is not None:
         home = pwd.getpwnam(susername).pw_dir
 
     # try expanding '~' -- should work on most Unixes
     if home is None:
         home = check(os.path.expanduser, '~')
+
 
     # try the common environmental variables
     if home is  None:
