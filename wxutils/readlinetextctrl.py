@@ -16,10 +16,8 @@ class ReadlineTextCtrl(wx.TextCtrl):
     def __init__(self, parent=None, value='', size=(400,-1), historyfile=None,
                  style=wx.ALIGN_LEFT|wx.TE_PROCESS_ENTER,
                  appname='wxapp', **kws):
-
         wx.TextCtrl.__init__(self, parent, -1, value=value,
                              size=size, style=style, **kws)
-
         self._val = value
         self.appname = appname
 
