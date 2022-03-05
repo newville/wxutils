@@ -1,6 +1,28 @@
 import time
 import sys
+
+
 class debugtime(object):
+    """debugtimer returns a Timer object that can be used
+    to time the running of portions of code, and then
+    write a simple report of the results.  the Timer object
+    has methods:
+
+      clear()                  reset Timer
+      add(msg, verbose=False)  record time, with message
+      get_report()             get text of timer report
+      show()                   print timer report
+
+    An example:
+
+      timer = debugtimer()
+      x = 1
+      timer.add('now run foo')
+      foo()
+      timer.add('now run bar')
+      bar()
+      timer.show_report()
+    """
     def __init__(self):
         self.clear()
         self.add('debugtime init')
@@ -13,14 +35,14 @@ class debugtime(object):
         self.times.append((msg,time.time()))
         if verbose:
             sys.stdout.write("%s\n"% msg)
-            
+
     def show(self, writer=None, clear=True):
         if writer is None:
             writer = sys.stdout.write
         writer('%s\n' % self.get_report())
         if clear:
             self.clear()
-            
+
 
     def get_report(self):
         m0, t0 = self.times[0]
@@ -28,7 +50,7 @@ class debugtime(object):
         out  = ["# %s  %s " % (m0,time.ctime(t0))]
         lmsg = 0
         for m, t in self.times[1:]:
-            lmsg = max(lmsg, len(m))            
+            lmsg = max(lmsg, len(m))
         m = '#      Message'
         m = m + ' '*(lmsg-len(m))
 
