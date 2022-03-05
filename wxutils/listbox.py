@@ -15,7 +15,7 @@ class EditableListBox(wx.ListBox):
 
         if isinstance(bgcolor, (tuple, list)):
             bgcolor = wx.Colour(bgcolor)
-        if isinstance(gcolor, (tuple, list)):
+        if isinstance(color, (tuple, list)):
             color = wx.Colour(color)
 
         self.SetBackgroundColour(bgcolor)
