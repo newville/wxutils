@@ -6,8 +6,6 @@ mostly simplified wrappers around existing widgets.
 """
 import wx
 
-is_wxPhoenix = True
-
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = RCEN = wx.ALIGN_RIGHT
 LEFT  = LCEN = wx.ALIGN_LEFT
