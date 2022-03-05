@@ -2,7 +2,7 @@
 """
   simplified wx widgets and utilities
 """
-from pyshortcuts.version import version as __version__
+from .version import version as __version__
 __author__  = 'Matthew Newville'
 
 from . import utils
