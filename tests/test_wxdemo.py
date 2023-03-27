@@ -1,16 +1,8 @@
-from __future__ import print_function
-
 import time
 import os
 import sys
 import wx
 from functools import partial
-
-is_wxPhoenix = 'phoenix' in wx.PlatformInfo
-if is_wxPhoenix:
-    PyDeadObjectError = RuntimeError
-else:
-    from wx._core import PyDeadObjectError
 
 from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
@@ -26,13 +18,15 @@ PY_FILES = "Python scripts (*.py)|*.py"
 ALL_FILES = "All files (*.*)|*.*"
 
 class DemoFrame(wx.Frame):
-    def __init__(self):
+    def __init__(self, idletime=30.0):
 
         wx.Frame.__init__(self, None, -1, 'wxutil demo',
                           style=wx.DEFAULT_FRAME_STYLE|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
         self.SetTitle('wxutil demo')
 
         self.SetFont(Font(11))
+        self.idletime = idletime
+        self.deadtime = time.time() + idletime
 
         self.set_menu()
         self.statusbar = self.CreateStatusBar(2, 1)
@@ -48,7 +42,7 @@ class DemoFrame(wx.Frame):
         tctrl_name = TextCtrl(panel, value='', action=self.onName,
                               size=(250, -1))
 
-        lctrl_addr = LabeledTextCtrl(self, value='<>', action=self.onAddr,
+        lctrl_addr = LabeledTextCtrl(panel, value='<>', action=self.onAddr,
                                      labeltext=' Address: ', size=(250, -1))
 
         lab3 = HyperText(panel,' FloatCtrl: ', size=(100, -1), action=self.onHyperText)
@@ -133,12 +127,9 @@ class DemoFrame(wx.Frame):
         panel.Add(filelist_btn)
 
         panel.Add(okcancel, newrow=True)
-
-
         panel.pack()
 
         self.timer = wx.Timer(self)
-        self.last_time = time.time()
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
 
         fsizer = wx.BoxSizer(wx.VERTICAL)
@@ -152,19 +143,20 @@ class DemoFrame(wx.Frame):
         self.Refresh()
 
     def init_timer(self):
-        self.timer.Start(500)
+        self.timer.Start(100)
 
-    def onTimer(self, event):
-        idle_time = (time.time() - self.last_time)
-        msg = "Time remaining = %.1f sec" % (30 - idle_time)
+    def onTimer(self, event=None):
+        time_remaining = self.deadtime  - time.time()
+
+        msg = "Time remaining = %.1f sec" % (time_remaining)
         self.statusbar.SetStatusText(msg, 1)
-        if (time.time() - self.last_time) > 30:
+        if time_remaining < 0:
             print("quitting...")
             self.onExit()
 
     def report(self, reason, value):
         self.statusbar.SetStatusText("%s: %s" % (reason, value), 0)
-        self.last_time = time.time()
+        self.deadtime = time.time() + self.idletime
 
     def set_menu(self):
         menu = wx.Menu()
@@ -214,6 +206,7 @@ class DemoFrame(wx.Frame):
 
     def onPTable(self, event=None):
         PTableFrame(fontsize=10).Show()
+        self.report("on Periodic Table: ", '')
 
     def onEdList(self, event=None):
         frame = wx.Frame(self)
@@ -221,7 +214,7 @@ class DemoFrame(wx.Frame):
         edlist.Append(" Item 1 ")
         edlist.Append(" Item 2 ")
         edlist.Append(" Next ")
-
+        self.report("on Edit List: ", '')
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(edlist, 1, wx.EXPAND|wx.ALL, 5)
         pack(frame, sizer)
@@ -237,7 +230,7 @@ class DemoFrame(wx.Frame):
         edlist  = FileCheckList(frame, select_action=self.onFileListSelect)
         for i in range(8):
             edlist.Append("File.%3.3d" % (i+1))
-
+        self.report("on File List: ", '')
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(edlist, 1, wx.EXPAND|wx.ALL, 5)
         pack(frame, sizer)
@@ -247,7 +240,6 @@ class DemoFrame(wx.Frame):
 
     def onFileListSelect(self, event=None, **kws):
         self.report(" File List selected ", event.GetString())
-
 
     def onFileOpen(self, event=None):
         wildcards = "%s|%s" % (PY_FILES, ALL_FILES)
@@ -265,14 +257,10 @@ class DemoFrame(wx.Frame):
         self.Destroy()
 
 
-def test_wxdemo():
-    try:
-        app = wx.App()
-        DemoFrame().Show(True)
-        app.MainLoop()
-    except SystemExit:
-        print("cannot run wx demo -- probably cannot draw to screen")
-        pass
+def test_wxdemo(idletime=5.0):
+    app = wx.App()
+    DemoFrame(idletime=idletime).Show(True)
+    app.MainLoop()
 
 if __name__ == '__main__':
-    test_wxdemo()
+    test_wxdemo(idletime=30.0)
