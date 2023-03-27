@@ -24,9 +24,10 @@ from .icons import get_icon
 from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
                      FloatSpin, FloatSpinWithPin)
 
+from .notebooks import flatnotebook
 from .periodictable import  PeriodicTablePanel
 
 from .paths import (platform, nativepath, get_homedir, get_configfile,
                     save_configfile, get_cwd)
 
-from .colors import GUIColors
+from .colors import GUIColors, COLORS, set_color
