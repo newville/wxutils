@@ -1,15 +1,15 @@
 import wx
-from collections import OrderedDict
 
 class FileDropTarget(wx.FileDropTarget):
     def __init__(self, main):
         wx.FileDropTarget.__init__(self)
-        self.main = main
+        self.reader = getattr(main, 'onRead', None)
 
     def OnDropFiles(self, x, y, filenames):
-        for file in filenames:
-            if hasattr(self.main, 'onRead'):
-                self.main.onRead(file)
+        if self.reader is not None:
+            for file in filenames:
+                self.reader(file)
+        return (self.reader is not None)
 
 class FileCheckList(wx.CheckListBox):
     """
@@ -19,34 +19,51 @@ class FileCheckList(wx.CheckListBox):
     """
     def __init__(self, parent, main=None, select_action=None,
                  right_click=True, remove_action=None,
-                 custom_actions=None, **kws):
+                 pre_actions=None, post_actions=None, **kws):
 
         wx.CheckListBox.__init__(self, parent, **kws)
-
         self.SetDropTarget(FileDropTarget(main))
 
-        self.SetBackgroundColour((250, 250, 250, 255))
-        self.SetForegroundColour((5, 5, 85, 255))
         if select_action is not None:
             self.Bind(wx.EVT_LISTBOX,  select_action)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.check_event)
         self.remove_action = remove_action
-        self.rclick_actions = OrderedDict()
+        self.rclick_actions = {}
+
+        core_actions = [("Select All",        self.select_all),
+                        ("Select All above",  self.select_allabove),
+                        ("Select All below",  self.select_allbelow),
+                        ("Select None",       self.select_none),
+                        ("Select None above", self.select_noneabove),
+                        ("Select None below", self.select_nonebelow),
+                        ("--sep--", None),
+                        ("Move up", None),
+                        ("Move down", None),
+                        ("Move to Top", None),
+                        ("Move to Bottom", None),
+                        ("Remove from List", None)]
+
+        click_actions =  []
+        if pre_actions is not None:
+            click_actions.extend(pre_actions)
+            click_actions.append(("--sep--", None))
+        click_actions.extend(core_actions)
+        if post_actions is not None:
+            click_actions.append(("--sep--", None))
+
+            click_actions.extend(post_actions)
+        click_actions.append(("--sep--", None))
         if right_click:
             self.Bind(wx.EVT_RIGHT_DOWN, self.onRightClick)
-            for title, action in (("Move up", None),
-                                  ("Move down", None),
-                                  ("Move to Top", None),
-                                  ("Move to Bottom", None),
-                                  ("Remove from List", None),
-                                  ("--sep--", None),
-                                  ("Select All",        self.select_all),
-                                  ("Select All above",  self.select_allabove),
-                                  ("Select All below",  self.select_allbelow),
-                                  ("Select None",       self.select_none),
-                                  ("Select None above", self.select_noneabove),
-                                  ("Select None below", self.select_nonebelow)):
+            for title, action in click_actions:
                 self.rclick_actions[title] = action
                 self.Bind(wx.EVT_MENU, self.onRightEvent)
+
+    def check_event(self, evt=None):
+        index = evt.GetSelection()
+        label = self.GetString(index)
+        self.SetSelection(index)
+
 
     def onRightClick(self, evt=None):
         menu = wx.Menu()
@@ -104,9 +121,12 @@ class FileCheckList(wx.CheckListBox):
             action(event=event)
 
         if do_relist:
-            self.Clear()
-            for name in names:
-                self.Append(name)
+            self.refresh(names)
+
+    def refresh(self, names):
+        self.Clear()
+        for name in names:
+            self.Append(name)
 
     def select_all(self, event=None):
         self.SetCheckedStrings(self.GetStrings())
