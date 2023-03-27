@@ -7,7 +7,7 @@ from functools import partial
 import wx
 from wx.lib.agw import floatspin as fspin
 
-is_gtk3  = 'gtk3' in wx.PlatformInfo
+from .icons import get_icon
 
 HAS_NUMPY = False
 try:
@@ -16,7 +16,6 @@ try:
 except ImportError:
     pass
 
-from .icons import get_icon
 
 def make_steps(prec=3, tmin=0, tmax=10, base=10, steps=(1, 2, 5)):
     """make a list of 'steps' to use for a numeric ComboBox
@@ -290,26 +289,45 @@ class FloatCtrl(wx.TextCtrl):
         self.Refresh()
 
 
-def FloatSpin(parent, value=0, action=None, tooltip=None,
-                 size=(100, -1), digits=1, increment=1, **kws):
+def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
+              digits=1, increment=1, use_gtk3=False, **kws):
     """FloatSpin with action and tooltip"""
     if value is None:
         value = 0
-    if is_gtk3:
-        fs = wx.SpinCtrlDouble(parent, -1, size=size, value=value,
-                               digits=digits, increment=increment, **kws)
+
+    # need to work this out better for GTK3 - lots of small
+    # differences with GTK2, but this one is the biggest headache.
+    # SpinCtrlDouble is like FloatSpin, but with every option
+    # having a slightly different name...
+    if use_gtk3 and 'gtk3' in wx.PlatformInfo:
+        maxval = kws.pop('max_val', None)
+        minval = kws.pop('min_val', None)
+        fmt = "%%%df" % digits
+        fs = wx.SpinCtrlDouble(parent, -1, value=fmt % value,
+                               size=(size[0]+40, size[1]),
+                               inc=increment, **kws)
+        fs.SetDigits(digits)
+        if minval is not None:
+            fs.SetMin(minval)
+        if maxval is not None:
+            fs.SetMax(maxval)
+
+        if action is not None:
+            fs.Bind(wx.EVT_SPINCTRLDOUBLE, action)
+
     else:
         fs = fspin.FloatSpin(parent, -1, size=size, value=value,
                              digits=digits, increment=increment, **kws)
 
-    if action is not None:
-        fs.Bind(fspin.EVT_FLOATSPIN, action)
+        if action is not None:
+            fs.Bind(fspin.EVT_FLOATSPIN, action)
     if tooltip is not None:
         fs.SetToolTip(tooltip)
     return fs
 
+
 def FloatSpinWithPin(parent, value=0, pin_action=None,
-                     tooltip='use last point selected from plot', **kws):
+                     tooltip='select point from plot', **kws):
     """create a FloatSpin with Pin button with action"""
     fspin = FloatSpin(parent, value=value, **kws)
     bmbtn = wx.BitmapButton(parent, id=-1, bitmap=get_icon('pin'),
