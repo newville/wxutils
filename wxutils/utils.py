@@ -4,7 +4,11 @@
 A collection of wx utility functions,
 mostly simplified wrappers around existing widgets.
 """
+import os
+import sys
+from traceback import format_tb
 import wx
+from  wx.lib.dialogs import ScrolledMessageDialog
 
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = RCEN = wx.ALIGN_RIGHT
@@ -119,3 +123,92 @@ def Popup(parent, message, title, style=None, **kws):
     ret = dlg.ShowModal()
     dlg.Destroy()
     return ret
+
+
+
+def ExceptionPopup(parent, title, lines, with_traceback=True,
+                   style=None, **kws):
+    """Modal message dialog with current Python Exception"""
+    if style is None:
+        style = wx.OK|wx.ICON_INFORMATION
+
+    etype, exc, tb = sys.exc_info()
+    if with_traceback:
+        lines.append("Traceback (most recent calls last):")
+        for tline in format_tb(tb):
+            if tline.endswith('\n'): tline = tline[:-1]
+            lines.append(tline)
+    lines.append(f"{etype.__name__}: {exc}")
+
+    message = '\n'.join(lines)
+    dkws = {'size': (700, 350)}
+    dkws.update(kws)
+    dlg = ScrolledMessageDialog(parent, message, title, **dkws)
+    dlg.ShowModal()
+    dlg.Destroy()
+
+
+def get_homedir():
+    "determine home directory"
+    homedir = None
+    def check(method, s):
+        "check that os.path.expanduser / expandvars gives a useful result"
+        try:
+            if method(s) not in (None, s):
+                return method(s)
+        except:
+            pass
+        return None
+
+    # try expanding '~' -- should work on most Unixes
+    homedir = check(os.path.expanduser, '~')
+
+    # try the common environmental variables
+    if homedir is  None:
+        for var in ('$HOME', '$HOMEPATH', '$USERPROFILE', '$ALLUSERSPROFILE'):
+            homedir = check(os.path.expandvars, var)
+            if homedir is not None:
+                break
+
+    # For Windows, ask for parent of Roaming 'Application Data' directory
+    if homedir is None and os.name == 'nt':
+        try:
+            from win32com.shell import shellcon, shell
+            homedir = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, 0, 0)
+        except ImportError:
+            pass
+
+    # finally, use current folder
+    if homedir is None:
+        homedir = os.path.abspath('.')
+    return homedir
+
+
+def get_cwd():
+    """get current working directory
+    Note: os.getcwd() can fail with permission error.
+
+    when that happens, this changes to the users `HOME` directory
+    and returns that directory so that it always returns an existing
+    and readable directory.
+    """
+    try:
+        return os.getcwd()
+    except:
+        curdir = os.path.abspath('.')
+        os.chdir(curdir)
+        return home
+
+def gcd(parent=None, **kws):
+    """Directory Browser to Change Directory"""
+    if parent is None:
+        parent = wx.GetApp()
+
+    dlg = wx.DirDialog(parent, 'Choose Directory',
+                       defaultPath = get_cwd(),
+                       style = wx.DD_DEFAULT_STYLE)
+
+    if dlg.ShowModal() == wx.ID_OK:
+        os.chdir(dlg.GetPath())
+    dlg.Destroy()
+    return get_cwd()

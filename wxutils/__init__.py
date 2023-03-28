@@ -12,9 +12,9 @@ if sys.platform.lower() == 'darwin':
     wx.PyApp.IsDisplayAvailable = lambda _: True
 
 from . import utils
-from .utils import (set_sizer, pack, SetTip, Font, HLine, Check, MenuItem,
-                    Popup, RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT,
-                    FRAMESTYLE)
+from .utils import (gcd, ExceptionPopup, set_sizer, pack, SetTip, Font, HLine,
+                    Check, MenuItem, Popup, RIGHT, LEFT, CEN , LCEN, RCEN,
+                    CCEN, LTEXT, FRAMESTYLE)
 
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
