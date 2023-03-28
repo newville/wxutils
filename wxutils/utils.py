@@ -212,3 +212,31 @@ def gcd(parent=None, **kws):
         os.chdir(dlg.GetPath())
     dlg.Destroy()
     return get_cwd()
+
+
+def panel_pack(window, panel, pad=10):
+    """
+    a simple method to pack a single panel to a single frame
+    """
+    sizer = wx.BoxSizer(wx.VERTICAL)
+    sizer.Add(panel, 1, wx.LEFT, 5)
+    window.SetSizer(sizer)
+    sizer.Fit(window)
+    w0, h0 = window.GetSize()
+    w1, h1 = window.GetBestSize()
+    window.SetSize((max(w0, w1)+pad, max(h0, h1)+pad))
+
+def show_wxsizes(obj):
+    """recursively show sizes of wxPython objects --
+    useful for avoiding size<1 errors"""
+    for child in obj.GetChildren():
+        try:
+            csize = child.GetSize()
+            if csize[0] < 1 or csize[1] < 1:
+                print(child, csize)
+        except:
+            pass
+        try:
+            show_wxsizes(child)
+        except:
+            pass
