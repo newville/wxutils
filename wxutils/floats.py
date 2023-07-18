@@ -308,7 +308,7 @@ def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
         fs.SetDigits(digits)
         fs.SetMin(minval)
         fs.SetMax(maxval)
-
+        fs.SetValue(value)
         if action is not None:
             fs.Bind(wx.EVT_SPINCTRLDOUBLE, action)
 
