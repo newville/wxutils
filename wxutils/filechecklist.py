@@ -62,7 +62,7 @@ class FileCheckList(wx.CheckListBox):
     def check_event(self, evt=None):
         index = evt.GetSelection()
         label = self.GetString(index)
-        self.SetSelection(index)
+        # self.SetSelection(index)
 
 
     def onRightClick(self, evt=None):
