@@ -289,14 +289,14 @@ class FloatCtrl(wx.TextCtrl):
 
 
 def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
-              digits=1, increment=1, use_gtk3=True, **kws):
+              digits=1, increment=1, use_gtk3=True, use_local=False, **kws):
     """FloatSpin with action and tooltip"""
     if value is None:
         value = 0
 
     # for gtk3, don't use the horrible SpinCtrlDouble, but instead
     # use a locally modified Float Spin with Bitmap Buttons
-    if use_gtk3 and 'gtk3' in wx.PlatformInfo:
+    if use_local or (use_gtk3 and 'gtk3' in wx.PlatformInfo):
         fs = MyFloatSpin(parent, -1, size=size, value=value,
                              digits=digits, increment=increment, **kws)
         if action is not None:
