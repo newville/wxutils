@@ -7,7 +7,7 @@ from functools import partial
 import wx
 from wx.lib.agw import floatspin as fspin
 from .icons import get_icon
-
+from .myfloatspin import FloatSpin as MyFloatSpin
 HAS_NUMPY = False
 try:
     import numpy
@@ -294,24 +294,13 @@ def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
     if value is None:
         value = 0
 
-    # need to work this out better for GTK3 - lots of small
-    # differences with GTK2, but this one is the biggest headache.
-    # SpinCtrlDouble is like FloatSpin, but with every option
-    # having a slightly different name...
+    # for gtk3, don't use the horrible SpinCtrlDouble, but instead
+    # use a locally modified Float Spin with Bitmap Buttons
     if use_gtk3 and 'gtk3' in wx.PlatformInfo:
-        maxval = kws.pop('max_val', 9999999)
-        minval = kws.pop('min_val', -9999999)
-        fmt  = "%%%df" % digits
-        fs = wx.SpinCtrlDouble(parent, -1, value=fmt % value,
-                               size=(size[0]+50, size[1]),
-                               inc=increment, **kws)
-        fs.SetDigits(digits)
-        fs.SetMin(minval)
-        fs.SetMax(maxval)
-        fs.SetValue(value)
+        fs = MyFloatSpin(parent, -1, size=size, value=value,
+                             digits=digits, increment=increment, **kws)
         if action is not None:
-            fs.Bind(wx.EVT_SPINCTRLDOUBLE, action)
-
+            fs.Bind(fspin.EVT_FLOATSPIN, action)
     else:
         fs = fspin.FloatSpin(parent, -1, size=size, value=value,
                              digits=digits, increment=increment, **kws)
@@ -321,7 +310,6 @@ def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
     if tooltip is not None:
         fs.SetToolTip(tooltip)
     return fs
-
 
 def FloatSpinWithPin(parent, value=0, pin_action=None,
                      tooltip='select point from plot', **kws):
