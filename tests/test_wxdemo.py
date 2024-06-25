@@ -11,6 +11,7 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      SimpleText, TextCtrl, fix_filename, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
                      make_steps)
+
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
 from wxutils.filechecklist import FileCheckList
 
@@ -54,6 +55,10 @@ class DemoFrame(wx.Frame):
         lab4 = HyperText(panel,' FloatSpin: ', size=(100, -1), action=self.onHyperText)
         val4 = FloatSpin(panel, '12.2', action=self.onFloatSpin, digits=2,
                          increment=0.1, size=(250, -1))
+
+        lab5 = HyperText(panel,' MyFloatSpin: ', size=(100, -1), action=self.onHyperText)
+        val5 = FloatSpin(panel, '12.2', action=self.onFloatSpin, digits=2,
+                         use_local=True, increment=0.1, size=(250, -1))
 
         labx = HyperText(panel,' NumericCombo: ', size=(100, -1), action=self.onHyperText)
 
@@ -106,6 +111,9 @@ class DemoFrame(wx.Frame):
 
         panel.Add(lab4, newrow=True)
         panel.Add(val4, dcol=3)
+
+        panel.Add(lab5, newrow=True)
+        panel.Add(val5, dcol=3)
 
         panel.Add(labx, newrow=True)
         panel.Add(valx, dcol=3)
