@@ -258,7 +258,7 @@ CHEVRON_UP = PyEmbeddedImage(
     b'clBpeGVsADPh181aAAAAG3RFWHRpY2M6Y29weXJpZ2h0AFB1YmxpYyBEb21haW62kTFbAAAA'
     b'InRFWHRpY2M6ZGVzY3JpcHRpb24AR0lNUCBidWlsdC1pbiBzUkdCTGdBEwAAABV0RVh0aWNj'
     b'Om1hbnVmYWN0dXJlcgBHSU1QTJ6QygAAAA50RVh0aWNjOm1vZGVsAHNSR0JbYElDAAAACXRF'
-    b'WHR1bmtub3duADHaIVV8AAAAAElFTkSuQmCC').GetBitmap()
+    b'WHR1bmtub3duADHaIVV8AAAAAElFTkSuQmCC')
 
 CHEVRON_DOWN = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAQAAAD8fJRsAAAAAmJLR0QA/4ePzL8AAAAJcEhZ'
@@ -336,7 +336,7 @@ CHEVRON_DOWN = PyEmbeddedImage(
     b'eGVsADPh181aAAAAG3RFWHRpY2M6Y29weXJpZ2h0AFB1YmxpYyBEb21haW62kTFbAAAAInRF'
     b'WHRpY2M6ZGVzY3JpcHRpb24AR0lNUCBidWlsdC1pbiBzUkdCTGdBEwAAABV0RVh0aWNjOm1h'
     b'bnVmYWN0dXJlcgBHSU1QTJ6QygAAAA50RVh0aWNjOm1vZGVsAHNSR0JbYElDAAAACXRFWHR1'
-    b'bmtub3duADHaIVV8AAAAAElFTkSuQmCC').GetBitmap()
+    b'bmtub3duADHaIVV8AAAAAElFTkSuQmCC')
 
 # Set The Styles For The Underline wx.TextCtrl
 FS_READONLY = 1
@@ -581,16 +581,10 @@ class FloatSpin(wx.Control):
         self._validkeycode.extend([wx.WXK_RETURN, wx.WXK_TAB, wx.WXK_BACK,
                                    wx.WXK_LEFT, wx.WXK_RIGHT])
 
-        # self._spinbutton = wx.SpinButton(self, wx.ID_ANY, wx.DefaultPosition,
-        #                                 size=(-1, height),
-        #                                 style=wx.SP_ARROW_KEYS | wx.SP_VERTICAL |
-        #                                 wx.SP_WRAP)
-
-        self._spin_up = wx.BitmapButton(self, -1, bitmap=CHEVRON_UP,
+        self._spin_up = wx.BitmapButton(self, -1, bitmap=CHEVRON_UP.GetBitmap()                                            ,
                                         size=(15, 15), style=wx.BORDER_NONE)
-        self._spin_dn = wx.BitmapButton(self, -1, bitmap=CHEVRON_DOWN,
+        self._spin_dn = wx.BitmapButton(self, -1, bitmap=CHEVRON_DOWN.GetBitmap(),
                                         size=(15, 15), style=wx.BORDER_NONE)
-
 
         txtstyle = wx.TE_NOHIDESEL | wx.TE_PROCESS_ENTER
         if agwStyle & FS_RIGHT:
