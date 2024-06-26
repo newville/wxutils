@@ -710,7 +710,6 @@ class FloatSpin(wx.Control):
 
     def DoSendEvent(self):
         """ Send the event to the parent. """
-
         event = wx.CommandEvent(wx.wxEVT_COMMAND_SPINCTRL_UPDATED, self.GetId())
         event.SetEventObject(self)
         event.SetInt(int(self._value + 0.5))
@@ -721,6 +720,9 @@ class FloatSpin(wx.Control):
         self.GetEventHandler().ProcessEvent(event)
 
         eventOut = FloatSpinEvent(wxEVT_FLOATSPIN, self.GetId())
+        if self._textctrl:
+            eventOut.SetString(self._textctrl.GetValue())
+
         eventOut.SetPosition(int(self._value + 0.5))
         eventOut.SetEventObject(self)
         self.GetEventHandler().ProcessEvent(eventOut)
@@ -754,12 +756,10 @@ class FloatSpin(wx.Control):
 
         :param `event`: a :class:`SpinEvent` event to be processed.
         """
-
         if self._textctrl and self._textctrl.IsModified():
             self.SyncSpinToText(False)
 
         if self.InRange(self._value + self._increment*self._spinmodifier):
-
             self._value = self._value + self._increment*self._spinmodifier
             self.SetValue(self._value)
             self.DoSendEvent()
@@ -771,12 +771,10 @@ class FloatSpin(wx.Control):
 
         :param `event`: a :class:`SpinEvent` event to be processed.
         """
-
         if self._textctrl and self._textctrl.IsModified():
             self.SyncSpinToText(False)
 
         if self.InRange(self._value - self._increment*self._spinmodifier):
-
             self._value = self._value - self._increment*self._spinmodifier
             self.SetValue(self._value)
             self.DoSendEvent()
