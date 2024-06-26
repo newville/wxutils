@@ -51,13 +51,12 @@ class DemoFrame(wx.Frame):
         val3 = FloatCtrl(panel, '3', action=self.onFloat1, precision=2,
                          minval=0, maxval=1000, size=(250, -1))
 
-
         lab4 = HyperText(panel,' FloatSpin: ', size=(100, -1), action=self.onHyperText)
-        val4 = FloatSpin(panel, '12.2', action=self.onFloatSpin, digits=2,
+        val4 = FloatSpin(panel, 12.2, action=self.onFloatSpin, digits=2,
                          increment=0.1, size=(250, -1))
 
         lab5 = HyperText(panel,' MyFloatSpin: ', size=(100, -1), action=self.onHyperText)
-        val5 = FloatSpin(panel, '12.2', action=self.onFloatSpin, digits=2,
+        val5 = FloatSpin(panel, 12.3, action=self.onFloatSpin, digits=2,
                          use_local=True, increment=0.1, size=(250, -1))
 
         labx = HyperText(panel,' NumericCombo: ', size=(100, -1), action=self.onHyperText)
@@ -265,9 +264,12 @@ class DemoFrame(wx.Frame):
         self.Destroy()
 
 
-def test_wxdemo(idletime=5.0):
+def test_wxdemo(idletime=30.0):
     app = wx.App()
-    DemoFrame(idletime=idletime).Show(True)
+    demo = DemoFrame(idletime=idletime)
+    demo.Show(True)
+    demo.Raise()
+
     app.MainLoop()
 
 if __name__ == '__main__':
