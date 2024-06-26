@@ -6,8 +6,9 @@ import sys
 from functools import partial
 import wx
 from wx.lib.agw import floatspin as fspin
+from . import myfloatspin as mspin
 from .icons import get_icon
-from .myfloatspin import FloatSpin as MyFloatSpin
+
 HAS_NUMPY = False
 try:
     import numpy
@@ -296,17 +297,12 @@ def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
 
     # for gtk3, don't use the horrible SpinCtrlDouble, but instead
     # use a locally modified Float Spin with Bitmap Buttons
-    if use_local or (use_gtk3 and 'gtk3' in wx.PlatformInfo):
-        fs = MyFloatSpin(parent, -1, size=size, value=value,
-                             digits=digits, increment=increment, **kws)
-        if action is not None:
-            fs.Bind(fspin.EVT_FLOATSPIN, action)
-    else:
-        fs = fspin.FloatSpin(parent, -1, size=size, value=value,
-                             digits=digits, increment=increment, **kws)
+    spin = mspin if (use_local or ('gtk3' in wx.PlatformInfo)) else fspin
 
-        if action is not None:
-            fs.Bind(fspin.EVT_FLOATSPIN, action)
+    fs = spin.FloatSpin(parent, -1, size=size, value=value,
+                        digits=digits, increment=increment, **kws)
+    if action is not None:
+        fs.Bind(spin.EVT_FLOATSPIN, action)
     if tooltip is not None:
         fs.SetToolTip(tooltip)
     return fs
