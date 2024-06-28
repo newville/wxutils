@@ -742,6 +742,9 @@ class FloatSpin(wx.Control):
         self._textctrl.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
         # self._spinbutton.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
+        self._spin_up.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+        self._spin_dn.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+
         self.Bind(wx.EVT_SET_FOCUS, self.OnFocus)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -896,7 +899,7 @@ class FloatSpin(wx.Control):
             modifier = modifier*10.0
         if event.AltDown():
             modifier = modifier*100.0
-
+        
         keycode = event.GetKeyCode()
 
         if keycode == wx.WXK_UP:
@@ -954,9 +957,7 @@ class FloatSpin(wx.Control):
         else:
             if keycode not in self._validkeycode:
                 return
-
             event.Skip()
-
 
     def OnMouseWheel(self, event):
         """
