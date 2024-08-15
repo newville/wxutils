@@ -70,7 +70,7 @@ def get_homedir():
     # finally, use current folder
     if home is None:
         home = os.path.abspath('.')
-    return nativepath(home)
+    return unixpath(home)
 
 def get_cwd():
     """get current working directory
@@ -81,11 +81,11 @@ def get_cwd():
     and readable directory.
     """
     try:
-        return os.getcwd()
+        cwd = os.getcwd()
     except:
-        home = get_homedir()
-        os.chdir(home)
-        return home
+        cwd = get_homedir()
+        os.chdir(cwd)
+    return unixpath(cwd)
 
 def get_configfile(configfile):
     """get configuration file from home dir"""

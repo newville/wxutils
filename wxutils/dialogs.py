@@ -10,7 +10,7 @@ from collections import namedtuple
 
 from .text import SimpleText
 from .gridpanel import GridPanel
-from .paths import get_configfile, save_configfile, get_cwd
+from .paths import get_configfile, save_configfile, get_cwd, unixpath
 
 def fix_filename(s):
     """fix string to be a 'good' filename.
@@ -23,8 +23,6 @@ def fix_filename(s):
             idot = t.find('.')
             t = "%s_%s" % (t[:idot], t[idot+1:])
     return t
-
-
 
 def FileOpen(parent, message, default_dir=None, default_file=None,
              multiple=False, wildcard=None):
@@ -50,7 +48,7 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
 
     out = None
     if dlg.ShowModal() == wx.ID_OK:
-        out = os.path.abspath(dlg.GetPath())
+        out = unixpath(os.path.abspath(dlg.GetPath()))
     dlg.Destroy()
     return out
 
@@ -71,7 +69,7 @@ def FileSave(parent, message, default_file=None,
                         defaultFile=default_file,
                         style=wx.FD_SAVE|wx.FD_CHANGE_DIR)
     if dlg.ShowModal() == wx.ID_OK:
-        out = os.path.abspath(dlg.GetPath())
+        out = unixpath(os.path.abspath(dlg.GetPath()))
     dlg.Destroy()
     return out
 
@@ -80,11 +78,11 @@ def SelectWorkdir(parent,  message='Select Working Folder...'):
     dlg = wx.DirDialog(parent, message,
                        style=wx.DD_DEFAULT_STYLE|wx.DD_CHANGE_DIR)
 
-    path = os.path.abspath(os.curdir)
+    path = unixpath(os.path.abspath(os.curdir))
     dlg.SetPath(path)
     if  dlg.ShowModal() == wx.ID_CANCEL:
         return None
-    path = os.path.abspath(dlg.GetPath())
+    path = unixpath(os.path.abspath(dlg.GetPath()))
     dlg.Destroy()
     os.chdir(path)
     return path
