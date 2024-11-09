@@ -5,24 +5,13 @@ file utilities
 import os
 import sys
 import time
-import wx
+from pathlib import Path
 from collections import namedtuple
 
-from .text import SimpleText
+import wx
+
 from .gridpanel import GridPanel
 from .paths import get_configfile, save_configfile, get_cwd, unixpath
-
-def fix_filename(s):
-    """fix string to be a 'good' filename.
-    This may be a more restrictive than the OS, but
-    avoids nasty cases."""
-    badchars = ' <>:"\'\\\t\r\n/|?*!%$'
-    t = s.translate(s.maketrans(badchars, '_'*len(badchars)))
-    if t.count('.') > 1:
-        for i in range(t.count('.') - 1):
-            idot = t.find('.')
-            t = "%s_%s" % (t[:idot], t[idot+1:])
-    return t
 
 def FileOpen(parent, message, default_dir=None, default_file=None,
              multiple=False, wildcard=None):
@@ -46,9 +35,11 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
                         defaultDir=default_dir,
                         style=style)
 
-    out = None
     if dlg.ShowModal() == wx.ID_OK:
-        out = unixpath(os.path.abspath(dlg.GetPath()))
+        if multiple:
+            out = [Path(p).absolute().as_posix() for p in dlg.GetPaths()]
+        else:
+            out = Path(dlg.GetPath()).absolute().as_posix()
     dlg.Destroy()
     return out
 
@@ -69,7 +60,7 @@ def FileSave(parent, message, default_file=None,
                         defaultFile=default_file,
                         style=wx.FD_SAVE|wx.FD_CHANGE_DIR)
     if dlg.ShowModal() == wx.ID_OK:
-        out = unixpath(os.path.abspath(dlg.GetPath()))
+        out = Path(dlg.GetPath()).absolute().as_posix()
     dlg.Destroy()
     return out
 
@@ -78,13 +69,12 @@ def SelectWorkdir(parent,  message='Select Working Folder...'):
     dlg = wx.DirDialog(parent, message,
                        style=wx.DD_DEFAULT_STYLE|wx.DD_CHANGE_DIR)
 
-    path = unixpath(os.path.abspath(os.curdir))
+    path = Path(os.curdir).absolute().as_posix()
     dlg.SetPath(path)
-    if  dlg.ShowModal() == wx.ID_CANCEL:
-        return None
-    path = unixpath(os.path.abspath(dlg.GetPath()))
+    if  dlg.ShowModal() == wx.ID_OK:
+        path = Path(dlg.GetPath()).absolute().as_posix()
+        os.chdir(path)
     dlg.Destroy()
-    os.chdir(path)
     return path
 
 
