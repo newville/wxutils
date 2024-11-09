@@ -8,7 +8,7 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
                      Font, GUIColors, GridPanel, LabeledTextCtrl, HLine,
                      HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
-                     SimpleText, TextCtrl, fix_filename, get_icon, pack,
+                     SimpleText, TextCtrl, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
                      make_steps)
 
