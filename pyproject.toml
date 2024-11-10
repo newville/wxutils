@@ -5,3 +5,51 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "wxutils/version.py"
 version_scheme = "post-release"
+
+[tool.setuptools.packages.find]
+include = ["wxutils"]
+# include_package_data = "True"
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[project]
+name = "wxutils"
+dynamic = ["version"]
+requires-python = ">= 3.9"
+description = "utilities and conveniences for wxPython"
+
+readme = "README.rst"
+authors = [
+     {name = "Matthew Newville", email = "matt.newville@gmail.com"}
+]
+license = {file = "LICENSE"}
+keywords = ["wxPython"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    ]
+dependencies = ["wxPython>=4.1.0"]
+[project.urls]
+Homepage = "https://github.com/newville/wxutils"
+Documentation ="https://github.com/newville/wxutils"
+Tracker = "https://github.com/newville/wxutils/issues"
+
+
+[project.optional-dependencies]
+dev = ["build", "twine"]
+doc = ["Sphinx"]
+test = ["pytest", "pytest-cov", "coverage"]
+all = ["wxutils[dev, doc, test]"]
