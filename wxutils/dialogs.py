@@ -13,17 +13,17 @@ import wx
 from .gridpanel import GridPanel
 from .paths import get_configfile, save_configfile, get_cwd, unixpath
 
-def FileOpen(parent, message, default_dir=None, default_file=None,
+def FileOpen(parent, message, default_dir=None, default_file='',
              multiple=False, wildcard=None):
     """File Open dialog wrapper.
     returns full path on OK or None on Cancel
     """
     out = None
+    if default_file is None:
+        default_file = ''
     if default_dir is None:
-        try:
-            default_dir = get_cwd()
-        except:
-            pass
+        default_dir = Path('.').absolute().as_posix()
+
     if wildcard is None:
         wildcard = 'All files (*.*)|*.*'
 
@@ -32,8 +32,7 @@ def FileOpen(parent, message, default_dir=None, default_file=None,
         style = style|wx.FD_MULTIPLE
     dlg = wx.FileDialog(parent, message=message, wildcard=wildcard,
                         defaultFile=default_file,
-                        defaultDir=default_dir,
-                        style=style)
+                        defaultDir=default_dir, style=style)
 
     if dlg.ShowModal() == wx.ID_OK:
         if multiple:
@@ -51,10 +50,7 @@ def FileSave(parent, message, default_file=None,
         wildcard = 'All files (*.*)|*.*'
 
     if default_dir is None:
-        try:
-            default_dir = get_cwd()
-        except:
-            pass
+        default_dir = Path('.').absolute().as_posix()
 
     dlg = wx.FileDialog(parent, message=message, wildcard=wildcard,
                         defaultFile=default_file,
