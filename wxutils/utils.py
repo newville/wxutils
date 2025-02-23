@@ -10,6 +10,7 @@ from traceback import format_tb
 import wx
 from  wx.lib.dialogs import ScrolledMessageDialog
 
+from .colors import GUI_COLORS as COLORS
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = RCEN = wx.ALIGN_RIGHT
 LEFT  = LCEN = wx.ALIGN_LEFT
@@ -66,14 +67,17 @@ def HLine(parent, size=(700, 3)):
     """
     return wx.StaticLine(parent, size=size, style=wx.LI_HORIZONTAL|wx.GROW)
 
-def HLineText(panel, text, colour='#222288'):
+def HLineText(panel, text, colour=None):
     """draw an Horizontal line, then SimpleText underneath
     HLineText(panel, text, **kws)
     keywords are passed to SimpleText
     """
+    if colour is None:
+        colour = COLORS.hline
     p = wx.Panel(panel)
     s = wx.BoxSizer(wx.HORIZONTAL)
-    s.Add(wx.StaticLine(p, size=(50, 5), style=wx.LI_HORIZONTAL), 0, LEFT, 5)
+    s.Add(wx.StaticLine(p, size=(50, 5), colour=colour,
+                       style=wx.LI_HORIZONTAL), 0, LEFT, 5)
     s.Add(SimpleText(p, text,  **kws),  0, LEFT, 5)
     pack(p, s)
     return p

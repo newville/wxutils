@@ -1,15 +1,9 @@
 import sys
 import wx
 import wx.lib.mixins.inspection
-
 from wxutils import SetTip
+from .colors import GUI_COLORS as COLORS
 
-FRAME_BG = (253, 253, 250) ## light grey
-TITLE_BG = (253, 253, 250) ## light grey
-FGCOL    = ( 20,  20, 120) ## blue
-BGCOL    = (253, 253, 250) ## light grey
-BGSEL    = (250, 250, 200) ## yellow
-FGSEL    = (200,   0,   0) ## red
 
 class PeriodicTablePanel(wx.Panel):
     """periodic table of the elements"""
@@ -84,12 +78,16 @@ class PeriodicTablePanel(wx.Panel):
         self.tooltip_msg = tooltip_msg
         self.wids = {}
         self.ctrls = {}
-        self.SetBackgroundColour(FRAME_BG)
+        self.SetBackgroundColour(COLORS.pt_frame_bg)
         self.selected = []
-        if fgcol is None: fgcol = FGCOL
-        if bgcol is None: bgcol = BGCOL
-        if fgsel is None: fgsel = FGSEL
-        if bgsel is None: bgsel = BGSEL
+        if fgcol is None:
+                fgcol = COLORS.pt_fg
+        if bgcol is None:
+                bgcol = COLORS.pt_bg
+        if fgsel is None:
+                fgsel = COLORS.pt_fgsel
+        if bgsel is None:
+                bgsel = COLORS.pt_bgsel
         self.fgcol = fgcol
         self.bgcol = bgcol
         self.fgsel = fgsel
@@ -229,7 +227,7 @@ class PeriodicTablePanel(wx.Panel):
 
         for a in (self.title, self.tsym, self.tznum):
             a.SetFont(self.titlefont)
-            a.SetBackgroundColour(TITLE_BG)
+            a.SetBackgroundColour(COLORS.pt_frame_bg)
 
         sizer.Add(self.title, (0, 4), (1, 8), wx.ALIGN_CENTER, 5)
         sizer.Add(self.tsym,  (0, 2), (1, 2), wx.ALIGN_LEFT, 5)

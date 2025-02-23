@@ -7,7 +7,7 @@ write_to = "wxutils/version.py"
 version_scheme = "post-release"
 
 [tool.setuptools.packages.find]
-include = ["wxutils"]
+include = ["wxutils", "darkdetect"]
 # include_package_data = "True"
 
 [tool.coverage.run]

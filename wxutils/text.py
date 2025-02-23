@@ -1,6 +1,7 @@
 import wx
 from functools import partial
 from .utils import LEFT, CEN
+from .colors import GUI_COLORS as COLORS
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"
@@ -117,9 +118,12 @@ class HyperText(wx.StaticText):
        2. performs the supplied action on Left-Up button events
     """
 
-    def __init__(self, parent, label, action=None, colour=(50, 50, 180),
+    def __init__(self, parent, label, action=None, colour=None,
                   bgcolour=None, underline=True, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, **kws)
+
+        if colour is None:
+            colour = COLORS.hyperlink
         self.SetForegroundColour(colour)
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)
