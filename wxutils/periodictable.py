@@ -2,7 +2,7 @@ import sys
 import wx
 import wx.lib.mixins.inspection
 from wxutils import SetTip
-from .colors import GUI_COLORS as COLORS
+from .colors import COLORS
 
 
 class PeriodicTablePanel(wx.Panel):

@@ -1,5 +1,5 @@
 import wx
-from .colors import GUI_COLORS as COLORS
+from .colors import COLORS
 
 class EditableListBox(wx.ListBox):
     """

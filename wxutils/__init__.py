@@ -17,6 +17,8 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 
+from .colors import COLORS, GUIColors, set_color
+
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl
@@ -35,5 +37,3 @@ from .periodictable import  PeriodicTablePanel
 
 from .paths import (platform, nativepath, get_homedir, get_configfile,
                     save_configfile, get_cwd)
-
-from .colors import GUIColors, COLORS, set_color

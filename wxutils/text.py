@@ -1,7 +1,7 @@
 import wx
 from functools import partial
 from .utils import LEFT, CEN
-from .colors import GUI_COLORS as COLORS
+from .colors import COLORS
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"

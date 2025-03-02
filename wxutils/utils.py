@@ -10,7 +10,7 @@ from traceback import format_tb
 import wx
 from  wx.lib.dialogs import ScrolledMessageDialog
 
-from .colors import GUI_COLORS as COLORS
+from .colors import COLORS
 # some common abbrevs for wx ALIGNMENT styles
 RIGHT = RCEN = wx.ALIGN_RIGHT
 LEFT  = LCEN = wx.ALIGN_LEFT

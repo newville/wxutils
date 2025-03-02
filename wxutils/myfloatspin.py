@@ -181,7 +181,7 @@ import locale
 from math import ceil, floor
 
 from wx.lib.embeddedimage import PyEmbeddedImage
-
+from .colors import COLORS
 CHEVRON_UP = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMEAQAAACs7EgvAAAAAmJLR0QA/4ePzL8AAAAJcEhZ'
     b'cwAACxMAAAsTAQCanBgAAAAHdElNRQfoBhoWGzrxtrz+AAAEenpUWHRSYXcgcHJvZmlsZSB0'
@@ -652,7 +652,7 @@ class FloatSpin(wx.Control):
         # end Philip Semanchuk addition
 
         self.SetLabel(name)
-        self.SetForegroundColour(parent.GetForegroundColour())
+        # self.SetForegroundColour(parent.GetForegroundColour())
 
         width = size[0]
         height = size[1]
@@ -668,10 +668,12 @@ class FloatSpin(wx.Control):
         self._validkeycode.extend([wx.WXK_RETURN, wx.WXK_TAB, wx.WXK_BACK,
                                    wx.WXK_LEFT, wx.WXK_RIGHT])
 
-        self._spin_up = wx.BitmapButton(self, -1, bitmap=CHEVRON_UP.GetBitmap()                                            ,
+        self._spin_up = wx.BitmapButton(self, -1, bitmap=CHEVRON_UP.GetBitmap(),
                                         size=(15, 15), style=wx.BORDER_NONE)
         self._spin_dn = wx.BitmapButton(self, -1, bitmap=CHEVRON_DOWN.GetBitmap(),
                                         size=(15, 15), style=wx.BORDER_NONE)
+        self._spin_up.SetBackgroundColour(COLORS.button_bg)
+        self._spin_dn.SetBackgroundColour(COLORS.button_bg)
 
         txtstyle = wx.TE_NOHIDESEL | wx.TE_PROCESS_ENTER
         if agwStyle & FS_RIGHT:
@@ -899,7 +901,7 @@ class FloatSpin(wx.Control):
             modifier = modifier*10.0
         if event.AltDown():
             modifier = modifier*100.0
-        
+
         keycode = event.GetKeyCode()
 
         if keycode == wx.WXK_UP:

@@ -8,7 +8,7 @@ import wx
 from wx.lib.agw import floatspin as fspin
 from . import myfloatspin as mspin
 from .icons import get_icon
-from .colors import GUI_COLORS as COLORS
+from .colors import COLORS
 
 HAS_NUMPY = False
 try:
