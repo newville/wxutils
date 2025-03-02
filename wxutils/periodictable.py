@@ -2,7 +2,7 @@ import sys
 import wx
 import wx.lib.mixins.inspection
 from wxutils import SetTip
-from .colors import COLORS
+from .colors import GUI_COLORS
 
 
 class PeriodicTablePanel(wx.Panel):
@@ -78,16 +78,16 @@ class PeriodicTablePanel(wx.Panel):
         self.tooltip_msg = tooltip_msg
         self.wids = {}
         self.ctrls = {}
-        self.SetBackgroundColour(COLORS.pt_frame_bg)
+        self.SetBackgroundColour(GUI_COLORS.pt_frame_bg)
         self.selected = []
         if fgcol is None:
-                fgcol = COLORS.pt_fg
+                fgcol = GUI_COLORS.pt_fg
         if bgcol is None:
-                bgcol = COLORS.pt_bg
+                bgcol = GUI_COLORS.pt_bg
         if fgsel is None:
-                fgsel = COLORS.pt_fgsel
+                fgsel = GUI_COLORS.pt_fgsel
         if bgsel is None:
-                bgsel = COLORS.pt_bgsel
+                bgsel = GUI_COLORS.pt_bgsel
         self.fgcol = fgcol
         self.bgcol = bgcol
         self.fgsel = fgsel
@@ -227,7 +227,7 @@ class PeriodicTablePanel(wx.Panel):
 
         for a in (self.title, self.tsym, self.tznum):
             a.SetFont(self.titlefont)
-            a.SetBackgroundColour(COLORS.pt_frame_bg)
+            a.SetBackgroundColour(GUI_COLORS.pt_frame_bg)
 
         sizer.Add(self.title, (0, 4), (1, 8), wx.ALIGN_CENTER, 5)
         sizer.Add(self.tsym,  (0, 2), (1, 2), wx.ALIGN_LEFT, 5)

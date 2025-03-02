@@ -6,7 +6,7 @@ try:
 except ImportError:
     pass
 
-_GUI_COLORS = {'text': wx.Colour(0, 0, 0),
+COLORS = {'text': wx.Colour(0, 0, 0),
           'text_bg': wx.Colour(255, 255, 255),
           'text_invalid': wx.Colour(240, 0, 10),
           'text_invalid_bg': wx.Colour(253, 253, 90),
@@ -32,7 +32,7 @@ _GUI_COLORS = {'text': wx.Colour(0, 0, 0),
         }
 
 if DARK_THEME:
-    _GUI_COLORS = {'text': wx.Colour(255, 255, 255),
+    COLORS = {'text': wx.Colour(255, 255, 255),
              'text_bg': wx.Colour(25, 25, 25),
              'text_invalid': wx.Colour(240, 0, 10),
              'text_invalid_bg': wx.Colour(220, 220, 60),
@@ -339,7 +339,7 @@ X11_COLORS = {'aliceblue': (240,248,255), 'antiquewhite': (250,235,215),
 # attribitue interface
 class GUIColors(object):
     def __init__(self):
-        for key, val in _GUI_COLORS.items():
+        for key, val in COLORS.items():
             self.add_color(key, val)
 
     def add_color(self, name,  value):
@@ -368,14 +368,13 @@ class GUIColors(object):
         else:
             raise ValueError(f"unknown color value {value}")
 
-COLORS = GUIColors()
+GUI_COLORS = GUIColors()
 
 def set_color(widget, colorname='text', bg=None):
-    if not hasattr(COLORS, colorname):
+    if not hasattr(GUI_COLORS, colorname):
         colorname = 'text'
-    print("SET COLOR ", widget, getattr(COLORS, colorname))
-    widget.SetForegroundColour(getattr(COLORS, colorname))
+    widget.SetForegroundColour(getattr(GUI_COLORS, colorname))
     if bg is not None:
-        if not hasattr(COLORS, bg):
+        if not hasattr(GUI_COLORS, bg):
             bg = 'text_bg'
-        widget.SetBackgroundColour(getattr(COLORS, bg))
+        widget.SetBackgroundColour(getattr(GUI_COLORS, bg))

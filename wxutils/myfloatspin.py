@@ -181,7 +181,8 @@ import locale
 from math import ceil, floor
 
 from wx.lib.embeddedimage import PyEmbeddedImage
-from .colors import COLORS
+from .colors import GUI_COLORS
+
 CHEVRON_UP = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMEAQAAACs7EgvAAAAAmJLR0QA/4ePzL8AAAAJcEhZ'
     b'cwAACxMAAAsTAQCanBgAAAAHdElNRQfoBhoWGzrxtrz+AAAEenpUWHRSYXcgcHJvZmlsZSB0'
@@ -672,8 +673,8 @@ class FloatSpin(wx.Control):
                                         size=(15, 15), style=wx.BORDER_NONE)
         self._spin_dn = wx.BitmapButton(self, -1, bitmap=CHEVRON_DOWN.GetBitmap(),
                                         size=(15, 15), style=wx.BORDER_NONE)
-        self._spin_up.SetBackgroundColour(COLORS.button_bg)
-        self._spin_dn.SetBackgroundColour(COLORS.button_bg)
+        self._spin_up.SetBackgroundColour(GUI_COLORS.button_bg)
+        self._spin_dn.SetBackgroundColour(GUI_COLORS.button_bg)
 
         txtstyle = wx.TE_NOHIDESEL | wx.TE_PROCESS_ENTER
         if agwStyle & FS_RIGHT:

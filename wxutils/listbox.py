@@ -1,5 +1,5 @@
 import wx
-from .colors import COLORS
+from .colors import GUI_COLORS
 
 class EditableListBox(wx.ListBox):
     """
@@ -12,9 +12,9 @@ class EditableListBox(wx.ListBox):
                  remove_action=None, color=None, bgcolor=None, **kws):
         wx.ListBox.__init__(self, parent, **kws)
         if color is None:
-            color = COLORS.list_fg
+            color = GUI_COLORS.list_fg
         if bgcolor is None:
-            bgcolor = COLORS.list_bg
+            bgcolor = GUI_COLORS.list_bg
         self.SetBackgroundColour(bgcolor)
         self.SetOwnBackgroundColour(bgcolor)
         self.SetForegroundColour(color)

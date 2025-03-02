@@ -17,8 +17,7 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 
-from .colors import COLORS, GUIColors, set_color, DARK_THEME
-GUI_COLORS = COLORS
+from .colors import COLORS, GUI_COLORS, GUIColors, set_color, DARK_THEME
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl

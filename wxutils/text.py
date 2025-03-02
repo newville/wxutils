@@ -1,7 +1,7 @@
 import wx
 from functools import partial
 from .utils import LEFT, CEN
-from .colors import COLORS
+from .colors import GUI_COLORS
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"
@@ -123,7 +123,7 @@ class HyperText(wx.StaticText):
         wx.StaticText.__init__(self, parent, -1, label=label, **kws)
 
         if colour is None:
-            colour = COLORS.hyperlink
+            colour = GUI_COLORS.hyperlink
         self.SetForegroundColour(colour)
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)

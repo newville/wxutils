@@ -8,7 +8,7 @@ import wx
 from wx.lib.agw import floatspin as fspin
 from . import myfloatspin as mspin
 from .icons import get_icon
-from .colors import COLORS
+from .colors import GUI_COLORS
 
 HAS_NUMPY = False
 try:
@@ -91,10 +91,10 @@ class FloatCtrl(wx.TextCtrl):
         self.__mark = None
         self.__action = None
 
-        self.fgcol_valid   = COLORS.text
-        self.bgcol_valid   = COLORS.text_bg
-        self.fgcol_invalid = COLORS.text_invalid
-        self.bgcol_invalid = COLORS.text_invalid_bg
+        self.fgcol_valid   = GUI_COLORS.text
+        self.bgcol_valid   = GUI_COLORS.text_bg
+        self.fgcol_invalid = GUI_COLORS.text_invalid
+        self.bgcol_invalid = GUI_COLORS.text_invalid_bg
         self.bell_on_invalid = bell_on_invalid
         self.act_on_losefocus = act_on_losefocus
 
