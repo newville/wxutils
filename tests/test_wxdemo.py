@@ -6,7 +6,7 @@ from functools import partial
 
 from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
-                     Font, GUIColors, GridPanel, LabeledTextCtrl, HLine,
+                     Font, COLORS, set_color, GridPanel, LabeledTextCtrl, HLine,
                      HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
                      SimpleText, TextCtrl, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
@@ -72,6 +72,7 @@ class DemoFrame(wx.Frame):
         check1 = Check(panel, label='enable? ',   action=self.onCheck)
 
         btn1 = Button(panel, label='Start', size=(100, -1), action=self.onStart)
+        set_color(btn1, 'text', bg='title_blue')
 
         pinbtn = BitmapButton(panel, get_icon('pin'), size=(50, -1),
                               action=partial(self.onBMButton, opt='pin1'),
