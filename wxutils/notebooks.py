@@ -18,10 +18,10 @@ def flatnotebook(parent, paneldict, panelkws={},
         style |= flat_nb.FNB_SMART_TABS
 
     nb = flat_nb.FlatNotebook(parent, agwStyle=style, **kws)
-    nb.SetTabAreaColour(GUI_COLORSS.nb_area)
-    nb.SetActiveTabColour(GUI_COLORSS.nb_active)
-    nb.SetNonActiveTabTextColour(GUI_COLORSS.nb_text)
-    nb.SetActiveTabTextColour(GUI_COLORSS.nb_activetext)
+    nb.SetTabAreaColour(GUI_COLORS.nb_area)
+    nb.SetActiveTabColour(GUI_COLORS.nb_active)
+    nb.SetNonActiveTabTextColour(GUI_COLORS.nb_text)
+    nb.SetActiveTabTextColour(GUI_COLORS.nb_activetext)
     nb.SetPadding(wx.Size(5, 5))
 
     nb.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD, 0, ""))
