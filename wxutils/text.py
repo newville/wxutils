@@ -9,8 +9,6 @@ class SimpleText(wx.StaticText):
                  bgcolour=None, style=CEN, tooltip=None, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, style=style,
                                **kws)
-        # if tooltip is not None:
-        #     self.SetTooltip(tooltip)
         if minsize is not None:
             self.SetMinSize(minsize)
         if font is not None:
@@ -50,7 +48,7 @@ class TextCtrl(wx.TextCtrl):
         if bgcolour is not None:
             self.SetBackgroundColour(bgcolour)
         if tooltip is not None:
-            self.SetTooltip(tooltip)
+            self.SetToolTip(tooltip)
         if action_kws is None:
             action_kws = {}
 
