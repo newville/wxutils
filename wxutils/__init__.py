@@ -33,6 +33,7 @@ from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
 
 from .notebooks import flatnotebook
 from .periodictable import  PeriodicTablePanel
-
+from .passwords import (random_salt, hash_password, password_rules,
+                        PasswordSetDialog, PasswordCheckDialog)
 from .paths import (platform, nativepath, get_homedir, get_configfile,
                     save_configfile, get_cwd)
