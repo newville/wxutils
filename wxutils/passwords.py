@@ -101,6 +101,73 @@ def password_rules(pwtest, minlen=8, lowercase=1, uppercase=1, digits=1, special
         return False, f'must be at least {digits} digits.'
     return True, 'password conforms to rules'
 
+
+class PasswordPanel(wx.Panel):
+    """Panel that includes a Password TextCtrl and a toggled icon to
+       show/hide plaintext password
+    """
+    def __init__(self, parent, id=-1, value='', size=(175, -1),
+                 action=None,  icon_side='right'):
+        self.size = size
+        self.value = value
+        self.action = action
+        self.icon_side = icon_side
+
+        wx.Panel.__init__(self, parent, id=id, size=(size[0]+25, size[1]))
+
+        self.bmp_hide = get_icon('pw_hide')
+        self.bmp_show = get_icon('pw_show')
+
+        self.font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).Larger()
+
+        self.pw_icon = wx.StaticBitmap(self, -1, self.bmp_show)
+        self.pw_icon.Bind(wx.EVT_LEFT_UP, self.OnShowPassword)
+
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.build_display()
+        self.SetSizer(self.sizer)
+
+    def build_display(self, hide=True):
+        tstyle = wx.TE_PROCESS_ENTER | wx.BORDER_NONE
+        bitmap = self.bmp_hide
+        if hide:
+            bitmap = self.bmp_show
+            tstyle = tstyle | wx.TE_PASSWORD
+
+        if hasattr(self, 'pw_ctrl'):
+            self.value = self.pw_ctrl.GetValue()
+
+        self.pw_icon.SetBitmap(bitmap)
+
+        self.pw_ctrl = TextCtrl(self, value=self.value,
+                                size=self.size, style=tstyle,
+                                act_on_losefocus=False,
+                                action=self.action)
+
+        self.pw_ctrl.SetFont(self.font)
+
+        self.sizer.Clear()
+        if self.icon_side.startswith('l'):
+            self.sizer.Add(self.pw_icon, 0, wx.ALIGN_CENTER_VERTICAL, 2)
+            self.sizer.Add(self.pw_ctrl, 1, wx.EXPAND|wx.ALL, 2)
+        else:
+            self.sizer.Add(self.pw_ctrl, 1, wx.EXPAND|wx.ALL, 2)
+            self.sizer.Add(self.pw_icon, 0, wx.ALIGN_CENTER_VERTICAL, 2)
+
+        self.Layout()
+
+    def OnShowPassword(self, event=None):
+        hidden = self.pw_ctrl.GetWindowStyle() & wx.TE_PASSWORD
+        self.build_display(hide=(hidden==0))
+
+    def GetValue(self, event=None):
+        return self.pw_ctrl.GetValue()
+
+    def SetValue(self, value):
+        self.value = value
+        self.pw_ctrl.SetValue(value)
+
+
 class PasswordCheckDialog(wx.Dialog):
     """Check Password"""
     def __init__(self, parent=None, pwhash='_'):
@@ -112,9 +179,7 @@ class PasswordCheckDialog(wx.Dialog):
         panel = GridPanel(self, itemstyle=wx.ALIGN_LEFT)
 
         panel.Add(SimpleText(panel, ' Enter Password:'), dcol=1, newrow=True)
-        self.pwtext = TextCtrl(panel, '', style=wx.TE_PASSWORD,
-                               size=(175, -1), act_on_losefocus=False,
-                               action=self.onCheck)
+        self.pwtext = PasswordPanel(panel, action=self.onCheck)
         test = Button(panel, label='Check ', size=(175, -1), action=self.onCheck)
         panel.Add(self.pwtext, dcol=1, newrow=False)
         panel.Add(test, dcol=1, newrow=True)
@@ -191,12 +256,12 @@ class PasswordSetDialog(wx.Dialog):
         if len(self.current_hash) > 30:
             panel.Add(SimpleText(panel, ' Enter Current Password:'), dcol=1, newrow=True)
 
-            self.currpw = TextCtrl(panel, '', style=wx.TE_PASSWORD, size=(175, -1))
+            self.currpw = PasswordPanel(panel)
             panel.Add(self.currpw, dcol=1, newrow=False)
             panel.Add(HLine(panel, size=(300, -1)), dcol=2, newrow=True)
 
-        self.pw1 = TextCtrl(panel, '', style=wx.TE_PASSWORD, size=(175, -1))
-        self.pw2 = TextCtrl(panel, '', style=wx.TE_PASSWORD, size=(175, -1))
+        self.pw1 = PasswordPanel(panel)
+        self.pw2 = PasswordPanel(panel)
         test = Button(panel, label='Check ', size=(175, -1), action=self.onCheck)
         self.msg = SimpleText(panel, ' ', size=(200, -1))
 
