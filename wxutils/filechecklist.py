@@ -19,7 +19,8 @@ class FileCheckList(wx.CheckListBox):
     """
     def __init__(self, parent, main=None, select_action=None,
                  right_click=True, remove_action=None,
-                 pre_actions=None, post_actions=None, **kws):
+                 pre_actions=None, post_actions=None,
+                 custom_key_bindings={}, with_remove_from_list=True,  **kws):
 
         wx.CheckListBox.__init__(self, parent, **kws)
         self.SetDropTarget(FileDropTarget(main))
@@ -27,37 +28,76 @@ class FileCheckList(wx.CheckListBox):
         if select_action is not None:
             self.Bind(wx.EVT_LISTBOX,  select_action)
         self.Bind(wx.EVT_CHECKLISTBOX, self.check_event)
+        self.Bind(wx.EVT_KEY_DOWN, self.key_event)
+
         self.remove_action = remove_action
         self.rclick_actions = {}
 
-        core_actions = [("Select All",        self.select_all),
-                        ("Select All above",  self.select_allabove),
-                        ("Select All below",  self.select_allbelow),
-                        ("Select None",       self.select_none),
-                        ("Select None above", self.select_noneabove),
-                        ("Select None below", self.select_nonebelow),
-                        ("--sep--", None),
-                        ("Move up", None),
-                        ("Move down", None),
-                        ("Move to Top", None),
-                        ("Move to Bottom", None),
-                        ("Remove from List", None)]
+        core_actions = [("Select All",         self.select_all, "ctrl+A"),
+                        ("Select All above",   self.select_allabove, "ctrl+shift+up"),
+                        ("Select All below",   self.select_allbelow, "ctrl+shift+down"),
+                        ("Select None",        self.select_none, "ctrl+D"),
+                        ("Select None above",  self.select_noneabove,  "ctrl+shift+left"),
+                        ("Select None below",  self.select_nonebelow, "ctrl+shift+right"),
+                        ("--sep--", None, None),
+                        ("Move up",           self.move_up, "cmd+up"),
+                        ("Move down",         self.move_down, "cmd+down"),
+                        ("Move to Top",       self.move_to_top, "cmd+left"),
+                        ("Move to Bottom",    self.move_to_bottom, "cmd+right")]
+        if with_remove_from_list:
+            core_actions.append(("--sep--", None, None))
+            core_actions.append(("Remove from List", self.remove_from_list, "alt-+del"))
 
         click_actions =  []
         if pre_actions is not None:
             click_actions.extend(pre_actions)
-            click_actions.append(("--sep--", None))
+            click_actions.append(("--sep--", None, None))
         click_actions.extend(core_actions)
         if post_actions is not None:
-            click_actions.append(("--sep--", None))
+            click_actions.append(("--sep--", None, None))
 
             click_actions.extend(post_actions)
-        click_actions.append(("--sep--", None))
+        click_actions.append(("--sep--", None, None))
+        self.key_bindings = {}
         if right_click:
             self.Bind(wx.EVT_RIGHT_DOWN, self.onRightClick)
-            for title, action in click_actions:
+            for dat in click_actions:
+                keybind = None
+                title = dat[0]
+                action = dat[1]
+                if len(dat) == 3:
+                    keybind = dat[2]
+                if title in custom_key_bindings:
+                    keybind = custom_key_bindings[title]
+                if keybind is not None:
+                    self.key_bindings[keybind] = action
                 self.rclick_actions[title] = action
                 self.Bind(wx.EVT_MENU, self.onRightEvent)
+
+    def key_event(self, evt=None):
+        thiskey = evt.GetKeyCode()
+        arrows = {wx.WXK_LEFT: 'left', wx.WXK_RIGHT: 'right',
+                  wx.WXK_UP: 'up',  wx.WXK_DOWN: 'down'}
+        key = arrows.get(thiskey, chr(thiskey))
+        if evt.HasAnyModifiers():
+            mod = evt.GetModifiers()
+            if evt.AltDown():
+                key = f'alt+{key}'
+                mod -= 1
+            if evt.ShiftDown():
+                key = f'shift+{key}'
+                mod -= 4
+            if evt.MetaDown():
+                key = f'meta+{key}'
+
+            if mod == 2:
+                key = f'cmd+{key}'
+            elif mod == 16:
+                key = f'ctrl+{key}'
+
+        action = self.key_bindings.get(key, None)
+        if action is not None:
+            action()
 
     def check_event(self, evt=None):
         index = evt.GetSelection()
@@ -71,7 +111,7 @@ class FileCheckList(wx.CheckListBox):
                 menu.AppendSeparator()
             else:
                 wid = menu.Append(-1, label)
-                self.rclick_wids[wid.Id] = (label, action)
+                self.rclick_wids[wid.Id] = action
         self.PopupMenu(menu)
         menu.Destroy()
 
@@ -86,45 +126,55 @@ class FileCheckList(wx.CheckListBox):
             self.Append(name)
 
     def onRightEvent(self, event=None):
-        idx = self.GetSelection()
-        if idx < 0: # no item selected
-            return
-        names = self.GetItems()
-        this  = names[idx]
-        do_relist = False
-
-        label, action = self.rclick_wids[event.GetId()]
-        if label == "Move up" and idx > 0:
-            names.pop(idx)
-            names.insert(idx-1, this)
-            do_relist = True
-        elif label == "Move down" and idx < len(names):
-            names.pop(idx)
-            names.insert(idx+1, this)
-            do_relist = True
-        elif label == "Move to Top":
-            names.pop(idx)
-            names.insert(0, this)
-            do_relist = True
-        elif label == "Move to Bottom":
-            names.pop(idx)
-            names.append(this)
-            do_relist = True
-        elif label == "Remove from List":
-            names.pop(idx)
-            if self.remove_action is not None:
-                self.remove_action(this)
-            do_relist = True
-        elif action is not None:
+        action = self.rclick_wids[event.GetId()]
+        if action is not None:
             action(event=event)
 
-        if do_relist:
-            self.refresh(names)
 
     def refresh(self, names):
         self.Clear()
         for name in names:
             self.Append(name)
+
+    def _get_current(self):
+        idx, names = self.GetSelection(), self.GetItems()
+        return idx, names, names[idx]
+
+    def remove_from_list(self, event=None):
+        idx, names, this =  self._get_current()
+        if idx > -1:
+            names.pop(idx)
+            if self.remove_action is not None:
+                self.remove_action(this)
+            self.refresh(names)
+
+    def move_up(self, event=None):
+        idx, names, this =  self._get_current()
+        if idx > 0:
+            names.pop(idx)
+            names.insert(idx-1, this)
+            self.refresh(names)
+
+    def move_down(self, event=None):
+        idx, names, this =  self._get_current()
+        if idx > -1 and idx < len(names):
+            names.pop(idx)
+            names.insert(idx+1, this)
+            self.refresh(names)
+
+    def move_to_top(self, event=None):
+        idx, names, this =  self._get_current()
+        if idx > -1:
+            names.pop(idx)
+            names.insert(0, this)
+            self.refresh(names)
+
+    def move_to_bottom(self, event=None):
+        idx, names, this =  self._get_current()
+        if idx > -1:
+            names.pop(idx)
+            names.append(this)
+            self.refresh(names)
 
     def select_all(self, event=None):
         self.SetCheckedStrings(self.GetStrings())
