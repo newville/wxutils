@@ -274,4 +274,4 @@ def test_wxdemo(idletime=30.0):
     app.MainLoop()
 
 if __name__ == '__main__':
-    test_wxdemo(idletime=30.0)
+    test_wxdemo(idletime=300.0)
