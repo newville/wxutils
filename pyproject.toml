@@ -40,8 +40,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    ]
-dependencies = ["wxPython>=4.1.0"]
+]
+dependencies = [
+    "wxPython>=4.1.0",
+    "pyshortcuts",
+]
 [project.urls]
 Homepage = "https://github.com/newville/wxutils"
 Documentation ="https://github.com/newville/wxutils"
