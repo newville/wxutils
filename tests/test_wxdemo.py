@@ -252,8 +252,12 @@ class DemoFrame(wx.Frame):
     def onFileOpen(self, event=None):
         wildcards = "%s|%s" % (PY_FILES, ALL_FILES)
 
-        dlg = wx.FileDialog(self, message='Select File',
-                            wildcard=wildcards,
+        print("OnFileOpen")
+        dlg = wx.FileDialog(self,
+                                #message='Select File',
+                            #defaultDir='.',
+                            #defaultFile='m.py',
+                            # wildcard=wildcards,
                             style=wx.FD_OPEN)
 
         if dlg.ShowModal() == wx.ID_OK:
@@ -270,7 +274,6 @@ def test_wxdemo(idletime=30.0):
     demo = DemoFrame(idletime=idletime)
     demo.Show(True)
     demo.Raise()
-
     app.MainLoop()
 
 if __name__ == '__main__':
