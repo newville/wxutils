@@ -7,7 +7,7 @@ write_to = "wxutils/version.py"
 version_scheme = "post-release"
 
 [tool.setuptools.packages.find]
-include = ["wxutils", "darkdetect"]
+include = ["wxutils"]
 # include_package_data = "True"
 
 [tool.coverage.run]
@@ -16,7 +16,7 @@ omit = ["tests/*"]
 [project]
 name = "wxutils"
 dynamic = ["version"]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 description = "utilities and conveniences for wxPython"
 
 readme = "README.rst"
@@ -35,16 +35,19 @@ classifiers = [
     "Operating System :: POSIX",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-]
+    "Programming Language :: Python :: 3.14",
+    ]
 dependencies = [
     "wxPython>=4.1.0",
     "pyshortcuts",
-]
+    "darkdetect",
+    "pyobjc-framework-Cocoa; platform_system == 'Darwin'"
+    ]
+
 [project.urls]
 Homepage = "https://github.com/newville/wxutils"
 Documentation ="https://github.com/newville/wxutils"
