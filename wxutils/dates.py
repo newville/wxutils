@@ -7,37 +7,31 @@ import os
 from datetime import timedelta
 
 import wx
-import wx.lib.masked as masked
+import wx.adv as wxadv
+from .utils import pack
 
 def hms(secs):
     "format time in seconds to H:M:S"
     return str(timedelta(seconds=int(secs)))
 
-class DateTimeCtrl(object):
+class DateTimeCtrl(wx.Panel):
     """
     Simple Combined date/time control
     """
-    def __init__(self, parent, name='datetimectrl', use_now=False):
+    def __init__(self, parent, name='datetimectrl', use_now=None):
         self.name = name
-        panel = self.panel = wx.Panel(parent)
-        bgcol = wx.Colour(250, 250, 250)
+        wx.Panel.__init__(self, parent)
+        datestyle = wxadv.DP_DROPDOWN|wxadv.DP_SHOWCENTURY|wxadv.DP_ALLOWNONE
+        now = wx.DateTime.Now()
 
-        datestyle = wx.DP_DROPDOWN|wx.DP_SHOWCENTURY|wx.DP_ALLOWNONE
+        self.datectrl = wxadv.DatePickerCtrl(self, size=(120, -1), dt=now, style=datestyle)
+        self.timectrl = wxadv.TimePickerCtrl(self, size=(120, -1), dt=now)
 
-        self.datectrl = wx.DatePickerCtrl(panel, size=(120, -1),
-                                          style=datestyle)
-        self.timectrl = masked.TimeCtrl(panel, -1, name=name,
-                                        limited=False,
-                                        fmt24hr=True, oob_color=bgcol)
-        timerheight = self.timectrl.GetSize().height
-        spinner = wx.SpinButton(panel, -1, wx.DefaultPosition,
-                                (-1, timerheight), wx.SP_VERTICAL )
-        self.timectrl.BindSpinButton(spinner)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.datectrl, 0, wx.ALIGN_CENTER)
         sizer.Add(self.timectrl, 0, wx.ALIGN_CENTER)
-        sizer.Add(spinner, 0,  wx.ALIGN_LEFT)
-        panel.SetSizer(sizer)
-        sizer.Fit(panel)
-        if use_now:
-            self.timectrl.SetValue(wx.DateTime_Now())
+        pack(self, sizer)
+
+    def GetValue(self):
+        return {'date': self.datectrl.GetValue(),
+                'time': self.timectrl.GetValue()}
