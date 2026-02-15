@@ -1,7 +1,7 @@
 import wx
 
 import wx.lib.agw.flatnotebook as flat_nb
-from .colors import GUI_COLORS
+from .colors import get_color, register_darkdetect
 
 FNB_STYLE = flat_nb.FNB_NO_X_BUTTON|flat_nb.FNB_NODRAG
 
@@ -18,10 +18,20 @@ def flatnotebook(parent, paneldict, panelkws={},
         style |= flat_nb.FNB_SMART_TABS
 
     nb = flat_nb.FlatNotebook(parent, agwStyle=style, **kws)
-    nb.SetTabAreaColour(GUI_COLORS.nb_area)
-    nb.SetActiveTabColour(GUI_COLORS.nb_active)
-    nb.SetNonActiveTabTextColour(GUI_COLORS.nb_text)
-    nb.SetActiveTabTextColour(GUI_COLORS.nb_activetext)
+    nb.SetTabAreaColour(get_color('nb_area'))
+    nb.SetActiveTabColour(get_color('nb_active'))
+    nb.SetNonActiveTabTextColour(get_color('nb_text'))
+    nb.SetActiveTabTextColour(get_color('nb_activetext'))
+
+    def onDarkTheme(is_dark=None):
+        nb.SetTabAreaColour(get_color('nb_area'))
+        nb.SetActiveTabColour(get_color('nb_active'))
+        nb.SetNonActiveTabTextColour(get_color('nb_text'))
+        nb.SetActiveTabTextColour(get_color('nb_activetext'))
+        wx.CallAfter(nb.Refresh)
+
+    register_darkdetect(onDarkTheme)
+
     nb.SetPadding(wx.Size(5, 5))
 
     nb.SetFont(wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD, 0, ""))
