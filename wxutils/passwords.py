@@ -8,7 +8,7 @@ from collections import namedtuple
 
 from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
-                     Font, COLORS, set_color, GridPanel, LabeledTextCtrl, HLine,
+                     Font, GridPanel, LabeledTextCtrl, HLine,
                      HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
                      SimpleText, TextCtrl, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
