@@ -8,7 +8,7 @@ import wx
 from wx.lib.agw import floatspin as fspin
 from . import myfloatspin as mspin
 from .icons import get_icon
-from .colors import GUI_COLORS
+from .colors import get_color, register_darkdetect
 
 HAS_NUMPY = False
 try:
@@ -91,10 +91,13 @@ class FloatCtrl(wx.TextCtrl):
         self.__mark = None
         self.__action = None
 
-        self.fgcol_valid   = GUI_COLORS.text
-        self.bgcol_valid   = GUI_COLORS.text_bg
-        self.fgcol_invalid = GUI_COLORS.text_invalid
-        self.bgcol_invalid = GUI_COLORS.text_invalid_bg
+        self.fgcol_valid   = get_color('text')
+        self.bgcol_valid   = get_color('text_bg')
+        self.fgcol_invalid = get_color('text_invalid')
+        self.bgcol_invalid = get_color('text_invalid_bg')
+
+        register_darkdetect(self.onDarkTheme)
+
         self.bell_on_invalid = bell_on_invalid
         self.act_on_losefocus = act_on_losefocus
 
@@ -164,7 +167,6 @@ class FloatCtrl(wx.TextCtrl):
             self.__action(value=self.__val)
         elif not self.is_valid and self.bell_on_invalid:
             wx.Bell()
-
         self.__SetMark()
 
     def OnKillFocus(self, event):
@@ -288,6 +290,22 @@ class FloatCtrl(wx.TextCtrl):
         self.SetForegroundColour(fgcol)
         self.SetBackgroundColour(bgcol)
         self.Refresh()
+
+    def onDarkTheme(self, is_dark=None):
+        self.fgcol_valid   = get_color('text')
+        self.bgcol_valid   = get_color('text_bg')
+        self.fgcol_invalid = get_color('text_invalid')
+        self.bgcol_invalid = get_color('text_invalid_bg')
+
+        fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
+        if not self.is_valid:
+            fgcol, bgcol = self.fgcol_invalid, self.bgcol_invalid
+
+        try:
+            self.SetValue(self.__val)
+        except:
+            pass
+        wx.CallAfter(self.Refresh)
 
 
 def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),
