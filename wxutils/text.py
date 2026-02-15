@@ -1,7 +1,7 @@
 import wx
 from functools import partial
 from .utils import LEFT, CEN
-from .colors import GUI_COLORS
+from .colors import set_color
 
 class SimpleText(wx.StaticText):
     "simple static text wrapper"
@@ -13,10 +13,8 @@ class SimpleText(wx.StaticText):
             self.SetMinSize(minsize)
         if font is not None:
             self.SetFont(font)
-        if colour is not None:
-            self.SetForegroundColour(colour)
-        if bgcolour is not None:
-            self.SetBackgroundColour(bgcolour)
+        set_color(self, colour, bg=bgcolour)
+
 
 class TextCtrl(wx.TextCtrl):
     """simple TextCtrl
@@ -43,10 +41,8 @@ class TextCtrl(wx.TextCtrl):
         self.SetValue(value)
         if font is not None:
             self.SetFont(font)
-        if colour is not None:
-            self.SetForegroundColour(colour)
-        if bgcolour is not None:
-            self.SetBackgroundColour(bgcolour)
+        set_color(self, colour, bg=bgcolour)
+
         if tooltip is not None:
             self.SetToolTip(tooltip)
         if action_kws is None:
@@ -93,9 +89,8 @@ class LabeledTextCtrl(TextCtrl):
 
         if labeltext is not None:
             self.label = SimpleText(parent, labeltext, size=labelsize,
-                                    font=font, style=style,
-                                    colour=labelcolour,
-                                    bgcolour=labelbgcolour)
+                                    font=font, style=style)
+            set_color(self.label, labelcolour, bg=labelbgcolour)
 
         try:
             value = str(value)
@@ -120,11 +115,8 @@ class HyperText(wx.StaticText):
                   bgcolour=None, underline=True, **kws):
         wx.StaticText.__init__(self, parent, -1, label=label, **kws)
 
-        if colour is None:
-            colour = GUI_COLORS.hyperlink
-        self.SetForegroundColour(colour)
-        if bgcolour is not None:
-            self.SetBackgroundColour(bgcolour)
+        set_color(self, 'hyperlink', bg=bgcolour)
+
         if underline:
             font  = self.GetFont()
             try:
