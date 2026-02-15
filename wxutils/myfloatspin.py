@@ -181,7 +181,7 @@ import locale
 from math import ceil, floor
 
 from wx.lib.embeddedimage import PyEmbeddedImage
-from .colors import GUI_COLORS
+from .colors import get_color, register_darkdetect
 
 CHEVRON_UP = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMEAQAAACs7EgvAAAAAmJLR0QA/4ePzL8AAAAJcEhZ'
@@ -673,8 +673,10 @@ class FloatSpin(wx.Control):
                                         size=(15, 15), style=wx.BORDER_NONE)
         self._spin_dn = wx.BitmapButton(self, -1, bitmap=CHEVRON_DOWN.GetBitmap(),
                                         size=(15, 15), style=wx.BORDER_NONE)
-        self._spin_up.SetBackgroundColour(GUI_COLORS.button_bg)
-        self._spin_dn.SetBackgroundColour(GUI_COLORS.button_bg)
+        self._spin_up.SetBackgroundColour(get_color('button_bg'))
+        self._spin_dn.SetBackgroundColour(get_color('button_bg'))
+
+        register_darkdetect(self.onDarkTheme)
 
         txtstyle = wx.TE_NOHIDESEL | wx.TE_PROCESS_ENTER
         if agwStyle & FS_RIGHT:
@@ -756,6 +758,11 @@ class FloatSpin(wx.Control):
         self.SetInitialSize((width, height))
         # end Philip Semanchuk move
 
+    def onDarkTheme(self, is_dark=None):
+        print("myfloat dark ", is_dark)
+        self._spin_up.SetBackgroundColour(get_color('button_bg'))
+        self._spin_dn.SetBackgroundColour(get_color('button_bg'))
+        wx.CallAfter(self.Refresh)
 
     def OnDestroy(self, event):
         """

@@ -15,7 +15,10 @@ def onDarkTheme(*args, **kws):
     COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
     for cb in _DD_OBJECTS:
         if callable(cb):
-            cb(is_dark=DARK_THEME)
+            try:
+                cb(is_dark=DARK_THEME)
+            except Exception:
+                pass
 
 def use_darkdetect():
     global _DD_THREAD
@@ -78,7 +81,7 @@ COLORS_DARK = {'text': wx.Colour(255, 255, 255, 216),
              'list_bg': wx.Colour(25, 25, 25),
              'list_fg': wx.Colour(5, 5, 125),
              'hline': wx.Colour(220, 220, 250),
-             'button_bg':  wx.Colour(220,  220, 100),
+             'button_bg':  wx.Colour(100, 100, 80),
              'pt_frame_bg':  wx.Colour(10, 10, 10),
              'pt_fg':  wx.Colour(180,  200, 250),
              'pt_bg': wx.Colour(10, 10, 10),
@@ -88,7 +91,7 @@ COLORS_DARK = {'text': wx.Colour(255, 255, 255, 216),
              'info_bg': wx.Colour(38, 38, 38, 255),
              'graytext': wx.Colour(255, 255, 255, 63),
              'highlight': wx.Colour(49, 79, 120, 255),
-             'highlight_text': wx.Colour((255, 255, 255, 255),
+             'highlight_text': wx.Colour(255, 255, 255, 255),
              'btn_highlight': wx.Colour(255, 255, 255, 25),
              'hotlight': wx.Colour(53, 134, 255, 255),
     }
@@ -408,7 +411,8 @@ class GUIColors(object):
 GUI_COLORS = GUIColors()
 
 def set_color(widget, colorname, bg=None):
-    """set color by logical name, and suppporting dark mode detection
+    """set foreground color and optionally background color by logical name,
+       and suppporting dark mode detection.
     """
     if colorname not in COLORS:
         colorname = 'text'
@@ -443,4 +447,5 @@ def set_color(widget, colorname, bg=None):
         register_darkdetect(widget.onDarkTheme)
 
 def get_color(name='text'):
+    "get dark-mode-aware color by name"
     return wx.SystemSettings.SelectLightDark(COLORS_LIGHT[name], COLORS_DARK[name])

@@ -1,5 +1,5 @@
 import wx
-from .colors import GUI_COLORS
+from .colors import register_darkdetect, get_color
 
 class EditableListBox(wx.ListBox):
     """
@@ -12,9 +12,9 @@ class EditableListBox(wx.ListBox):
                  remove_action=None, color=None, bgcolor=None, **kws):
         wx.ListBox.__init__(self, parent, **kws)
         if color is None:
-            color = GUI_COLORS.list_fg
+            color = get_color('list_fg')
         if bgcolor is None:
-            bgcolor = GUI_COLORS.list_bg
+            bgcolor = get_color('list_bg')
         self.SetBackgroundColour(bgcolor)
         self.SetOwnBackgroundColour(bgcolor)
         self.SetForegroundColour(color)
@@ -24,6 +24,8 @@ class EditableListBox(wx.ListBox):
         self.remove_action = remove_action
         if right_click:
             self.Bind(wx.EVT_RIGHT_DOWN, self.onRightClick)
+        register_darkdetect(self.onDarkTheme)
+
 
     def onRightClick(self, evt=None):
         menu = wx.Menu()
@@ -59,3 +61,12 @@ class EditableListBox(wx.ListBox):
         self.Clear()
         for name in names:
             self.Append(name)
+
+    def onDarkTheme(self, is_dark=None):
+        color = get_color('list_fg')
+        bgcolor = get_color('list_bg')
+        self.SetBackgroundColour(bgcolor)
+        self.SetOwnBackgroundColour(bgcolor)
+        self.SetForegroundColour(color)
+        self.SetOwnForegroundColour(color)
+        wx.CallAfter(self.Refresh)
