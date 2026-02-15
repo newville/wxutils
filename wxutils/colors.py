@@ -448,4 +448,5 @@ def set_color(widget, colorname, bg=None):
 
 def get_color(name='text'):
     "get dark-mode-aware color by name"
-    return wx.SystemSettings.SelectLightDark(COLORS_LIGHT[name], COLORS_DARK[name])
+    global  DARK_THEME
+    return COLORS_DARK[name] if DARK_THEME else COLORS_LIGHT[name]
