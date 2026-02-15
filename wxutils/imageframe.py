@@ -1,27 +1,23 @@
 #!/usr/bin/env python
-
 """
 panel and frame for image display
 """
-
 import wx
-
 
 class ImagePanel(wx.Panel):
     def __init__(self, parent, image_path=None, size=(700, 500), **kws):
         wx.Panel.__init__(self, parent, **kws)
-        self.panel = wx.Panel(self)
         self.iw = size[0]
         self.ih = size[1]
         self.image_path = None
         bitmap = wx.Bitmap(self.iw-10, self.ih-10, depth=24)
-        self.static_bitmap = wx.StaticBitmap(self.panel, wx.ID_ANY, bitmap)
+        self.static_bitmap = wx.StaticBitmap(self, wx.ID_ANY, bitmap)
         if image_path is not None:
             self.showfile(image_path)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.static_bitmap, 1, wx.ALL|wx.EXPAND, 5)
-        self.panel.SetSizerAndFit(sizer)
+        self.SetSizerAndFit(sizer)
 
     def showfile(self, image_path, title=None):
         self.image_path = image_path
