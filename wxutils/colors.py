@@ -1,12 +1,35 @@
-import wx
-DARK_THEME = False
-try:
-    import darkdetect
-    DARK_THEME = darkdetect.isDark()
-except ImportError:
-    pass
+from threading import Thread
+from functools import partial
 
-COLORS = {'text': wx.Colour(0, 0, 0),
+import wx
+
+import darkdetect
+
+_DD_OBJECTS = []
+_DD_THREAD = None
+DARK_THEME = darkdetect.isDark()
+
+def onDarkTheme(*args, **kws):
+    global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
+    DARK_THEME = darkdetect.isDark()
+    COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
+    for cb in _DD_OBJECTS:
+        if callable(cb):
+            cb(is_dark=DARK_THEME)
+
+def use_darkdetect():
+    global _DD_THREAD
+    if _DD_THREAD is None:
+        _DD_THREAD = Thread(target=darkdetect.listener, args=(onDarkTheme,))
+        _DD_THREAD.daemon = True
+        _DD_THREAD.start()
+
+def register_darkdetect(callable):
+    global _DD_THREAD, _DD_OBJECTS
+    if callable not in _DD_OBJECTS:
+        _DD_OBJECTS.append(callable)
+
+COLORS_LIGHT = {'text': wx.Colour(0, 0, 0, 216),
           'text_bg': wx.Colour(255, 255, 255),
           'text_invalid': wx.Colour(240, 0, 10),
           'text_invalid_bg': wx.Colour(253, 253, 90),
@@ -29,11 +52,17 @@ COLORS = {'text': wx.Colour(0, 0, 0),
           'pt_bg': wx.Colour(253, 253, 250),
           'pt_fgsel': wx.Colour(200,   0,   0),
           'pt_bgsel': wx.Colour(250, 250, 200),
+          'window': wx.Colour(255, 255, 255, 255),
+          'info_bg': wx.Colour(231, 231, 231, 255),
+          'graytext': wx.Colour(0, 0, 0, 63),
+          'highight': wx.Colour(165, 205, 255, 255),
+          'highlight_text': wx.Colour(0, 0, 0, 255),
+          'btn_highight': wx.Colour(255, 255, 255, 255),
+          'hotlight': wx.Colour(9, 79, 209, 255),
         }
 
-if DARK_THEME:
-    COLORS = {'text': wx.Colour(255, 255, 255),
-             'text_bg': wx.Colour(25, 25, 25),
+COLORS_DARK = {'text': wx.Colour(255, 255, 255, 216),
+             'text_bg': wx.Colour(50, 50, 50),
              'text_invalid': wx.Colour(240, 0, 10),
              'text_invalid_bg': wx.Colour(220, 220, 60),
              'bg': wx.Colour(20, 20, 20),
@@ -55,8 +84,16 @@ if DARK_THEME:
              'pt_bg': wx.Colour(10, 10, 10),
              'pt_fgsel': wx.Colour(250, 180,  200),
              'pt_bgsel': wx.Colour(30, 20, 80),
+             'window': wx.Colour(23, 23, 23, 255),
+             'info_bg': wx.Colour(38, 38, 38, 255),
+             'graytext': wx.Colour(255, 255, 255, 63),
+             'highlight': wx.Colour(49, 79, 120, 255),
+             'highlight_text': wx.Colour((255, 255, 255, 255),
+             'btn_highlight': wx.Colour(255, 255, 255, 25),
+             'hotlight': wx.Colour(53, 134, 255, 255),
     }
 
+COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
 
 X11_COLORS = {'aliceblue': (240,248,255), 'antiquewhite': (250,235,215),
               'antiquewhite1': (255,239,219), 'antiquewhite2': (238,223,204),
@@ -370,11 +407,40 @@ class GUIColors(object):
 
 GUI_COLORS = GUIColors()
 
-def set_color(widget, colorname='text', bg=None):
-    if not hasattr(GUI_COLORS, colorname):
+def set_color(widget, colorname, bg=None):
+    """set color by logical name, and suppporting dark mode detection
+    """
+    if colorname not in COLORS:
         colorname = 'text'
-    widget.SetForegroundColour(getattr(GUI_COLORS, colorname))
-    if bg is not None:
-        if not hasattr(GUI_COLORS, bg):
-            bg = 'text_bg'
-        widget.SetBackgroundColour(getattr(GUI_COLORS, bg))
+
+    setter = getattr(widget, 'SetForegroundColour', None)
+    bgsetter = getattr(widget, 'SetBackgroundColour', None)
+
+    if setter is None:
+        return
+
+    setter(get_color(colorname))
+    if bgsetter is not None and bg is not None:
+        bgsetter(get_color(bg))
+
+    if not hasattr(widget, 'onDarkTheme'):
+        widget._colfg = colorname
+        if bg is not None:
+            widget._colbg = bg
+
+        def on_dark(wid, is_dark=None):
+            colfg = getattr(wid, '_colfg', 'text')
+            colbg = getattr(wid, '_colbg', None)
+            setter = getattr(wid, 'SetForegroundColour', None)
+            if setter is not None:
+                setter(get_color(colfg))
+            if colbg is not None:
+                bgsetter = getattr(wid, 'SetBackgroundColour', None)
+                if bgsetter is not None:
+                    setter(get_color(colbg))
+            wx.CallAfter(wid.Refresh)
+        widget.onDarkTheme = partial(on_dark, widget)
+        register_darkdetect(widget.onDarkTheme)
+
+def get_color(name='text'):
+    return wx.SystemSettings.SelectLightDark(COLORS_LIGHT[name], COLORS_DARK[name])
