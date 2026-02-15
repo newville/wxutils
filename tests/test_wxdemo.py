@@ -10,8 +10,9 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
                      SimpleText, TextCtrl, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
-                     make_steps)
+                     make_steps, use_darkdetect, get_color)
 
+from wxutils.dates import DateTimeCtrl
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
 from wxutils.filechecklist import FileCheckList
 
@@ -67,12 +68,15 @@ class DemoFrame(wx.Frame):
         self.choice1 = Choice(panel, size=(200, -1),action=self.onChoice)
         self.choice1.SetChoices(['Apple', 'Banana', 'Cherry'])
 
+        self.dtime = DateTimeCtrl(panel, name='dtc', use_now=True)
+
         yesno = YesNo(panel)
 
         check1 = Check(panel, label='enable? ',   action=self.onCheck)
 
         btn1 = Button(panel, label='Start', size=(100, -1), action=self.onStart)
         set_color(btn1, 'text', bg='title_blue')
+
 
         pinbtn = BitmapButton(panel, get_icon('pin'), size=(50, -1),
                               action=partial(self.onBMButton, opt='pin1'),
@@ -118,6 +122,9 @@ class DemoFrame(wx.Frame):
         panel.Add(labx, newrow=True)
         panel.Add(valx, dcol=3)
 
+        panel.AddText(' DateTime : ', newrow=True)
+        panel.Add(self.dtime, dcol=3)
+
         panel.AddText(' Choice : ', newrow=True)
         panel.Add(check1)
         panel.Add(self.choice1)
@@ -139,6 +146,7 @@ class DemoFrame(wx.Frame):
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
+        self.Bind(wx.EVT_CLOSE, self.onExit)
 
         fsizer = wx.BoxSizer(wx.VERTICAL)
         fsizer.Add(panel, 0, LEFT|wx.EXPAND)
@@ -149,6 +157,7 @@ class DemoFrame(wx.Frame):
 
         pack(self, fsizer)
         self.Refresh()
+        use_darkdetect()
 
     def init_timer(self):
         self.timer.Start(100)
@@ -252,9 +261,8 @@ class DemoFrame(wx.Frame):
     def onFileOpen(self, event=None):
         wildcards = "%s|%s" % (PY_FILES, ALL_FILES)
 
-        print("OnFileOpen")
         dlg = wx.FileDialog(self,
-                                #message='Select File',
+                              #message='Select File',
                             #defaultDir='.',
                             #defaultFile='m.py',
                             # wildcard=wildcards,
@@ -266,6 +274,7 @@ class DemoFrame(wx.Frame):
         dlg.Destroy()
 
     def onExit(self, event=None):
+        self.timer.Stop()
         self.Destroy()
 
 
