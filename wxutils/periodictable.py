@@ -2,7 +2,7 @@ import sys
 import wx
 import wx.lib.mixins.inspection
 from wxutils import SetTip
-from .colors import GUI_COLORS
+from .colors import get_color, register_darkdetect
 
 
 class PeriodicTablePanel(wx.Panel):
@@ -78,20 +78,21 @@ class PeriodicTablePanel(wx.Panel):
         self.tooltip_msg = tooltip_msg
         self.wids = {}
         self.ctrls = {}
-        self.SetBackgroundColour(GUI_COLORS.pt_frame_bg)
+        self.SetBackgroundColour(get_color('pt_frame_bg'))
         self.selected = []
         if fgcol is None:
-                fgcol = GUI_COLORS.pt_fg
+                fgcol = get_color('pt_fg')
         if bgcol is None:
-                bgcol = GUI_COLORS.pt_bg
+                bgcol = get_color('pt_bg')
         if fgsel is None:
-                fgsel = GUI_COLORS.pt_fgsel
+                fgsel = get_color('pt_fgsel')
         if bgsel is None:
-                bgsel = GUI_COLORS.pt_bgsel
+                bgsel = get_color('pt_bgsel')
         self.fgcol = fgcol
         self.bgcol = bgcol
         self.fgsel = fgsel
         self.bgsel = bgsel
+        register_darkdetect(self.onDarkTheme)
 
         self.current = None
         self.multi_select = multi_select
@@ -105,6 +106,22 @@ class PeriodicTablePanel(wx.Panel):
         self.subtitlefont = wx.Font(subfontsize, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 
         self.BuildPanel()
+
+    def onDarkTheme(self, is_dark=None):
+        self.SetBackgroundColour(get_color('pt_frame_bg'))
+        self.fgcol = get_color('pt_fg')
+        self.bgcol = get_color('pt_bg')
+        self.fgsel = get_color('pt_fgsel')
+        self.bgsel = get_color('pt_bgsel')
+        for name, coords in self.elems.items():
+            tw = self.ctrls[name]
+            tw.SetForegroundColour(self.fgcol)
+            tw.SetBackgroundColour(self.bgcol)
+        for a in (self.title, self.tsym, self.tznum):
+            a.SetBackgroundColour(get_color('pt_frame_bg'))
+
+        wx.CallAfter(self.Refresh)
+
 
     def onKey(self, event=None, name=None):
         """support browsing through elements with arrow keys"""
@@ -227,7 +244,7 @@ class PeriodicTablePanel(wx.Panel):
 
         for a in (self.title, self.tsym, self.tznum):
             a.SetFont(self.titlefont)
-            a.SetBackgroundColour(GUI_COLORS.pt_frame_bg)
+            a.SetBackgroundColour(get_color('pt_frame_bg'))
 
         sizer.Add(self.title, (0, 4), (1, 8), wx.ALIGN_CENTER, 5)
         sizer.Add(self.tsym,  (0, 2), (1, 2), wx.ALIGN_LEFT, 5)
