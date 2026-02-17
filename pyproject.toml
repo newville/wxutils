@@ -42,7 +42,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     ]
 dependencies = [
-    "wxPython>=4.1.0",
+    "wxPython>=4.2.0",
     "pyshortcuts",
     "darkdetect",
     "pyobjc-framework-Cocoa; platform_system == 'Darwin'"
