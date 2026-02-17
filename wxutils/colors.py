@@ -13,10 +13,12 @@ def onDarkTheme(*args, **kws):
     global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
     DARK_THEME = darkdetect.isDark()
     COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
-    for cb in _DD_OBJECTS:
+    for cb in _DD_OBJECTS[:]:
         if callable(cb):
             try:
                 cb(is_dark=DARK_THEME)
+            except RuntimeError:
+                _DD_OBJECTS.remove(cb)
             except Exception:
                 pass
 
@@ -29,8 +31,11 @@ def use_darkdetect():
 
 def register_darkdetect(callable):
     global _DD_THREAD, _DD_OBJECTS
+    print("Register DD ", callable, _DD_THREAD, _DD_OBJECTS)
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
+        if _DD_THREAD is None:
+            use_darkdetect()
 
 COLORS_LIGHT = {'text': wx.Colour(0, 0, 0, 216),
           'text_bg': wx.Colour(255, 255, 255),
@@ -414,20 +419,23 @@ def set_color(widget, colorname, bg=None):
     """set foreground color and optionally background color by logical name,
        and suppporting dark mode detection.
     """
-    if colorname not in COLORS:
+    if isinstance(colorname, wx.Colour):
+        color = colorname
+        colorname = None
+    elif colorname not in COLORS:
         colorname = 'text'
+        color = get_color(colorname)
 
     setter = getattr(widget, 'SetForegroundColour', None)
-    bgsetter = getattr(widget, 'SetBackgroundColour', None)
-
     if setter is None:
         return
+    setter(color)
 
-    setter(get_color(colorname))
+    bgsetter = getattr(widget, 'SetBackgroundColour', None)
     if bgsetter is not None and bg is not None:
         bgsetter(get_color(bg))
 
-    if not hasattr(widget, 'onDarkTheme'):
+    if colorname is not None and not hasattr(widget, 'onDarkTheme'):
         widget._colfg = colorname
         if bg is not None:
             widget._colbg = bg
@@ -449,4 +457,6 @@ def set_color(widget, colorname, bg=None):
 def get_color(name='text'):
     "get dark-mode-aware color by name"
     global  DARK_THEME
+    if isinstance(name, wx.Colour):
+        return name
     return COLORS_DARK[name] if DARK_THEME else COLORS_LIGHT[name]

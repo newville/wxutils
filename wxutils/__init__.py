@@ -18,7 +18,7 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 
 from .colors import (COLORS, GUI_COLORS, GUIColors,
-                    set_color, DARK_THEME, use_darkdetect, register_darkdetect, get_color)
+                    set_color, DARK_THEME, register_darkdetect, get_color)
 
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
