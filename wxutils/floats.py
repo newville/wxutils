@@ -292,20 +292,21 @@ class FloatCtrl(wx.TextCtrl):
         self.Refresh()
 
     def onDarkTheme(self, is_dark=None):
-        self.fgcol_valid   = get_color('text')
-        self.bgcol_valid   = get_color('text_bg')
-        self.fgcol_invalid = get_color('text_invalid')
-        self.bgcol_invalid = get_color('text_invalid_bg')
-
-        fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
-        if not self.is_valid:
-            fgcol, bgcol = self.fgcol_invalid, self.bgcol_invalid
-
         try:
-            self.SetValue(self.__val)
-        except:
+            self.fgcol_valid   = get_color('text')
+            self.bgcol_valid   = get_color('text_bg')
+            self.fgcol_invalid = get_color('text_invalid')
+            self.bgcol_invalid = get_color('text_invalid_bg')
+            fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
+            if not self.is_valid:
+                fgcol, bgcol = self.fgcol_invalid, self.bgcol_invalid
+            self.SetForegroundColour(fgcol)
+            self.SetBackgroundColour(bgcol)
+            self.Refresh()
+        except RuntimeError:
             pass
-        wx.CallAfter(self.Refresh)
+        except Exception:
+            pass
 
 
 def FloatSpin(parent, value=0, action=None, tooltip=None, size=(100, -1),

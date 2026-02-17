@@ -5,7 +5,7 @@ from .colors import get_color, register_darkdetect
 
 FNB_STYLE = flat_nb.FNB_NO_X_BUTTON|flat_nb.FNB_NODRAG
 
-def flatnotebook(parent, paneldict, panelkws={},
+def flatnotebook(parent, paneldict=None, panelkws={},
                  on_change=None, selection=0, style=None, with_dropdown=False,
                  with_nav_buttons=False, with_smart_tabs=False, **kws):
     if style is None:
@@ -41,10 +41,11 @@ def flatnotebook(parent, paneldict, panelkws={},
     grandparent = parent.GetParent()
     if grandparent is None:
         grandparent = parent
-    for name, creator in paneldict.items():
-        _page = creator(parent=grandparent, **panelkws)
-        nb.AddPage(_page," %s " % name, True)
-        nb.pagelist.append(_page)
+    if paneldict is not None:
+        for name, creator in paneldict.items():
+            _page = creator(parent=grandparent, **panelkws)
+            nb.AddPage(_page,f" {name} ", True)
+            nb.pagelist.append(_page)
 
     if callable(on_change):
         nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, on_change)

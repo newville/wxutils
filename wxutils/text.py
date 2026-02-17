@@ -102,6 +102,7 @@ class LabeledTextCtrl(TextCtrl):
                           style=style, size=size,
                           action=action, action_kws=action_kws,
                           act_on_losefocus=act_on_losefocus, **kws)
+        set_color(self, colour, bg=bgcolour)
 
 
 class HyperText(wx.StaticText):
