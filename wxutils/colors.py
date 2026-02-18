@@ -31,7 +31,7 @@ def use_darkdetect():
 
 def register_darkdetect(callable):
     global _DD_THREAD, _DD_OBJECTS
-    print("Register DD ", callable, _DD_THREAD, _DD_OBJECTS)
+    # print("Register DD ", callable, _DD_THREAD, _DD_OBJECTS)
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
         if _DD_THREAD is None:
