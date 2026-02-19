@@ -31,75 +31,72 @@ def use_darkdetect():
 
 def register_darkdetect(callable):
     global _DD_THREAD, _DD_OBJECTS
-    # print("Register DD ", callable, _DD_THREAD, _DD_OBJECTS)
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
         if _DD_THREAD is None:
             use_darkdetect()
 
-COLORS_LIGHT = {'text': wx.Colour(0, 0, 0, 216),
-          'text_bg': wx.Colour(255, 255, 255),
-          'text_invalid': wx.Colour(240, 0, 10),
-          'text_invalid_bg': wx.Colour(253, 253, 90),
-          'bg': wx.Colour(240,240,230),
-          'hyperlink': wx.Colour(0, 0, 60),
-          'nb_active': wx.Colour(254,254,195),
-          'nb_area': wx.Colour(250,250,245),
-          'nb_text': wx.Colour(10,10,180),
-          'nb_activetext': wx.Colour(80,10,10),
-          'title': wx.Colour(80,10,10),
-          'title_red': wx.Colour(120, 10, 10),
-          'title_blue': wx.Colour(10, 10, 120),
-          'pvname': wx.Colour(10,10,80),
-          'list_bg': wx.Colour(255, 255, 250),
-          'list_fg': wx.Colour(5, 5, 25),
-          'hline': wx.Colour(80, 80, 200),
-          'button_bg':  wx.Colour(252,  252, 245),
-          'pt_frame_bg':  wx.Colour(253, 253, 250),
-          'pt_fg':  wx.Colour( 20,  20, 120),
-          'pt_bg': wx.Colour(253, 253, 250),
-          'pt_fgsel': wx.Colour(200,   0,   0),
-          'pt_bgsel': wx.Colour(250, 250, 200),
-          'window': wx.Colour(255, 255, 255, 255),
-          'info_bg': wx.Colour(231, 231, 231, 255),
-          'graytext': wx.Colour(0, 0, 0, 63),
-          'highight': wx.Colour(165, 205, 255, 255),
-          'highlight_text': wx.Colour(0, 0, 0, 255),
-          'btn_highight': wx.Colour(255, 255, 255, 255),
-          'hotlight': wx.Colour(9, 79, 209, 255),
-        }
+COLORS_LIGHT = {}
+COLORS_DARK = {}
 
-COLORS_DARK = {'text': wx.Colour(255, 255, 255, 216),
-             'text_bg': wx.Colour(50, 50, 50),
-             'text_invalid': wx.Colour(240, 0, 10),
-             'text_invalid_bg': wx.Colour(220, 220, 60),
-             'bg': wx.Colour(20, 20, 20),
-             'hyperlink': wx.Colour(200, 200, 255),
-             'nb_active': wx.Colour(120, 120, 180),
-             'nb_area': wx.Colour(60, 60, 80),
-             'nb_text': wx.Colour(220,240,245),
-             'nb_activetext': wx.Colour(255,245,245),
-             'title': wx.Colour(240,120,120),
-             'title_red': wx.Colour(240,120,120),
-             'title_blue': wx.Colour(120,120,250),
-             'pvname': wx.Colour(10,10,80),
-             'list_bg': wx.Colour(25, 25, 25),
-             'list_fg': wx.Colour(5, 5, 125),
-             'hline': wx.Colour(220, 220, 250),
-             'button_bg':  wx.Colour(100, 100, 80),
-             'pt_frame_bg':  wx.Colour(10, 10, 10),
-             'pt_fg':  wx.Colour(180,  200, 250),
-             'pt_bg': wx.Colour(10, 10, 10),
-             'pt_fgsel': wx.Colour(250, 180,  200),
-             'pt_bgsel': wx.Colour(30, 20, 80),
-             'window': wx.Colour(23, 23, 23, 255),
-             'info_bg': wx.Colour(38, 38, 38, 255),
-             'graytext': wx.Colour(255, 255, 255, 63),
-             'highlight': wx.Colour(49, 79, 120, 255),
-             'highlight_text': wx.Colour(255, 255, 255, 255),
-             'btn_highlight': wx.Colour(255, 255, 255, 25),
-             'hotlight': wx.Colour(53, 134, 255, 255),
-    }
+
+_COLOR_DATA = [  #  NAME,   LIGHT_RGBA,         DARK_RGBA
+('text',            (  0,   0,   0, 216), (255, 255, 255, 216)),
+('text_bg',         (255, 255, 255, 255), ( 50,  50 , 50, 255)),
+('text_invalid',    (240,   0,  10, 255), (240,   0,  10, 255)),
+('text_invalid_bg', (253, 253,  90, 255), (220, 220,  60, 255)),
+('bg',              (240, 240, 230, 255), ( 20,  20,  20, 255)),
+('hyperlink',       (  0,   0,  60, 255), (200, 200, 255, 255)),
+('nb_active',       (254, 254, 195, 255), (120, 120, 180, 255)),
+('nb_area',         (250, 250, 245, 255), ( 60,  60,  80, 255)),
+('nb_text',         ( 10,  10, 180, 255), (220, 240, 245, 255)),
+('nb_activetext',   ( 80,  10,  10, 255), (255, 245, 245, 255)),
+('title',           ( 80,  10,  10, 255), (240, 120, 120, 255)),
+('title_red',       (120,  10,  10, 255), (240, 120, 120, 255)),
+('title_green',     ( 10, 120,  10, 255), (120, 240, 120, 255)),
+('title_blue',      ( 10,  10, 210, 255), (120, 120, 250, 255)),
+('pvname',          ( 10,  10,  80, 255), ( 10,  10,  80, 255)),
+('list_bg',         (255, 255, 250, 255), ( 25,  25,  25, 255)),
+('list_fg',         (  5,   5,  25, 255), (  5,   5, 125, 255)),
+('hline',           ( 80,  80, 200, 255), (220, 220, 250, 255)),
+('button_bg',       (252, 252, 245, 255), (100, 100,  80, 255)),
+('pt_frame_bg',     (253, 253, 250, 255), ( 10,  10,  10, 255)),
+('pt_fg',           ( 20,  20, 120, 255), (180, 200, 250, 255)),
+('pt_bg',           (253, 253, 250, 255), ( 10,  10,  10, 255)),
+('pt_fgsel',        (200,   0,   0, 255), (250, 180, 200, 255)),
+('pt_bgsel',        (250, 250, 200, 255), ( 30,  20,  80, 255)),
+('window',          (255, 255, 255, 255), ( 23,  23,  23, 255)),
+('info_bg',         (231, 231, 231, 255), ( 38,  38,  38, 255)),
+('graytext',        (  0,   0,   0,  63), (255, 255, 255,  63)),
+('highight',        (165, 205, 255, 255), ( 49,  79, 120, 255)),
+('highlight_text',  (  0,   0,   0, 255), (255, 255, 255, 255)),
+('btn_highight',    (255, 255, 255, 255), (255, 255, 255,  25)),
+('hotlight',        (  9,  79, 209, 255), ( 53, 134, 255, 255)),
+]
+
+def add_named_color(name, lightcolor, darkcolor):
+    """add a named color for light and dark modes
+    Arguments
+    ---------
+    name       str                  name of color
+    lightcolor wx.Colour or tuple   RGB or RGBA values for light-mode color
+    darkcolor  wx.Colour or tuple   RGB or RGBA values for dark-mode color
+
+    """
+    global COLORS_LIGHT, COLORS_DARK
+    if isinstance(lightcolor, (list, tuple)):
+        if len(lightcolor) == 3:
+            lightcolor = (lightcolor[0], lightcolor[1], lightcolor[2], 255)
+        # lightcolor = wx.Colour(lightcolor)
+    if isinstance(darkcolor, (list, tuple)):
+        if len(darkcolor) == 3:
+            darkcolor = (darkcolor[0], darkcolor[1], darkcolor[2], 255)
+        # darkcolor = wx.Colour(darkcolor)
+    COLORS_LIGHT[name] = lightcolor
+    COLORS_DARK[name] = darkcolor
+
+for cname, clight, cdark in _COLOR_DATA:
+    add_named_color(cname, clight, cdark)
 
 COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
 
@@ -420,11 +417,22 @@ def set_color(widget, colorname, bg=None):
        and suppporting dark mode detection.
     """
     if isinstance(colorname, wx.Colour):
-        color = colorname
-        colorname = None
-    elif colorname not in COLORS:
+        newcolorname = 'text'
+        if colorname in COLORS_LIGHT.values():
+            for k, v in COLORS_LIGHT.items():
+                if v == colorname:
+                    newcolorname = k
+                    break
+        elif colorname in COLORS_DARK.values():
+            for k, v in COLORS_DARK.items():
+                if v == colorname:
+                    newcolorname = k
+                    break
+        colorname = newcolorname
+
+    if colorname not in COLORS:
         colorname = 'text'
-        color = get_color(colorname)
+    color = get_color(colorname)
 
     setter = getattr(widget, 'SetForegroundColour', None)
     if setter is None:
@@ -432,8 +440,9 @@ def set_color(widget, colorname, bg=None):
     setter(color)
 
     bgsetter = getattr(widget, 'SetBackgroundColour', None)
-    if bgsetter is not None and bg is not None:
-        bgsetter(get_color(bg))
+    if bgsetter is not None:
+        if bg is not None:
+            bgsetter(get_color(bg))
 
     if colorname is not None and not hasattr(widget, 'onDarkTheme'):
         widget._colfg = colorname
