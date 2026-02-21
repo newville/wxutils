@@ -8,7 +8,7 @@ import wx
 from wx.lib.agw import floatspin as fspin
 from . import myfloatspin as mspin
 from .icons import get_icon
-from .colors import get_color, register_darkdetect
+from .colors import get_color, register_darkdetect, COLORS_LIGHT
 
 HAS_NUMPY = False
 try:
@@ -178,6 +178,7 @@ class FloatCtrl(wx.TextCtrl):
 
     def OnSetFocus(self, event):
         "focus gained - resume editing from last mark point"
+        print("Float SetFocus")
         self.__SetMark()
         event.Skip()
 
@@ -293,16 +294,16 @@ class FloatCtrl(wx.TextCtrl):
 
     def onDarkTheme(self, is_dark=None):
         try:
-            self.fgcol_valid   = get_color('text')
-            self.bgcol_valid   = get_color('text_bg')
-            self.fgcol_invalid = get_color('text_invalid')
-            self.bgcol_invalid = get_color('text_invalid_bg')
+            self.fgcol_valid   = get_color('text', dark=is_dark)
+            self.bgcol_valid   = get_color('text_bg', dark=is_dark)
+            self.fgcol_invalid = get_color('text_invalid', dark=is_dark)
+            self.bgcol_invalid = get_color('text_invalid_bg', dark=is_dark)
             fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
             if not self.is_valid:
                 fgcol, bgcol = self.fgcol_invalid, self.bgcol_invalid
             self.SetForegroundColour(fgcol)
             self.SetBackgroundColour(bgcol)
-            self.Refresh()
+            wx.CallAfter(self.Refresh)
         except RuntimeError:
             pass
         except Exception:
