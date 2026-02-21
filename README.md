@@ -23,7 +23,7 @@ becomes
 ```
 import wxutils
 btn = wxutils.Button(parent, label,  action=action, **kws)
-`
+```
 
 Yes, this can be viewed as merely a convenience, and not a completely
 general solution. But it is a remarkably common pattern, and the
