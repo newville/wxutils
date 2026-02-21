@@ -22,12 +22,12 @@ becomes
 
 ```
 import wxutils
-btn = wxutils.Button(parent, label,  action=action, **kws)
+btn = wxutils.Button(parent, label,  action=onButtonPress, **kws)
 ```
 
-Yes, this can be viewed as merely a convenience, and not a completely
-general solution. But it is a remarkably common pattern, and the
-wxutils form hides the ugliest parts of wxPython.
+While this can be viewed as merely a convenience, and not a completely
+general solution. But it is a very common pattern, and the
+wxutils version hides the ugliest parts of wxPython.
 
 There are several similar convenience widgets, including Check, Choice, and
 SimpleText (a simplified variant of StaticText), MenuItem, Font, HLine,
