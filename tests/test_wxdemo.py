@@ -1,8 +1,7 @@
 import time
-import os
-import sys
-import wx
+from pathlib import Path
 from functools import partial
+import wx
 
 from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
@@ -175,7 +174,7 @@ class DemoFrame(wx.Frame):
             self.onExit()
 
     def report(self, reason, value):
-        self.statusbar.SetStatusText("%s: %s" % (reason, value), 0)
+        self.statusbar.SetStatusText(f"{reason}: {value}", 0)
         self.deadtime = time.time() + self.idletime
 
     def set_menu(self):
@@ -246,7 +245,8 @@ class DemoFrame(wx.Frame):
         self.report(" Editable List selected ", event.GetString())
 
     def onImageView(self, event=None):
-        frame = ImageFrame(image_path='wx_example.png')
+        parent = Path(__file__).parent
+        frame = ImageFrame(image_path=Path(parent, 'wx_example.png').as_posix())
         frame.Show(True)
         frame.Raise()
 
@@ -277,8 +277,8 @@ class DemoFrame(wx.Frame):
                             style=wx.FD_OPEN)
 
         if dlg.ShowModal() == wx.ID_OK:
-            path = os.path.abspath(dlg.GetPath())
-            self.report("file ",  path)
+            path = Path(dlg.GetPath())
+            self.report("file ",  path.as_posixx())
         dlg.Destroy()
 
     def onExit(self, event=None):
