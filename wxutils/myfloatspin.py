@@ -759,8 +759,8 @@ class FloatSpin(wx.Control):
         # end Philip Semanchuk move
 
     def onDarkTheme(self, is_dark=None):
-        self._spin_up.SetBackgroundColour(get_color('button_bg'))
-        self._spin_dn.SetBackgroundColour(get_color('button_bg'))
+        self._spin_up.SetBackgroundColour(get_color('button_bg', dark=is_dark))
+        self._spin_dn.SetBackgroundColour(get_color('button_bg', dark=is_dark))
         wx.CallAfter(self.Refresh)
 
     def OnDestroy(self, event):

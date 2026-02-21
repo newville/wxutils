@@ -63,8 +63,8 @@ class EditableListBox(wx.ListBox):
             self.Append(name)
 
     def onDarkTheme(self, is_dark=None):
-        color = get_color('list_fg')
-        bgcolor = get_color('list_bg')
+        color = get_color('list_fg', dark=is_dark)
+        bgcolor = get_color('list_bg', dark=is_dark)
         self.SetBackgroundColour(bgcolor)
         self.SetOwnBackgroundColour(bgcolor)
         self.SetForegroundColour(color)

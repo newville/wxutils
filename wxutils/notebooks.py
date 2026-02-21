@@ -24,10 +24,10 @@ def flatnotebook(parent, paneldict=None, panelkws={},
     nb.SetActiveTabTextColour(get_color('nb_activetext'))
 
     def onDarkTheme(is_dark=None):
-        nb.SetTabAreaColour(get_color('nb_area'))
-        nb.SetActiveTabColour(get_color('nb_active'))
-        nb.SetNonActiveTabTextColour(get_color('nb_text'))
-        nb.SetActiveTabTextColour(get_color('nb_activetext'))
+        nb.SetTabAreaColour(get_color('nb_area', dark=is_dark))
+        nb.SetActiveTabColour(get_color('nb_active', dark=is_dark))
+        nb.SetNonActiveTabTextColour(get_color('nb_text', dark=is_dark))
+        nb.SetActiveTabTextColour(get_color('nb_activetext', dark=is_dark))
         wx.CallAfter(nb.Refresh)
 
     register_darkdetect(onDarkTheme)

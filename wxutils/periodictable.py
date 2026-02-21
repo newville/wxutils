@@ -108,17 +108,17 @@ class PeriodicTablePanel(wx.Panel):
         self.BuildPanel()
 
     def onDarkTheme(self, is_dark=None):
-        self.SetBackgroundColour(get_color('pt_frame_bg'))
-        self.fgcol = get_color('pt_fg')
-        self.bgcol = get_color('pt_bg')
-        self.fgsel = get_color('pt_fgsel')
-        self.bgsel = get_color('pt_bgsel')
+        self.SetBackgroundColour(get_color('pt_frame_bg', dark=is_dark))
+        self.fgcol = get_color('pt_fg', dark=is_dark)
+        self.bgcol = get_color('pt_bg', dark=is_dark)
+        self.fgsel = get_color('pt_fgsel', dark=is_dark)
+        self.bgsel = get_color('pt_bgsel', dark=is_dark)
         for name, coords in self.elems.items():
             tw = self.ctrls[name]
             tw.SetForegroundColour(self.fgcol)
             tw.SetBackgroundColour(self.bgcol)
         for a in (self.title, self.tsym, self.tznum):
-            a.SetBackgroundColour(get_color('pt_frame_bg'))
+            a.SetBackgroundColour(get_color('pt_frame_bg', dark=is_dark))
 
         wx.CallAfter(self.Refresh)
 
