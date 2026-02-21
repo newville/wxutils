@@ -42,7 +42,6 @@ def register_darkdetect(callable):
 COLORS_LIGHT = {}
 COLORS_DARK = {}
 
-
 _COLOR_DATA = [  #  NAME,   LIGHT_RGBA,         DARK_RGBA
 ('text',            (  0,   0,   0, 216), (255, 255, 255, 216)),
 ('text_bg',         (255, 255, 255, 255), ( 50,  50 , 50, 255)),
@@ -436,7 +435,7 @@ def set_color(widget, colorname, bg=None):
 
     if colorname not in COLORS:
         colorname = 'text'
-    color = get_c1`olor(colorname)
+    color = get_color(colorname)
 
     setter = getattr(widget, 'SetForegroundColour', None)
     if setter is None:
@@ -467,9 +466,19 @@ def set_color(widget, colorname, bg=None):
         widget.onDarkTheme = partial(on_dark, widget)
         register_darkdetect(widget.onDarkTheme)
 
-def get_color(name='text'):
-    "get dark-mode-aware color by name"
+def get_color(name='text', dark=None):
+    """get dark-mode-aware color by name
+    Arguments
+    --------
+    name    str , name of color in  COLORS_LIGHT/COLORS_DARK ['text']
+    dark   bool or None, force dark or light mode, use None as 'auto' [None]
+
+    """
     global  DARK_THEME
     if isinstance(name, wx.Colour):
         return name
-    return COLORS_DARK[name] if DARK_THEME else COLORS_LIGHT[name]
+    if dark is None:
+        dark = DARK_THEME
+    if name not in COLORS_DARK:
+        name = 'text'
+    return COLORS_DARK[name] if dark else COLORS_LIGHT[name]
