@@ -19,7 +19,7 @@ class ImagePanel(wx.Panel):
         sizer.Add(self.static_bitmap, 1, wx.ALL|wx.EXPAND, 5)
         self.SetSizerAndFit(sizer)
 
-    def showfile(self, image_path, title=None):
+    def showfile(self, image_path, set_title=True):
         self.image_path = image_path
         try:
             img = wx.Image(image_path, wx.BITMAP_TYPE_ANY)
@@ -29,8 +29,9 @@ class ImagePanel(wx.Panel):
             self.static_bitmap.SetBitmap(wx.Bitmap(self.img))
         except:
             wx.MessageBox(f"Cannot load image file '{image_path}'", "Error", wx.OK | wx.ICON_ERROR)
-        if title is not None:
-            self.SetTitle(title)
+        if set_title:
+            self.SetTitle(image_path)
+
 
     def onSize(self, evt):
         self.iw, self.ih = evt.GetSize()
@@ -39,8 +40,8 @@ class ImagePanel(wx.Panel):
         evt.Skip()
 
 class ImageFrame(wx.Frame):
-    def __init__(self, image_path=None, size=(700, 500), pad=5, **kws):
-        wx.Frame.__init__(self, None, -1, 'hello', size=size,
+    def __init__(self, image_path=None, size=(700, 500), pad=5, title='', **kws):
+        wx.Frame.__init__(self, None, -1, title, size=size,
                           style=wx.DEFAULT_FRAME_STYLE, **kws)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.image_path = image_path
@@ -59,7 +60,7 @@ class ImageFrame(wx.Frame):
         if image_path is not None:
             self.showfile(image_path)
 
-    def showfile(self, image_path, title=None):
+    def showfile(self, image_path, set_title=True):
         self.image_path = image_path
         try:
             img = wx.Image(image_path, wx.BITMAP_TYPE_ANY)
@@ -67,10 +68,11 @@ class ImageFrame(wx.Frame):
             scale = min((self.iw-self.pad)/(w+1.0), (self.ih-self.pad)/(h+1))
             self.img = img.Scale(int(scale*w-self.pad), int(scale*h-self.pad), wx.IMAGE_QUALITY_HIGH)
             self.static_bitmap.SetBitmap(wx.Bitmap(self.img))
+
         except:
             wx.MessageBox(f"Cannot load image file '{image_path}'", "Error", wx.OK | wx.ICON_ERROR)
-        if title is not None:
-            self.SetTitle(title)
+        if set_title:
+            self.SetTitle(image_path)
 
 
     def onSize(self, evt):

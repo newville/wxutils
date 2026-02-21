@@ -15,6 +15,7 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
 from wxutils.dates import DateTimeCtrl
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
 from wxutils.filechecklist import FileCheckList
+from wxutils.imageframe import ImageFrame
 
 PY_FILES = "Python scripts (*.py)|*.py"
 ALL_FILES = "All files (*.*)|*.*"
@@ -103,6 +104,8 @@ class DemoFrame(wx.Frame):
         filelist_btn = Button(panel, 'Show File CheckList',
                             action=self.onFileList, size=(175, -1))
 
+        image_btn = Button(panel, 'Show Image Display', action=self.onImageView, size=(175, -1))
+
 
         panel.AddText(' Name: ', style=LEFT)
 
@@ -138,6 +141,7 @@ class DemoFrame(wx.Frame):
 
         panel.Add(browse_btn, newrow=True)
         panel.Add(ptable_btn)
+        panel.Add(image_btn)
         panel.Add(edlist_btn, newrow=True)
         panel.Add(filelist_btn)
 
@@ -240,6 +244,11 @@ class DemoFrame(wx.Frame):
 
     def onEdListSelect(self, event=None, **kws):
         self.report(" Editable List selected ", event.GetString())
+
+    def onImageView(self, event=None):
+        frame = ImageFrame(image_path='wx_example.png')
+        frame.Show(True)
+        frame.Raise()
 
     def onFileList(self, event=None):
         frame = wx.Frame(self)
