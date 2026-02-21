@@ -30,6 +30,9 @@ def use_darkdetect():
         _DD_THREAD.start()
 
 def register_darkdetect(callable):
+    """defined a callback to be run when darkdetect
+       sees a change in Dark Mode
+    """
     global _DD_THREAD, _DD_OBJECTS
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
@@ -413,8 +416,9 @@ class GUIColors(object):
 GUI_COLORS = GUIColors()
 
 def set_color(widget, colorname, bg=None):
-    """set foreground color and optionally background color by logical name,
-       and suppporting dark mode detection.
+    """set foreground color and optionally background color by logical name
+       in the COLORS_LIGHT and COLORS_DARK dictionries, to respond to
+       changes in dark mode.
     """
     if isinstance(colorname, wx.Colour):
         newcolorname = 'text'
@@ -432,7 +436,7 @@ def set_color(widget, colorname, bg=None):
 
     if colorname not in COLORS:
         colorname = 'text'
-    color = get_color(colorname)
+    color = get_c1`olor(colorname)
 
     setter = getattr(widget, 'SetForegroundColour', None)
     if setter is None:
