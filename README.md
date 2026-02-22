@@ -80,3 +80,24 @@ utility functions in `wxutils.colors` are provided:
 * `get_color(name)` to get the color value by name.
 * `register_darkdetect(callback)` to define a callback to be run when
   a change in Dark mode is detected.
+
+
+## dedicated widgets for working with passwords
+
+The `wxutils.passwords` module has dedicated code and wx widgets for
+dealing with Password dialogs, including 'show and hide password'
+icons.  These methods can enforce common password rules like length
+and number of specials and can generate a "password hash" (which
+includes a salt and a number of iterations for the pbkdf2 algorithm)
+which is safe to store on disk, and methods to check the password
+against an existing hash.  Methods in this module include
+
+* `hash_password()` to convert a password into a safe-to-store
+  hash.bimum number of lowercase, upper case,
+  digits, special characters.
+* `PasswordPanel` which includes a Password TextCtrl that can be
+  toggled to show or hide plain text password.
+* `PasswordCheckDialog` a dialog to challenge for a password to match an
+  existing hash.
+* `PasswordSetDialog` a dialog to set a Password, checking that
+  password rules are satisfied.
