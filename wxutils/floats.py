@@ -2,13 +2,12 @@
 """
 Code for floating point controls
 """
-import sys
 from functools import partial
 import wx
 from wx.lib.agw import floatspin as fspin
 from . import myfloatspin as mspin
 from .icons import get_icon
-from .colors import get_color, register_darkdetect, COLORS_LIGHT
+from .colors import get_color, register_darkdetect
 
 HAS_NUMPY = False
 try:
@@ -40,7 +39,7 @@ def set_float(val, default=0):
     """ utility to set a floating value,
     useful for converting from strings """
     out = None
-    if not val in (None, ''):
+    if val not in (None, ''):
         try:
             out = float(val)
         except ValueError:
@@ -178,7 +177,6 @@ class FloatCtrl(wx.TextCtrl):
 
     def OnSetFocus(self, event):
         "focus gained - resume editing from last mark point"
-        print("Float SetFocus")
         self.__SetMark()
         event.Skip()
 
