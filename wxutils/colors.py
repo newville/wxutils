@@ -461,7 +461,7 @@ def set_color(widget, colorname, bg=None):
             if colbg is not None:
                 bgsetter = getattr(wid, 'SetBackgroundColour', None)
                 if bgsetter is not None:
-                    setter(get_color(colbg))
+                    setter(get_color(colbg, dark=is_dark))
             wx.CallAfter(wid.Refresh)
         widget.onDarkTheme = partial(on_dark, widget)
         register_darkdetect(widget.onDarkTheme)
