@@ -17,9 +17,8 @@ omit = ["tests/*"]
 name = "wxutils"
 dynamic = ["version"]
 requires-python = ">= 3.10"
-description = "utilities and conveniences for wxPython"
-
-readme = "README.rst"
+description = "utilities and convenience functions for wxPython"
+readme = "README.md"
 authors = [
      {name = "Matthew Newville", email = "matt.newville@gmail.com"}
 ]
