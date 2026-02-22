@@ -1,18 +1,13 @@
 import wx
 import time
 from os import urandom
+from random import randrange
 from base64 import b64encode
 from hashlib import pbkdf2_hmac
 
-from collections import namedtuple
 
-from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
-                     FRAMESTYLE, FileOpen, FileSave, FloatCtrl, FloatSpin,
-                     Font, GridPanel, LabeledTextCtrl, HLine,
-                     HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
-                     SimpleText, TextCtrl, get_icon, pack,
-                     BitmapButton, ToggleButton, YesNo, NumericCombo,
-                     make_steps)
+from wxutils import (Button, GridPanel, HLine,
+                     SimpleText, TextCtrl, get_icon)
 
 def b64(inp):
     "base64 endcode a bytes array"
@@ -31,14 +26,21 @@ def hash_password(password, salt=None, iterations=391939, hash_name='sha512'):
     randomly generated 37-character salt, minimizing the likliehood of
     existing rainbow tables.  The hashing uses `pbdkf2_hmac()` with
     'sha512' and the generated salt and a large number (default 93719)
-    of iterations to deliberately slow down computation time.  On CPUs
-    from 2025, this function should take at least 100 ms to run.
+    of iterations to deliberately slow down computation time.  This
+    function will take at least 60 ms to run, sleeping for if necessary.
+    Using default values in 2025, this function should take at least 100
+    ms to run.
     """
+    end_time = time.perf_counter() + (40 + randrange(35))/1000.0
     if salt is None:
         salt = random_salt()
+    iterations = max(1023, iterations)
     pwhash = b64(pbkdf2_hmac(hash_name, password.encode('ascii'),
                              salt.encode('ascii'), iterations))
-    return '&'.join([hash_name, f'{iterations:d}', salt, pwhash])
+    out = '&'.join([hash_name, f'{iterations:d}', salt, pwhash])
+    while time.perf_counter() < end_time:
+        time.sleep(0.003)
+    return out
 
 def test_password(password, pwhash):
     """test whether password matches a hash, as set with `hash_password()`"""
@@ -48,7 +50,7 @@ def test_password(password, pwhash):
             hash_name, iterations, salt, result = pwhash.split('&')
             test_hash = b64(pbkdf2_hmac(hash_name, password.encode('ascii'),
                                       salt.encode('ascii'), int(iterations)))
-        except:
+        except Exception:
             pass
     return len(test_hash)> 55 and (result == test_hash)
 
