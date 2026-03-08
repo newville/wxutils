@@ -1,14 +1,23 @@
 import wx
 
-def Button(parent, label, action=None, **kws):
+from typing import Callable, Optional
+
+class Button(wx.Button):
     """Simple button with bound action
     b = Button(parent, label, action=None, **kws)
 
     """
-    thisb = wx.Button(parent, label=label, **kws)
-    if callable(action):
-        parent.Bind(wx.EVT_BUTTON, action, thisb)
-    return thisb
+    def __init__(self, parent: wx.Window, label: str, action: Optional[Callable] = None, **kws) -> None:
+        super(Button, self).__init__(parent=parent, label=label, **kws)
+        if action is not None:
+            self.SetAction(action)
+
+    def SetAction(self, action: Callable) -> None:
+        self.Bind(wx.EVT_BUTTON, handler=action)
+
+    def RemoveAction(self, action: Callable) -> None:
+        self.Unbind(wx.EVT_BUTTON, handler=action)
+
 
 def BitmapButton(parent, bmp, action=None, tooltip=None, size=(20, 20), **kws):
     b = wx.BitmapButton(parent, id=-1, bitmap=bmp, size=size, **kws)
