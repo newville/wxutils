@@ -1,43 +1,52 @@
-from threading import Thread
 from functools import partial
 
 import wx
+import atexit
 
 import darkdetect
-
+_DD_TIMER = None
 _DD_OBJECTS = []
-_DD_THREAD = None
 DARK_THEME = darkdetect.isDark()
 
-def onDarkTheme(*args, **kws):
+def onDarkTheme(event=None, **kws):
     global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
-    DARK_THEME = darkdetect.isDark()
-    COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
-    for cb in _DD_OBJECTS[:]:
-        if callable(cb):
-            try:
-                cb(is_dark=DARK_THEME)
-            except RuntimeError:
-                _DD_OBJECTS.remove(cb)
-            except Exception:
-                pass
+    now_dark = darkdetect.isDark()
+    if now_dark != DARK_THEME:
+        DARK_THEME = now_dark
+        COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
+        for cb in _DD_OBJECTS[:]:
+            if callable(cb):
+                try:
+                    cb(is_dark=DARK_THEME)
+                except RuntimeError:
+                    _DD_OBJECTS.remove(cb)
+                except Exception:
+                    pass
+
+def stop_darkdetect_timer():
+    try:
+        _DD_TIMER.stop()
+    except:
+        pass
+
 
 def use_darkdetect():
-    global _DD_THREAD
-    if _DD_THREAD is None:
-        _DD_THREAD = Thread(target=darkdetect.listener, args=(onDarkTheme,))
-        _DD_THREAD.daemon = True
-        _DD_THREAD.start()
+    global _DD_TIMER
+    if _DD_TIMER is None:
+        wxapp = wx.GetApp()
+        _DD_TIMER = wx.Timer(wxapp)
+        wxapp.Bind(wx.EVT_TIMER, onDarkTheme, _DD_TIMER)
+        wx.CallAfter(_DD_TIMER.Start, 2500)
+        atexit.register(stop_darkdetect_timer)
 
 def register_darkdetect(callable):
     """defined a callback to be run when darkdetect
        sees a change in Dark Mode
     """
-    global _DD_THREAD, _DD_OBJECTS
+    global _DD_OBJECTS
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
-        if _DD_THREAD is None:
-            use_darkdetect()
+        use_darkdetect()
 
 COLORS_LIGHT = {}
 COLORS_DARK = {}
