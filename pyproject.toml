@@ -45,6 +45,7 @@ dependencies = [
     "pyshortcuts",
     "darkdetect",
     "pyobjc-framework-Cocoa; platform_system == 'Darwin'"
+    "jeepney; platform_system == 'Linux'"
     ]
 
 [project.urls]
