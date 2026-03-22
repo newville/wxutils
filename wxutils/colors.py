@@ -6,19 +6,14 @@ from functools import partial
 from pyshortcuts import uname
 import darkdetect
 
-# use jeepney on linux
+# use jeepney for dark detection on linux
 try:
     import jeepney
 except ImportError:
     jeepney = None
 
-# # use winreg on windows
-# try:
-#     import winreg
-# except ImportError:
-#     winreg = None
-
 def dark_theme_linux():
+    global jeepney
     if jeepney is not None:
         # Using the freedesktop portals for checking dark mode
         import jeepney.io.blocking
@@ -57,30 +52,13 @@ def dark_theme_linux():
         else:
             return 'Light'
 
-# def dark_theme_win32():
-#     """ Uses the Windows Registry to detect if the user is using Dark Mode """
-#     if winreg is not None:
-#         is_light_theme = 1
-#         try:
-#             key = winreg.OpenKey(winreg.HK_CURRENT_USER,
-#                  "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
-#             is_light_theme = winreg.QueryValueEx(key, "AppsUseLightTheme")[0]
-#         except FileNotFoundError:
-#             return None
-#         return 'Light' if is_light_theme==1 else 'Dark'
-
 dark_theme = darkdetect.theme
-
-
 if uname == 'linux':
     dark_theme = dark_theme_linux
-# if uname == 'win32':
-#    dark_theme = dark_theme_win32
 
 _DD_TIMER = None
 _DD_OBJECTS = []
 IS_DARK = DARK_THEME = dark_theme() == 'Dark'
-
 
 def onDarkTheme(event=None, **kws):
     global _DD_OBJECTS, IS_DARK, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
