@@ -1,23 +1,97 @@
-from functools import partial
-
-import wx
 import atexit
+import subprocess
+import wx
 
+from functools import partial
+from pyshortcuts import uname
 import darkdetect
+
+# use jeepney on linux
+try:
+    import jeepney
+except ImportError:
+    jeepney = None
+
+# # use winreg on windows
+# try:
+#     import winreg
+# except ImportError:
+#     winreg = None
+
+def dark_theme_linux():
+    if jeepney is not None:
+        # Using the freedesktop portals for checking dark mode
+        import jeepney.io.blocking
+        portal = jeepney.DBusAddress(
+            object_path='/org/freedesktop/portal/desktop',
+            bus_name='org.freedesktop.portal.Desktop',
+            interface='org.freedesktop.portal.Settings')
+
+        conn = jeepney.io.blocking.open_dbus_connection(bus='SESSION')
+        method = jeepney.new_method_call(portal, 'Read', 'ss',
+                             ('org.freedesktop.appearance', 'color-scheme'))
+        darkmode = conn.send_and_get_reply(method).body[0][1][1]
+        if darkmode == 1:
+            return 'Dark'
+        else:
+            return 'Light'
+    else:
+        try:
+            #Using the freedesktop specifications for checking dark mode
+            out = subprocess.run(
+                ['gsettings', 'get', 'org.gnome.desktop.interface', 'color-scheme'],
+                capture_output=True)
+            stdout = out.stdout.decode()
+            #If not found then trying older gtk-theme method
+            if len(stdout)<1:
+                out = subprocess.run(
+                    ['gsettings', 'get', 'org.gnome.desktop.interface', 'gtk-theme'],
+                    capture_output=True)
+                stdout = out.stdout.decode()
+        except Exception:
+            return 'Light'
+        # we have a string, now remove start and end quote
+        theme = stdout.lower().strip()[1:-1]
+        if '-dark' in theme.lower():
+            return 'Dark'
+        else:
+            return 'Light'
+
+# def dark_theme_win32():
+#     """ Uses the Windows Registry to detect if the user is using Dark Mode """
+#     if winreg is not None:
+#         is_light_theme = 1
+#         try:
+#             key = winreg.OpenKey(winreg.HK_CURRENT_USER,
+#                  "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
+#             is_light_theme = winreg.QueryValueEx(key, "AppsUseLightTheme")[0]
+#         except FileNotFoundError:
+#             return None
+#         return 'Light' if is_light_theme==1 else 'Dark'
+
+dark_theme = darkdetect.theme
+
+
+if uname == 'linux':
+    dark_theme = dark_theme_linux
+# if uname == 'win32':
+#    dark_theme = dark_theme_win32
+
 _DD_TIMER = None
 _DD_OBJECTS = []
-DARK_THEME = darkdetect.isDark()
+IS_DARK = DARK_THEME = dark_theme() == 'Dark'
+
 
 def onDarkTheme(event=None, **kws):
-    global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
-    now_dark = darkdetect.isDark()
-    if now_dark != DARK_THEME:
-        DARK_THEME = now_dark
-        COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
+    global _DD_OBJECTS, IS_DARK, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
+    now_dark = dark_theme() == 'Dark'
+    if now_dark != IS_DARK:
+        IS_DARK = DARK_THEME = now_dark
+        COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
         for cb in _DD_OBJECTS[:]:
             if callable(cb):
                 try:
-                    cb(is_dark=DARK_THEME)
+                    cb(is_dark=IS_DARK)
                 except RuntimeError:
                     _DD_OBJECTS.remove(cb)
                 except Exception:
@@ -109,7 +183,7 @@ def add_named_color(name, lightcolor, darkcolor):
 for cname, clight, cdark in _COLOR_DATA:
     add_named_color(cname, clight, cdark)
 
-COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
+COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
 
 X11_COLORS = {'aliceblue': (240,248,255), 'antiquewhite': (250,235,215),
               'antiquewhite1': (255,239,219), 'antiquewhite2': (238,223,204),
@@ -483,11 +557,11 @@ def get_color(name='text', dark=None):
     dark   bool or None, force dark or light mode, use None as 'auto' [None]
 
     """
-    global  DARK_THEME
+    global  IS_DARK
     if isinstance(name, wx.Colour):
         return name
     if dark is None:
-        dark = DARK_THEME
+        dark = IS_DARK
     if name not in COLORS_DARK:
         name = 'text'
     return COLORS_DARK[name] if dark else COLORS_LIGHT[name]
