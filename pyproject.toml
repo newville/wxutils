@@ -44,7 +44,7 @@ dependencies = [
     "wxPython>=4.2.0",
     "pyshortcuts",
     "darkdetect",
-    "pyobjc-framework-Cocoa; platform_system == 'Darwin'"
+    "pyobjc-framework-Cocoa; platform_system == 'Darwin'",
     "jeepney; platform_system == 'Linux'"
     ]
 
