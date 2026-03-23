@@ -58,37 +58,43 @@ if uname == 'linux':
 
 _DD_TIMER = None
 _DD_OBJECTS = []
-IS_DARK = DARK_THEME = dark_theme() == 'Dark'
+IS_DARK = DARK_THEME = (dark_theme() == 'Dark')
 
 def onDarkTheme(event=None, **kws):
     global _DD_OBJECTS, IS_DARK, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
-    now_dark = dark_theme() == 'Dark'
+    now_dark = (dark_theme() == 'Dark')
     if now_dark != IS_DARK:
         IS_DARK = DARK_THEME = now_dark
         COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
         for cb in _DD_OBJECTS[:]:
-            if callable(cb):
-                try:
-                    cb(is_dark=IS_DARK)
-                except RuntimeError:
+            try:
+                if not callable(cb):
                     _DD_OBJECTS.remove(cb)
-                except Exception:
-                    pass
+                else:
+                    cb(is_dark=IS_DARK)
+            except RuntimeError:
+                _DD_OBJECTS.remove(cb)
+            except Exception:
+                pass
 
 def stop_darkdetect_timer():
+    """
+    run by atexit to ensure that timer is stopped
+    """
     try:
-        _DD_TIMER.stop()
-    except:
+        _DD_TIMER.Stop()
+    except Exception:
         pass
 
 
-def use_darkdetect():
+def use_darkdetect(parent=None, poll_time=1000):
     global _DD_TIMER
     if _DD_TIMER is None:
-        wxapp = wx.GetApp()
-        _DD_TIMER = wx.Timer(wxapp)
-        wxapp.Bind(wx.EVT_TIMER, onDarkTheme, _DD_TIMER)
-        wx.CallAfter(_DD_TIMER.Start, 2500)
+        if parent is None:
+            parent = wx.GetApp()
+        _DD_TIMER = wx.Timer(parent)
+        parent.Bind(wx.EVT_TIMER, onDarkTheme, _DD_TIMER)
+        wx.CallAfter(_DD_TIMER.Start, poll_time)
         atexit.register(stop_darkdetect_timer)
 
 def register_darkdetect(callable):
@@ -98,7 +104,6 @@ def register_darkdetect(callable):
     global _DD_OBJECTS
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
-        use_darkdetect()
 
 COLORS_LIGHT = {}
 COLORS_DARK = {}
