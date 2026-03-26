@@ -14,6 +14,7 @@ if sys.platform.lower() == 'darwin':
 from . import utils
 
 from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
+                    set_widget_value,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 

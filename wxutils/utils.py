@@ -243,3 +243,30 @@ def show_wxsizes(obj):
             show_wxsizes(child)
         except:
             pass
+
+def set_widget_value(widget, value):
+    """generic method to set value for wx widget based on widget type/class
+       class                 method
+       ------                -------
+       wx.StaticText         SetLabel
+       wx.CheckBox           Check(True / False)
+       wx.Choice             SetSelection if int, SetStringSelection if str
+       wx.TextCtrl           SetValue
+       FloatSpin             SetValue
+       FloatCtrl             SetValue
+    """
+    setter = getattr(widget, 'SetValue', None)
+    if isinstance(widget, wx.StaticText):
+        setter = widget.SetLabel
+    elif isinstance(widget, wx.CheckBox):
+        setter = widget.Check
+        value = bool(value)
+    elif isinstance(widget, wx.Choice):
+        setter = widget.SetSelection
+        if isinstance(value, str):
+            setter = widget.SetStringSelection
+
+    if setter is None:
+        print(f"Warning: not method for setting value for {widget=}")
+    else:
+        setter(value)
