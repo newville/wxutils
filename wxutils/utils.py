@@ -267,7 +267,7 @@ def set_widget_value(widget, value):
         if isinstance(value, str):
             setter = widget.SetStringSelection
     if setter is None:
-        print(f"Warning: not method for setting value for {widget=}")
+        print(f"Warning: no method for setting value for {widget=}")
     else:
         setter(value)
 
@@ -286,6 +286,6 @@ def get_widget_value(widget):
     elif isinstance(widget, wx.Choice):
         getter = widget.GetStringSelection
     if getter is None:
-        print(f"Warning: not method for getting value for {widget=}")
+        print(f"Warning: no method for getting value for {widget=}")
     else:
         return getter()
