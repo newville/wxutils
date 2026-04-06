@@ -41,8 +41,7 @@ def dark_theme_linux():
                 capture_output=True)
             stdout = out.stdout.decode()
             if len(stdout) > 1:
-                theme = stdout.lower().strip()[1:-1]
-                darkmode = '-dark' in theme
+                darkmode = '-dark' in stdout.lower().strip()
         except Exception:
             pass
         if darkmode is not None:
