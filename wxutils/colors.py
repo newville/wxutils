@@ -25,32 +25,30 @@ def dark_theme_linux():
         conn = jeepney.io.blocking.open_dbus_connection(bus='SESSION')
         method = jeepney.new_method_call(portal, 'Read', 'ss',
                              ('org.freedesktop.appearance', 'color-scheme'))
-        darkmode = conn.send_and_get_reply(method).body[0][1][1]
-        if darkmode == 1:
-            return 'Dark'
-        else:
-            return 'Light'
-    else:
+        try:
+            darkmode = conn.send_and_get_reply(method).body[0][1][1]
+            return 'Dark' if (darkmode == 1) else 'Light'
+        except Exception:
+            pass
+
+    # try with `gsettings get org.gnome.desktop.interface`
+    darkmode = None
+    for gkey in ('color-scheme', 'gtk-theme'):
         try:
             #Using the freedesktop specifications for checking dark mode
             out = subprocess.run(
-                ['gsettings', 'get', 'org.gnome.desktop.interface', 'color-scheme'],
+                ['gsettings', 'get', 'org.gnome.desktop.interface', gkey],
                 capture_output=True)
             stdout = out.stdout.decode()
-            #If not found then trying older gtk-theme method
-            if len(stdout)<1:
-                out = subprocess.run(
-                    ['gsettings', 'get', 'org.gnome.desktop.interface', 'gtk-theme'],
-                    capture_output=True)
-                stdout = out.stdout.decode()
+            if len(stdout) > 1:
+                theme = stdout.lower().strip()[1:-1]
+                darkmode = '-dark' in theme
         except Exception:
-            return 'Light'
-        # we have a string, now remove start and end quote
-        theme = stdout.lower().strip()[1:-1]
-        if '-dark' in theme.lower():
-            return 'Dark'
-        else:
-            return 'Light'
+            pass
+        if darkmode is not None:
+            return 'Dark' if darkmode  else 'Light'
+    # finally, give up
+    return 'Light'
 
 dark_theme = darkdetect.theme
 if uname == 'linux':
