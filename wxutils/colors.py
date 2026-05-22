@@ -61,7 +61,7 @@ def dark_theme_windows():
         WINDOWS_STARTMODE = theme
 
     # for wxPython < 4.3.0, we have to force light mode
-    if pkg_version(wx.__version__) < pkg_version('4.3.0'):
+    if pkg_version.parse(wx.__version__) < pkg_version.parse('4.3.0'):
         return 'Light'
 
     app = wx.GetApp()
