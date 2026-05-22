@@ -2,15 +2,19 @@ import atexit
 import subprocess
 import wx
 
+from packaging import version as pkg_version
 from functools import partial
 from pyshortcuts import uname
 import darkdetect
+
+WINDOWS_STARTMODE = None
 
 # use jeepney for dark detection on linux
 try:
     import jeepney
 except ImportError:
     jeepney = None
+
 
 def dark_theme_linux():
     global jeepney
@@ -49,9 +53,38 @@ def dark_theme_linux():
     # finally, give up
     return 'Light'
 
+def dark_theme_windows():
+    global WINDOWS_STARTMODE
+    theme = darkdetect.theme()
+
+    if WINDOWS_STARTMODE is None:
+        WINDOWS_STARTMODE = theme
+
+    # for wxPython < 4.3.0, we have to force light mode
+    if pkg_version(wx.__version__) < pkg_version('4.3.0'):
+        return 'Light'
+
+    app = wx.GetApp()
+    # ideally, this would work, and maybe someday:
+    # if app is not None:
+    #    mode = app.Appearance.Dark if theme=='Dark' else app.Appearance.Light
+    #   app.SetAppearance(mode)
+    # return theme
+
+    # but for 4.3.0, we need to maintain the starting mode,
+    # and probably set Dark mode
+    if theme == 'Dark':
+        try:
+            app.MSWEnableDarkMode(app.DarkMode_Always)
+        except Exception:
+            pass
+    return WINDOWS_STARTMODE
+
 dark_theme = darkdetect.theme
 if uname == 'linux':
     dark_theme = dark_theme_linux
+elif uname == 'win':
+    dark_theme = dark_theme_windows
 
 _DD_TIMER = None
 _DD_OBJECTS = []
@@ -463,7 +496,7 @@ class GUIColors(object):
                 r, g, b = [int(n, 16) for n in (r, g, b)]
                 a = int(value[7:9], 16) if len(value) == 9 else 255
                 cval = wx.Colour(r, g, b, a)
-            elif value in x11_colors:
+            elif value in X11_COLORS:
                 cval = wx.Colour(*X11_COLORS[value])
         if isinstance(value, (tuple, list)) and len(value) in (3, 4):
             cval = wx.Colour(*value)
