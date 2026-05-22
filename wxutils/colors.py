@@ -20,16 +20,16 @@ def dark_theme_linux():
     global jeepney
     if jeepney is not None:
         # Using the freedesktop portals for checking dark mode
-        import jeepney.io.blocking
-        portal = jeepney.DBusAddress(
-            object_path='/org/freedesktop/portal/desktop',
-            bus_name='org.freedesktop.portal.Desktop',
-            interface='org.freedesktop.portal.Settings')
-
-        conn = jeepney.io.blocking.open_dbus_connection(bus='SESSION')
-        method = jeepney.new_method_call(portal, 'Read', 'ss',
-                             ('org.freedesktop.appearance', 'color-scheme'))
         try:
+            import jeepney.io.blocking
+            portal = jeepney.DBusAddress(
+                object_path='/org/freedesktop/portal/desktop',
+                bus_name='org.freedesktop.portal.Desktop',
+                interface='org.freedesktop.portal.Settings')
+
+            conn = jeepney.io.blocking.open_dbus_connection(bus='SESSION')
+            method = jeepney.new_method_call(portal, 'Read', 'ss',
+                                             ('org.freedesktop.appearance', 'color-scheme'))
             darkmode = conn.send_and_get_reply(method).body[0][1][1]
             return 'Dark' if (darkmode == 1) else 'Light'
         except Exception:
