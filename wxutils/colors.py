@@ -1,43 +1,139 @@
-from threading import Thread
-from functools import partial
-
+import atexit
+import subprocess
 import wx
 
+from packaging import version as pkg_version
+from functools import partial
+from pyshortcuts import uname
 import darkdetect
 
-_DD_OBJECTS = []
-_DD_THREAD = None
-DARK_THEME = darkdetect.isDark()
+WINDOWS_STARTMODE = None
 
-def onDarkTheme(*args, **kws):
-    global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
-    DARK_THEME = darkdetect.isDark()
-    COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
-    for cb in _DD_OBJECTS[:]:
-        if callable(cb):
+# use jeepney for dark detection on linux
+try:
+    import jeepney
+except ImportError:
+    jeepney = None
+
+
+def dark_theme_linux():
+    global jeepney
+    if jeepney is not None:
+        # Using the freedesktop portals for checking dark mode
+        try:
+            import jeepney.io.blocking
+            portal = jeepney.DBusAddress(
+                object_path='/org/freedesktop/portal/desktop',
+                bus_name='org.freedesktop.portal.Desktop',
+                interface='org.freedesktop.portal.Settings')
+
+            conn = jeepney.io.blocking.open_dbus_connection(bus='SESSION')
+            method = jeepney.new_method_call(portal, 'Read', 'ss',
+                                             ('org.freedesktop.appearance', 'color-scheme'))
+            darkmode = conn.send_and_get_reply(method).body[0][1][1]
+            return 'Dark' if (darkmode == 1) else 'Light'
+        except Exception:
+            pass
+
+    # try with `gsettings get org.gnome.desktop.interface`
+    darkmode = None
+    for gkey in ('color-scheme', 'gtk-theme'):
+        try:
+            #Using the freedesktop specifications for checking dark mode
+            out = subprocess.run(
+                ['gsettings', 'get', 'org.gnome.desktop.interface', gkey],
+                capture_output=True)
+            stdout = out.stdout.decode()
+            if len(stdout) > 1:
+                darkmode = '-dark' in stdout.lower().strip()
+        except Exception:
+            pass
+        if darkmode is not None:
+            return 'Dark' if darkmode  else 'Light'
+    # finally, give up
+    return 'Light'
+
+def dark_theme_windows():
+    global WINDOWS_STARTMODE
+    theme = darkdetect.theme()
+
+    if WINDOWS_STARTMODE is None:
+        WINDOWS_STARTMODE = theme
+
+    # for wxPython < 4.3.0, we have to force light mode
+    if pkg_version.parse(wx.__version__) < pkg_version.parse('4.3.0'):
+        return 'Light'
+
+    app = wx.GetApp()
+    # ideally, this would work, and maybe someday:
+    # if app is not None:
+    #    mode = app.Appearance.Dark if theme=='Dark' else app.Appearance.Light
+    #   app.SetAppearance(mode)
+    # return theme
+
+    # but for 4.3.0, we need to maintain the starting mode,
+    # and probably set Dark mode
+    if theme == 'Dark':
+        try:
+            app.MSWEnableDarkMode(app.DarkMode_Always)
+        except Exception:
+            pass
+    return WINDOWS_STARTMODE
+
+dark_theme = darkdetect.theme
+if uname == 'linux':
+    dark_theme = dark_theme_linux
+elif uname == 'win':
+    dark_theme = dark_theme_windows
+
+_DD_TIMER = None
+_DD_OBJECTS = []
+IS_DARK = DARK_THEME = (dark_theme() == 'Dark')
+
+def onDarkTheme(event=None, **kws):
+    global _DD_OBJECTS, IS_DARK, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
+    now_dark = (dark_theme() == 'Dark')
+    if now_dark != IS_DARK:
+        IS_DARK = DARK_THEME = now_dark
+        COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
+        for cb in _DD_OBJECTS[:]:
             try:
-                cb(is_dark=DARK_THEME)
+                if not callable(cb):
+                    _DD_OBJECTS.remove(cb)
+                else:
+                    cb(is_dark=IS_DARK)
             except RuntimeError:
                 _DD_OBJECTS.remove(cb)
             except Exception:
                 pass
 
-def use_darkdetect():
-    global _DD_THREAD
-    if _DD_THREAD is None:
-        _DD_THREAD = Thread(target=darkdetect.listener, args=(onDarkTheme,))
-        _DD_THREAD.daemon = True
-        _DD_THREAD.start()
+def stop_darkdetect_timer():
+    """
+    run by atexit to ensure that timer is stopped
+    """
+    try:
+        _DD_TIMER.Stop()
+    except Exception:
+        pass
+
+
+def use_darkdetect(parent=None, poll_time=1000):
+    global _DD_TIMER
+    if _DD_TIMER is None:
+        if parent is None:
+            parent = wx.GetApp()
+        _DD_TIMER = wx.Timer(parent)
+        parent.Bind(wx.EVT_TIMER, onDarkTheme, _DD_TIMER)
+        wx.CallAfter(_DD_TIMER.Start, poll_time)
+        atexit.register(stop_darkdetect_timer)
 
 def register_darkdetect(callable):
     """defined a callback to be run when darkdetect
        sees a change in Dark Mode
     """
-    global _DD_THREAD, _DD_OBJECTS
+    global _DD_OBJECTS
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
-        if _DD_THREAD is None:
-            use_darkdetect()
 
 COLORS_LIGHT = {}
 COLORS_DARK = {}
@@ -100,7 +196,7 @@ def add_named_color(name, lightcolor, darkcolor):
 for cname, clight, cdark in _COLOR_DATA:
     add_named_color(cname, clight, cdark)
 
-COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
+COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
 
 X11_COLORS = {'aliceblue': (240,248,255), 'antiquewhite': (250,235,215),
               'antiquewhite1': (255,239,219), 'antiquewhite2': (238,223,204),
@@ -400,7 +496,7 @@ class GUIColors(object):
                 r, g, b = [int(n, 16) for n in (r, g, b)]
                 a = int(value[7:9], 16) if len(value) == 9 else 255
                 cval = wx.Colour(r, g, b, a)
-            elif value in x11_colors:
+            elif value in X11_COLORS:
                 cval = wx.Colour(*X11_COLORS[value])
         if isinstance(value, (tuple, list)) and len(value) in (3, 4):
             cval = wx.Colour(*value)
@@ -474,11 +570,11 @@ def get_color(name='text', dark=None):
     dark   bool or None, force dark or light mode, use None as 'auto' [None]
 
     """
-    global  DARK_THEME
+    global  IS_DARK
     if isinstance(name, wx.Colour):
         return name
     if dark is None:
-        dark = DARK_THEME
+        dark = IS_DARK
     if name not in COLORS_DARK:
         name = 'text'
     return COLORS_DARK[name] if dark else COLORS_LIGHT[name]

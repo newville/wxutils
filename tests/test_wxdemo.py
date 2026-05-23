@@ -9,7 +9,7 @@ from wxutils import (Button, CEN, Check, Choice, EditableListBox, OkCancel,
                      HyperText, LEFT, MenuItem, Popup, RIGHT, RowPanel,
                      SimpleText, TextCtrl, get_icon, pack,
                      BitmapButton, ToggleButton, YesNo, NumericCombo,
-                     make_steps, get_color)
+                     make_steps, get_color, use_darkdetect)
 
 from wxutils.dates import DateTimeCtrl
 from wxutils.periodictable import PeriodicTablePanel, PTableFrame
@@ -158,6 +158,7 @@ class DemoFrame(wx.Frame):
         psize = panel.GetBestSize()
         self.SetSize((psize[0]+5, psize[1]+25))
 
+        use_darkdetect()
         pack(self, fsizer)
         self.Refresh()
 

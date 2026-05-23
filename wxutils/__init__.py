@@ -14,11 +14,13 @@ if sys.platform.lower() == 'darwin':
 from . import utils
 
 from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
+                    set_widget_value, get_widget_value,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 
 from .colors import (COLORS, GUI_COLORS, GUIColors,
-                    set_color, DARK_THEME, register_darkdetect, get_color)
+                     get_color, set_color, DARK_THEME,
+                     register_darkdetect, use_darkdetect)
 
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
