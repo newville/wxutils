@@ -22,6 +22,8 @@ from .colors import (COLORS, GUI_COLORS, GUIColors,
                      get_color, set_color, DARK_THEME,
                      register_darkdetect, use_darkdetect)
 
+from .base import EnableControl
+
 from .buttons import Button, ToggleButton, BitmapButton
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl
