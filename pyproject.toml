@@ -45,8 +45,9 @@ dependencies = [
     "pyshortcuts",
     "darkdetect",
     "pyobjc-framework-Cocoa; platform_system == 'Darwin'",
-    "jeepney; platform_system == 'Linux'"
-    ]
+    "jeepney; platform_system == 'Linux'",
+    "packaging>=26.2",
+]
 
 [project.urls]
 Homepage = "https://github.com/newville/wxutils"
