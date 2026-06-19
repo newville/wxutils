@@ -3,13 +3,7 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl
-from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme
-
-# Type aliases
-# ColorScheme: (idle_bg, hover_bg, press_bg, idle_fg, hover_fg)
-ColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]
-# DisabledScheme: (disabled_bg, disabled_fg)
-DisabledScheme = tuple[wx.Colour, wx.Colour]
+from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, ColorScheme, DisabledColorScheme
 
 
 class Button(wx.Button):
@@ -76,7 +70,7 @@ class FlatButton(EnableControl):
         label: str,
         action: Optional[Callable[[wx.CommandEvent], None]] = None,
         color_scheme: Optional[ColorScheme] = None,
-        disabled_scheme: Optional[DisabledScheme] = None,
+        disabled_scheme: Optional[DisabledColorScheme] = None,
         font: Optional[wx.Font] = None,
         corner_radius: int = 4,
         **kws,
@@ -89,7 +83,7 @@ class FlatButton(EnableControl):
         self._corner_radius = corner_radius
 
         self._custom_scheme: Optional[ColorScheme] = color_scheme
-        self._custom_disabled: Optional[DisabledScheme] = disabled_scheme
+        self._custom_disabled: Optional[DisabledColorScheme] = disabled_scheme
 
         self._resolve_colors()
 
@@ -124,7 +118,7 @@ class FlatButton(EnableControl):
         self._resolve_colors()
         self.Refresh()
 
-    def SetDisabledScheme(self, disabled_scheme: DisabledScheme) -> None:
+    def SetDisabledScheme(self, disabled_scheme: DisabledColorScheme) -> None:
         """Replace the disabled color scheme and repaint."""
         self._custom_disabled = disabled_scheme
         self._resolve_colors()

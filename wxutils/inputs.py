@@ -3,10 +3,7 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl
-from .colors import register_darkdetect, default_check_scheme, default_disabled_scheme
-
-# CheckScheme: (box_bg, hover_bg, check_color, label_fg)
-CheckScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]
+from .colors import register_darkdetect, default_check_scheme, default_disabled_scheme, CheckedColorScheme, DisabledColorScheme
 
 
 class FlatCheckBox(EnableControl):
@@ -29,7 +26,7 @@ class FlatCheckBox(EnableControl):
         label: str,
         value: Optional[bool] = False,
         action: Optional[Callable[[bool], None]] = None,
-        check_scheme: Optional[CheckScheme] = None,
+        check_scheme: Optional[CheckedColorScheme] = None,
         disabled_scheme=None,
         box_size: Optional[int] = 13,
         font: Optional[wx.Font] = None,
@@ -88,13 +85,13 @@ class FlatCheckBox(EnableControl):
         self.InvalidateBestSize()
         self.Refresh()
 
-    def SetCheckScheme(self, check_scheme: CheckScheme) -> None:
+    def SetCheckScheme(self, check_scheme: CheckedColorScheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = check_scheme
         self._resolve_colors()
         self.Refresh()
 
-    def SetDisabledScheme(self, disabled_scheme) -> None:
+    def SetDisabledScheme(self, disabled_scheme: DisabledColorScheme) -> None:
         """Replace the disabled color scheme and repaint."""
         self._custom_disabled = disabled_scheme
         self._resolve_colors()

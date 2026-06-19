@@ -16,6 +16,12 @@ except ImportError:
     jeepney = None
 
 
+# Type aliases for color schemes used by flat widgets
+ColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (idle_bg, hover_bg, press_bg, idle_fg, hover_fg)
+DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
+CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
+
+
 def dark_theme_linux():
     global jeepney
     if jeepney is not None:
@@ -584,10 +590,10 @@ def default_color_scheme():
     """Return a (idle_bg, hover_bg, press_bg, idle_fg, hover_fg) tuple based
     on the current light/dark palette.
     """
-    bg    = wx.Colour(*get_color('button_bg'))
+    bg = wx.Colour(*get_color('button_bg'))
     hover = wx.Colour(*get_color('highight'))
     press = wx.Colour(*get_color('btn_highight'))
-    fg    = wx.Colour(*get_color('text'))
+    fg = wx.Colour(*get_color('text'))
     return (bg, hover, press, fg, fg)
 
 
@@ -600,8 +606,8 @@ def default_disabled_scheme():
 
 def default_check_scheme():
     """Return a (box_bg, hover_bg, check_color, label_fg) tuple based on the current light/dark palette."""
-    box_bg      = wx.Colour(*get_color('button_bg'))
-    hover_bg    = wx.Colour(*get_color('highight'))
+    box_bg = wx.Colour(*get_color('button_bg'))
+    hover_bg = wx.Colour(*get_color('highight'))
     check_color = wx.Colour(*get_color('highight'))
-    label_fg    = wx.Colour(*get_color('text'))
+    label_fg = wx.Colour(*get_color('text'))
     return (box_bg, hover_bg, check_color, label_fg)
