@@ -596,3 +596,12 @@ def default_disabled_scheme():
     bg = wx.Colour(*get_color('info_bg'))
     fg = wx.Colour(*get_color('graytext'))
     return (bg, fg)
+
+
+def default_check_scheme():
+    """Return a (box_bg, hover_bg, check_color, label_fg) tuple based on the current light/dark palette."""
+    box_bg      = wx.Colour(*get_color('button_bg'))
+    hover_bg    = wx.Colour(*get_color('highight'))
+    check_color = wx.Colour(*get_color('highight'))
+    label_fg    = wx.Colour(*get_color('text'))
+    return (box_bg, hover_bg, check_color, label_fg)
