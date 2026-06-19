@@ -578,3 +578,21 @@ def get_color(name='text', dark=None):
     if name not in COLORS_DARK:
         name = 'text'
     return COLORS_DARK[name] if dark else COLORS_LIGHT[name]
+
+
+def default_color_scheme():
+    """Return a (idle_bg, hover_bg, press_bg, idle_fg, hover_fg) tuple based
+    on the current light/dark palette.
+    """
+    bg    = wx.Colour(*get_color('button_bg'))
+    hover = wx.Colour(*get_color('highight'))
+    press = wx.Colour(*get_color('btn_highight'))
+    fg    = wx.Colour(*get_color('text'))
+    return (bg, hover, press, fg, fg)
+
+
+def default_disabled_scheme():
+    """Return a (disabled_bg, disabled_fg) tuple based on the current light/dark palette."""
+    bg = wx.Colour(*get_color('info_bg'))
+    fg = wx.Colour(*get_color('graytext'))
+    return (bg, fg)
