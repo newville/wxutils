@@ -141,6 +141,7 @@ def register_darkdetect(callable):
        sees a change in Dark Mode
     """
     global _DD_OBJECTS
+    use_darkdetect()
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
 
