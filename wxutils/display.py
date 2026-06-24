@@ -1,7 +1,7 @@
 import wx
 from typing import Optional
 
-from .colors import register_darkdetect, get_color, is_dark_theme
+from .colors import register_darkdetect, get_color, is_dark_theme, default_disabled_scheme
 
 
 class SectionDivider(wx.Control):
@@ -68,3 +68,60 @@ class SectionDivider(wx.Control):
         gc.StrokeLine(self._padding, cy, tx - self._padding, cy)
         gc.StrokeLine(tx + tw + self._padding, cy, w - self._padding, cy)
         gc.DrawText(self._label, tx, ty)
+
+
+class StatusField(wx.Control):
+    """Read-only value display, centered on both axes."""
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        value: str = "",
+        bg: Optional[wx.Colour] = None,
+        fg: Optional[wx.Colour] = None,
+        font: Optional[wx.Font] = None,
+        corner_radius: int = 3,
+        height: int = 28,
+    ) -> None:
+        super().__init__(parent, size=wx.Size(-1, height), style=wx.BORDER_NONE)
+        self._value = value
+        self._custom_bg = bg
+        self._custom_fg = fg
+        self._font = font
+        self._corner_radius = corner_radius
+        self._resolve_colors()
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, lambda e: (self.Refresh(), e.Skip()))
+        if bg is None or fg is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def SetValue(self, value: str) -> None:
+        self._value = value
+        self.Refresh()
+
+    def GetValue(self) -> str:
+        return self._value
+
+    def _resolve_colors(self) -> None:
+        dis_bg, dis_fg = default_disabled_scheme()
+        self._bg = self._custom_bg if self._custom_bg is not None else dis_bg
+        self._fg = self._custom_fg if self._custom_fg is not None else dis_fg
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        self._resolve_colors()
+        wx.CallAfter(self.Refresh)
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+        gc.SetBrush(wx.Brush(self._bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRoundedRectangle(0, 0, w, h, self._corner_radius)
+        if not self._value:
+            return
+        font = self._font if self._font is not None else self.GetFont().Bold()
+        gc.SetFont(font, self._fg)
+        tw, th = gc.GetTextExtent(self._value)
+        gc.DrawText(self._value, (w - tw) / 2, (h - th) / 2)

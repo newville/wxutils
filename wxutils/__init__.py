@@ -30,7 +30,7 @@ from .buttons import Button, ToggleButton, BitmapButton, FlatButton
 from .inputs import FlatCheckBox, FlatTextCtrl, FlatCombo
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 from .splitter import FlatSplitter
-from .display import SectionDivider
+from .display import StatusField, SectionDivider
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl
 from .dialogs import (OkCancel, FileOpen, FileSave, SelectWorkdir,
