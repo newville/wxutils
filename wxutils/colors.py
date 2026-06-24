@@ -21,6 +21,7 @@ ColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (i
 DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
 CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
+SplitterScheme = tuple[wx.Colour, wx.Colour]  # (sash, sash_hover)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
 
@@ -658,3 +659,20 @@ def default_scrollbar_scheme():
         max(0, min(255, track.Blue() + offset * 2)),
     )
     return (track, thumb, thumb_hover)
+
+
+def default_splitter_scheme():
+    """Return a SplitterScheme tuple based on the current light/dark palette."""
+    base = wx.Colour(*get_color('info_bg'))
+    offset = -40 if not DARK_THEME else 40
+    sash = wx.Colour(
+        max(0, min(255, base.Red() + offset)),
+        max(0, min(255, base.Green() + offset)),
+        max(0, min(255, base.Blue() + offset)),
+    )
+    hover = wx.Colour(
+        max(0, min(255, base.Red() + offset * 2)),
+        max(0, min(255, base.Green() + offset * 2)),
+        max(0, min(255, base.Blue() + offset * 2)),
+    )
+    return (sash, hover)
