@@ -152,6 +152,12 @@ class FlatButton(EnableControl):
         self.Refresh()
         event.Skip()
 
+    def DoGetBestSize(self) -> wx.Size:
+        dc = wx.ClientDC(self)
+        dc.SetFont(self._font if self._font is not None else self.GetFont())
+        tw, th = dc.GetTextExtent(self._label)
+        return wx.Size(tw + 24, max(th + 10, 28))
+
     def _on_paint(self, _: wx.PaintEvent) -> None:
         dc = wx.AutoBufferedPaintDC(self)
         gc = wx.GraphicsContext.Create(dc)
