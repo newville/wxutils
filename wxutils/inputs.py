@@ -3,7 +3,11 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl, EnablePanel
-from .colors import register_darkdetect, default_check_scheme, default_disabled_scheme, default_text_scheme, CheckedColorScheme, DisabledColorScheme, TextScheme
+from .colors import (
+    register_darkdetect,
+    default_check_scheme, default_disabled_scheme, default_text_scheme, default_combo_scheme,
+    CheckedColorScheme, DisabledColorScheme, TextScheme, ComboScheme,
+)
 
 
 class FlatCheckBox(EnableControl):
@@ -454,3 +458,415 @@ class FlatTextCtrl(EnablePanel):
             text_w, text_h = gc.GetTextExtent(self._placeholder)
             tx = (w - text_w) / 2 if self._centered else x_pad
             gc.DrawText(self._placeholder, tx, (h - text_h) / 2)
+
+
+class _FlatComboPopup(wx.PopupTransientWindow):
+    """Dropdown list used by FlatCombo."""
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        choices: list[str],
+        selection: int,
+        on_select: Callable[[int], None],
+        choice_colours: dict[str, wx.Colour] | None,
+        popup_bg: wx.Colour,
+        popup_hover: wx.Colour,
+        fg: wx.Colour,
+        font: Optional[wx.Font],
+        row_height: int,
+        max_visible: int,
+        sb_width: int,
+        sb_radius: int,
+    ) -> None:
+        super().__init__(parent, wx.BORDER_SIMPLE)
+        self._choices = list(choices)
+        self._selection = selection
+        self._hover_index = -1
+        self._scroll_offset = 0
+        self._visible_rows = min(max_visible, len(self._choices))
+        self._needs_sb = len(self._choices) > self._visible_rows
+        self._row_height = row_height
+        self._sb_width = sb_width
+        self._sb_radius = sb_radius
+        self._on_select = on_select
+        self._choice_colours = choice_colours or {}
+        self._dismissed = False
+        self._popup_bg = popup_bg
+        self._popup_hover = popup_hover
+        self._fg = fg
+        self._font = font
+        # scrollbar drag state
+        self._sb_dragging = False
+        self._sb_drag_start_y: int = 0
+        self._sb_drag_start_offset: int = 0
+        self.SetBackgroundColour(popup_bg)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_MOTION, self._on_motion)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave)
+        self.Bind(wx.EVT_LEFT_DOWN, self._on_left_down)
+        self.Bind(wx.EVT_LEFT_UP, self._on_left_up)
+        self.Bind(wx.EVT_MOUSEWHEEL, self._on_wheel)
+
+    def popup_below(self, screen_pt: wx.Point, min_width: int) -> None:
+        dc = wx.ClientDC(self)
+        dc.SetFont(self._font if self._font is not None else self.GetFont())
+        text_w = max((dc.GetTextExtent(c)[0] for c in self._choices), default=0)
+        extra = self._sb_width + 4 if self._needs_sb else 0
+        width = max(min_width, text_w + 24 + extra)
+        height = self._row_height * self._visible_rows + 4
+        self.SetSize(width, height)
+        self._scroll_to(self._selection)
+        self.SetPosition(screen_pt)
+        self.Popup()
+
+    def _list_w(self, total_w: int) -> int:
+        """Width of the row list area."""
+        return total_w - self._sb_width if self._needs_sb else total_w
+
+    def _sb_thumb_rect(self, total_h: int) -> tuple[int, int, int, int]:
+        """x, y, w, h of the scrollbar thumb."""
+        n = len(self._choices)
+        track_h = total_h - 4
+        thumb_h = max(20, int(self._visible_rows / n * track_h))
+        max_offset = n - self._visible_rows
+        thumb_y = 2 + int(self._scroll_offset / max_offset * (track_h - thumb_h)) if max_offset > 0 else 2
+        return 0, thumb_y, self._sb_width - 2, thumb_h
+
+    def _scroll_to(self, idx: int) -> None:
+        if idx < 0:
+            return
+        if idx < self._scroll_offset:
+            self._scroll_offset = idx
+        elif idx >= self._scroll_offset + self._visible_rows:
+            self._scroll_offset = idx - self._visible_rows + 1
+        self._scroll_offset = max(0, min(self._scroll_offset, max(0, len(self._choices) - self._visible_rows)))
+
+    def _row_at(self, x: int, y: int) -> int:
+        """Return choice index under (x, y), or -1 if on scrollbar or out of range."""
+        w, _ = self.GetClientSize()
+        if self._needs_sb and x >= self._list_w(w):
+            return -1
+        idx = self._scroll_offset + (y - 2) // self._row_height
+        return int(idx) if 0 <= idx < len(self._choices) else -1
+
+    def _on_sb_scroll_to_y(self, y: int) -> None:
+        _, h = self.GetClientSize()
+        track_h = h - 4
+        n = len(self._choices)
+        max_offset = n - self._visible_rows
+        _, _, _, thumb_h = self._sb_thumb_rect(h)
+        frac = max(0.0, min((y - 2) / (track_h - thumb_h), 1.0)) if track_h > thumb_h else 0.0
+        self._scroll_offset = round(frac * max_offset)
+        self.Refresh()
+
+    def ProcessLeftDown(self, event: wx.MouseEvent) -> bool:
+        return False
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+        list_w = self._list_w(w)
+
+        # background
+        gc.SetBrush(wx.Brush(self._popup_bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+
+        # rows
+        font = self._font if self._font is not None else self.GetFont()
+        for slot in range(self._visible_rows):
+            i = self._scroll_offset + slot
+            if i >= len(self._choices):
+                break
+            label = self._choices[i]
+            y = 2 + slot * self._row_height
+            if i == self._hover_index:
+                gc.SetBrush(wx.Brush(self._popup_hover))
+                gc.SetPen(wx.TRANSPARENT_PEN)
+                gc.DrawRectangle(0, y, list_w, self._row_height)
+            colour = self._choice_colours.get(label, self._fg)
+            gc.SetFont(font, colour)
+            _, text_h = gc.GetTextExtent(label)
+            gc.DrawText(label, 10, y + (self._row_height - text_h) / 2)
+
+        # scrollbar
+        if self._needs_sb:
+            sb_x = list_w
+            track_colour = wx.Colour(
+                max(0, self._popup_bg.Red() - 15),
+                max(0, self._popup_bg.Green() - 15),
+                max(0, self._popup_bg.Blue() - 15),
+            )
+            gc.SetBrush(wx.Brush(track_colour))
+            gc.SetPen(wx.TRANSPARENT_PEN)
+            gc.DrawRectangle(sb_x, 0, self._sb_width, h)
+            tx, ty, tw, th = self._sb_thumb_rect(h)
+            thumb_colour = wx.Colour(
+                min(255, self._popup_bg.Red() + 60),
+                min(255, self._popup_bg.Green() + 60),
+                min(255, self._popup_bg.Blue() + 60),
+            )
+            gc.SetBrush(wx.Brush(thumb_colour))
+            gc.DrawRoundedRectangle(sb_x + tx, ty, tw, th, self._sb_radius)
+
+    def _on_left_down(self, event: wx.MouseEvent) -> None:
+        if not self._needs_sb:
+            event.Skip()
+            return
+        w, h = self.GetClientSize()
+        x, y = event.GetX(), event.GetY()
+        if x >= self._list_w(w):
+            tx, ty, tw, th = self._sb_thumb_rect(h)
+            if ty <= y <= ty + th:
+                self._sb_dragging = True
+                self._sb_drag_start_y = y
+                self._sb_drag_start_offset = self._scroll_offset
+                self.CaptureMouse()
+            else:
+                self._on_sb_scroll_to_y(y)
+        else:
+            event.Skip()
+
+    def _on_left_up(self, event: wx.MouseEvent) -> None:
+        if self._sb_dragging:
+            if self.HasCapture():
+                self.ReleaseMouse()
+            self._sb_dragging = False
+            return
+        x, y = event.GetX(), event.GetY()
+        idx = self._row_at(x, y)
+        if idx >= 0 and not self._dismissed:
+            self._dismissed = True
+            self.Dismiss()
+            wx.CallAfter(self._on_select, idx)
+
+    def _on_motion(self, event: wx.MouseEvent) -> None:
+        if self._sb_dragging:
+            _, h = self.GetClientSize()
+            dy = event.GetY() - self._sb_drag_start_y
+            track_h = h - 4
+            n = len(self._choices)
+            max_offset = n - self._visible_rows
+            _, _, _, thumb_h = self._sb_thumb_rect(h)
+            frac = dy / (track_h - thumb_h) if track_h > thumb_h else 0.0
+            new_offset = round(self._sb_drag_start_offset + frac * max_offset)
+            self._scroll_offset = max(0, min(new_offset, max_offset))
+            self.Refresh()
+            return
+        idx = self._row_at(event.GetX(), event.GetY())
+        if idx != self._hover_index:
+            self._hover_index = idx
+            self.Refresh()
+        event.Skip()
+
+    def _on_leave(self, event: wx.MouseEvent) -> None:
+        if self._hover_index != -1:
+            self._hover_index = -1
+            self.Refresh()
+
+    def _on_wheel(self, event: wx.MouseEvent) -> None:
+        delta = -1 if event.GetWheelRotation() > 0 else 1
+        new_offset = max(0, min(self._scroll_offset + delta, max(0, len(self._choices) - self._visible_rows)))
+        if new_offset != self._scroll_offset:
+            self._scroll_offset = new_offset
+            self._hover_index = -1
+            self.Refresh()
+
+
+class FlatCombo(EnablePanel):
+    """Flat owner-drawn read-only dropdown with a themed popup list.
+
+    parent: parent wx window
+    choices: list of option strings
+    selection: initial selected index (default 0)
+    choice_colours: optional per-label wx.Colour overrides
+    font: optional wx.Font; falls back to system font
+    combo_scheme: optional ComboScheme tuple; falls back to default_combo_scheme()
+    size: explicit size; defaults to wx.DefaultSize (expands to fill sizer slot)
+    corner_radius: corner radius of the field in pixels (default 4)
+    """
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        choices: list[str],
+        selection: int = 0,
+        choice_colours: dict[str, wx.Colour] | None = None,
+        font: Optional[wx.Font] = None,
+        combo_scheme: Optional[ComboScheme] = None,
+        size: wx.Size = wx.DefaultSize,
+        corner_radius: int = 4,
+        row_height: int = 26,
+        max_visible: int = 16,
+        popup_sb_width: int = 8,
+        popup_sb_radius: int = 3,
+    ) -> None:
+        super().__init__(parent, style=wx.BORDER_NONE, size=size)
+        self._choices = list(choices)
+        self._selection = selection
+        self._choice_colours = choice_colours or {}
+        self._font = font
+        self._custom_scheme = combo_scheme
+        self._corner_radius = corner_radius
+        self._row_height = row_height
+        self._max_visible = max_visible
+        self._popup_sb_width = popup_sb_width
+        self._popup_sb_radius = popup_sb_radius
+        self._hovered = False
+        self._callback: Callable[[str], None] | None = None
+
+        self._resolve_colors()
+
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, lambda e: (self.Refresh(), e.Skip()))
+        self.Bind(wx.EVT_LEFT_UP, self._on_click)
+        self.Bind(wx.EVT_ENTER_WINDOW, self._on_enter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave)
+
+        if combo_scheme is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def SetAction(self, action: Callable[[str], None]) -> None:
+        """Bind a callback that receives the selected string on change."""
+        self._callback = action
+
+    def GetStringSelection(self) -> str:
+        """Return the currently selected string."""
+        return self._choices[self._selection] if self._choices else ""
+
+    def GetSelection(self) -> int:
+        """Return the currently selected index."""
+        return self._selection
+
+    def SetSelection(self, idx: int) -> None:
+        """Set the selected index and repaint."""
+        self._selection = idx
+        self.Refresh()
+
+    def SetChoices(self, choices: list[str], selection: int = 0) -> None:
+        """Replace the choice list and repaint."""
+        self._choices = list(choices)
+        self._selection = max(0, min(selection, len(self._choices) - 1)) if self._choices else 0
+        self.InvalidateBestSize()
+        self.Refresh()
+
+    def SetComboScheme(self, scheme: ComboScheme) -> None:
+        """Replace the active color scheme and repaint."""
+        self._custom_scheme = scheme
+        self._resolve_colors()
+        self.Refresh()
+
+    def Bind(self, event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY):
+        """Maps EVT_CHOICE to internal callback"""
+        if event == wx.EVT_CHOICE:
+            self._callback = handler
+        else:
+            super().Bind(event, handler, source, id, id2)
+
+    def DoGetBestSize(self) -> wx.Size:
+        dc = wx.ClientDC(self)
+        dc.SetFont(self._font if self._font is not None else self.GetFont())
+        max_w = max((dc.GetTextExtent(c)[0] for c in self._choices), default=60)
+        return wx.Size(max_w + 40, 28)
+
+    def _resolve_colors(self) -> None:
+        scheme = self._custom_scheme if self._custom_scheme is not None else default_combo_scheme()
+        (
+            self._bg,
+            self._hover_bg,
+            self._fg,
+            self._border,
+            self._arrow,
+            self._disabled_bg,
+            self._disabled_fg,
+            self._popup_bg,
+            self._popup_hover,
+        ) = scheme
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        self._resolve_colors()
+        wx.CallAfter(self.Refresh)
+
+    def _on_enter(self, event: wx.MouseEvent) -> None:
+        self._hovered = True
+        self.Refresh()
+        event.Skip()
+
+    def _on_leave(self, event: wx.MouseEvent) -> None:
+        self._hovered = False
+        self.Refresh()
+        event.Skip()
+
+    def _on_click(self, event: wx.MouseEvent) -> None:
+        if not self._choices or not self.IsEnabled():
+            return
+        popup = _FlatComboPopup(
+            self,
+            self._choices,
+            self._selection,
+            on_select=self._select,
+            choice_colours=self._choice_colours,
+            popup_bg=self._popup_bg,
+            popup_hover=self._popup_hover,
+            fg=self._fg,
+            font=self._font,
+            row_height=self._row_height,
+            max_visible=self._max_visible,
+            sb_width=self._popup_sb_width,
+            sb_radius=self._popup_sb_radius,
+        )
+        w, h = self.GetSize()
+        popup.popup_below(self.ClientToScreen(wx.Point(0, h)), w)
+
+    def _select(self, idx: int) -> None:
+        self._selection = idx
+        self.Refresh()
+        if self._callback is not None:
+            self._callback(self.GetStringSelection())
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+        enabled = self.IsEnabled()
+
+        # Parent background
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+
+        # Field background
+        if not enabled:
+            field_bg = self._disabled_bg
+        elif self._hovered:
+            field_bg = self._hover_bg
+        else:
+            field_bg = self._bg
+        border_colour = self._disabled_fg if not enabled else self._border
+        gc.SetBrush(wx.Brush(field_bg))
+        gc.SetPen(wx.Pen(border_colour, 1))
+        gc.DrawRoundedRectangle(0, 0, w, h, self._corner_radius)
+
+        # Label
+        font = self._font if self._font is not None else self.GetFont()
+        label = self.GetStringSelection()
+        label_colour = self._disabled_fg if not enabled else self._choice_colours.get(label, self._fg)
+        gc.SetFont(font, label_colour)
+        _, text_h = gc.GetTextExtent(label)
+        gc.DrawText(label, 8, (h - text_h) / 2)
+
+        # Arrow
+        arrow_colour = self._disabled_fg if not enabled else self._arrow
+        arrow_x = w - 16
+        arrow_y = h / 2
+        gc.SetPen(wx.Pen(arrow_colour, 1))
+        gc.SetBrush(wx.TRANSPARENT_BRUSH)
+        path = gc.CreatePath()
+        path.MoveToPoint(arrow_x - 4, arrow_y - 2)
+        path.AddLineToPoint(arrow_x, arrow_y + 2)
+        path.AddLineToPoint(arrow_x + 4, arrow_y - 2)
+        gc.StrokePath(path)

@@ -21,6 +21,8 @@ ColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (i
 DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
 CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
+ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
+ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
 
 
 def dark_theme_linux():
@@ -623,3 +625,35 @@ def default_text_scheme():
     dis_fg = wx.Colour(*get_color('graytext'))
     error_bg = wx.Colour(*get_color('text_invalid_bg'))
     return (bg, fg, placeholder, dis_bg, dis_fg, error_bg)
+
+
+def default_combo_scheme():
+    """Return a ComboScheme tuple based on the current light/dark palette."""
+    bg = wx.Colour(*get_color('button_bg'))
+    hover_bg = wx.Colour(*get_color('highight'))
+    fg = wx.Colour(*get_color('text'))
+    border = wx.Colour(*get_color('graytext'))
+    arrow = wx.Colour(*get_color('graytext'))
+    disabled_bg = wx.Colour(*get_color('info_bg'))
+    disabled_fg = wx.Colour(*get_color('graytext'))
+    popup_bg = wx.Colour(*get_color('text_bg'))
+    popup_hover = wx.Colour(*get_color('highight'))
+    return (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
+
+
+def default_scrollbar_scheme():
+    """Return a ScrollBarScheme tuple based on the current light/dark palette."""
+    track = wx.Colour(*get_color('info_bg'))
+    # Derive thumb colours as offsets from the track — darker in light mode, lighter in dark.
+    offset = -50 if not DARK_THEME else 50
+    thumb = wx.Colour(
+        max(0, min(255, track.Red() + offset)),
+        max(0, min(255, track.Green() + offset)),
+        max(0, min(255, track.Blue() + offset)),
+    )
+    thumb_hover = wx.Colour(
+        max(0, min(255, track.Red() + offset * 2)),
+        max(0, min(255, track.Green() + offset * 2)),
+        max(0, min(255, track.Blue() + offset * 2)),
+    )
+    return (track, thumb, thumb_hover)
