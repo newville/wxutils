@@ -20,6 +20,7 @@ except ImportError:
 ColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (idle_bg, hover_bg, press_bg, idle_fg, hover_fg)
 DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
 CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
+TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
 
 
 def dark_theme_linux():
@@ -611,3 +612,14 @@ def default_check_scheme():
     check_color = wx.Colour(*get_color('highight'))
     label_fg = wx.Colour(*get_color('text'))
     return (box_bg, hover_bg, check_color, label_fg)
+
+
+def default_text_scheme():
+    """Return a TextScheme tuple based on the current light/dark palette."""
+    bg = wx.Colour(*get_color('text_bg'))
+    fg = wx.Colour(*get_color('text'))
+    placeholder = wx.Colour(*get_color('graytext'))
+    dis_bg = wx.Colour(*get_color('info_bg'))
+    dis_fg = wx.Colour(*get_color('graytext'))
+    error_bg = wx.Colour(*get_color('text_invalid_bg'))
+    return (bg, fg, placeholder, dis_bg, dis_fg, error_bg)

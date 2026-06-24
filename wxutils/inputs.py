@@ -2,8 +2,8 @@ import wx
 
 from typing import Callable, Optional
 
-from .base import EnableControl
-from .colors import register_darkdetect, default_check_scheme, default_disabled_scheme, CheckedColorScheme, DisabledColorScheme
+from .base import EnableControl, EnablePanel
+from .colors import register_darkdetect, default_check_scheme, default_disabled_scheme, default_text_scheme, CheckedColorScheme, DisabledColorScheme, TextScheme
 
 
 class FlatCheckBox(EnableControl):
@@ -192,3 +192,265 @@ class FlatCheckBox(EnableControl):
         gc.SetFont(font, fg)
         _, text_h = gc.GetTextExtent(self._label)
         gc.DrawText(self._label, bx + self._box_size + 8, cy - text_h / 2)
+
+
+class FlatTextCtrl(EnablePanel):
+    """Flat custom-painted editable text field with placeholder, validation, and theme support.
+
+    parent: parent wx window
+    value: initial text value (default "")
+    placeholder: hint text shown when empty and not editing (default "")
+    centered: center the text horizontally (default False)
+    font: optional wx.Font for the value text; falls back to system font
+    placeholder_font: optional wx.Font for placeholder text; falls back to font italic
+    text_scheme: optional TextScheme (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
+    corner_radius: corner radius of the field in pixels (default 2)
+    """
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        value: str = "",
+        placeholder: str = "",
+        centered: bool = False,
+        font: Optional[wx.Font] = None,
+        placeholder_font: Optional[wx.Font] = None,
+        text_scheme: Optional[TextScheme] = None,
+        corner_radius: int = 2,
+        size: wx.Size = wx.DefaultSize,
+    ) -> None:
+        super().__init__(parent, style=wx.BORDER_NONE, size=size)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+
+        self._value = value
+        self._placeholder = placeholder
+        self._centered = centered
+        self._font = font
+        self._placeholder_font = placeholder_font
+        self._corner_radius = corner_radius
+        self._text_scheme = text_scheme
+
+        self._editing = False
+        self._error = False
+        self._limit_error = False
+        self._validator: Callable[[str], str] | None = None
+        self._restrict_to_float = False
+        self._callback_enter: Callable | None = None
+        self._callback_kill: Callable | None = None
+
+        ctrl_style = wx.TE_PROCESS_ENTER | wx.BORDER_NONE
+        if centered:
+            ctrl_style |= wx.TE_CENTRE
+        self._ctrl = wx.TextCtrl(self, value=value, style=ctrl_style)
+        self._ctrl.EnableVisibleFocus(False)
+        self._ctrl.Hide()
+        self._apply_scheme()
+
+        if placeholder:
+            self._ctrl.SetHint(placeholder)
+
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_LEFT_DOWN, self._start_edit)
+        self.Bind(wx.EVT_SIZE, self._on_size)
+        self._ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_enter)
+        self._ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_kill)
+
+
+    def _resolve_scheme(self) -> TextScheme:
+        return self._text_scheme if self._text_scheme is not None else default_text_scheme()
+
+    def _apply_scheme(self) -> None:
+        bg, fg, _, _, _, _ = self._resolve_scheme()
+        font = self._font if self._font is not None else self.GetFont()
+        self._ctrl.SetBackgroundColour(bg)
+        self._ctrl.SetForegroundColour(fg)
+        self._ctrl.SetFont(font)
+
+    def GetValue(self) -> str:
+        return self._ctrl.GetValue() if self._editing else self._value
+
+    def SetValue(self, value: str) -> None:
+        self._value = value
+        self._ctrl.SetValue(value)
+        self.Refresh()
+
+    def SetPlaceholder(self, text: str) -> None:
+        self._placeholder = text
+        self._ctrl.SetHint(text)
+        self.Refresh()
+
+    def SetTextScheme(self, scheme: TextScheme) -> None:
+        """Replace the color scheme and repaint."""
+        self._text_scheme = scheme
+        self._apply_scheme()
+        self.Refresh()
+
+    def Enable(self, enable: bool = True) -> bool:
+        if not enable and self._editing:
+            self._ctrl.Hide()
+            self._editing = False
+        return super().Enable(enable)
+
+    def SetError(self, error: bool) -> None:
+        if error != self._error:
+            self._error = error
+            _, _, _, _, _, error_bg = self._resolve_scheme()
+            bg, _, _, _, _, _ = self._resolve_scheme()
+            self._ctrl.SetBackgroundColour(error_bg if error else bg)
+            self.Refresh()
+
+    def SetLimitError(self, error: bool) -> None:
+        if error != self._limit_error:
+            self._limit_error = error
+            self.Refresh()
+
+    def SetValidator(self, validator: Callable[[str], str] | None) -> None:
+        """Set an optional validator called on commit; raise any exception to signal an error."""
+        self._validator = validator
+
+    def SetRestrictToFloat(self, restrict: bool) -> None:
+        """When True, keystroke filtering allows only digits, one '.', and '-' at position 0."""
+        if restrict and not self._restrict_to_float:
+            self._ctrl.Bind(wx.EVT_CHAR, self._on_char_float)
+        elif not restrict and self._restrict_to_float:
+            self._ctrl.Unbind(wx.EVT_CHAR, handler=self._on_char_float)
+        self._restrict_to_float = restrict
+
+    def Bind(self, event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY):
+        if event == wx.EVT_KEY_DOWN:
+            self._ctrl.Bind(event, handler)
+        elif event == wx.EVT_KILL_FOCUS:
+            self._callback_kill = handler
+        elif event == wx.EVT_TEXT_ENTER:
+            self._callback_enter = handler
+        else:
+            super().Bind(event, handler, source, id, id2)
+
+    def _reposition_ctrl(self) -> None:
+        w, h = self.GetClientSize()
+        _, th = self._ctrl.GetTextExtent("0")
+        ctrl_h = th + 4
+        self._ctrl.SetSize(0, (h - ctrl_h) // 2, w, ctrl_h)
+
+    def _commit(self, raw: str) -> None:
+        """Validate raw, update internal state, and mark error on failure."""
+        if self._validator is not None:
+            try:
+                canonical = self._validator(raw)
+                self._value = canonical
+                self._ctrl.SetValue(canonical)
+                self.SetError(False)
+            except Exception:
+                self._ctrl.SetValue(self._value)
+                self.SetError(True)
+        else:
+            self._value = raw
+
+    def _on_size(self, event: wx.SizeEvent) -> None:
+        self._reposition_ctrl()
+        self.Refresh()
+        event.Skip()
+
+    def _start_edit(self, event: wx.MouseEvent) -> None:
+        if not self.IsEnabled():
+            return
+        self._editing = True
+        self._ctrl.SetValue(self._value)
+        self._reposition_ctrl()
+        self._ctrl.Show()
+        self._ctrl.SetFocus()
+        self._ctrl.SelectAll()
+        self.Refresh()
+        event.Skip()
+
+    def _on_enter(self, event: wx.Event) -> None:
+        raw = self._ctrl.GetValue()
+        self._commit(raw)
+        self._ctrl.Hide()
+        self._editing = False
+        self.Refresh()
+        if self._callback_enter:
+            self._callback_enter(event)
+
+    def _on_kill(self, event: wx.FocusEvent) -> None:
+        raw = self._ctrl.GetValue()
+        self._commit(raw)
+        self._ctrl.Hide()
+        self._editing = False
+        self.Refresh()
+        if self._callback_kill:
+            self._callback_kill(event)
+        event.Skip()
+
+    def _on_char_float(self, event: wx.KeyEvent) -> None:
+        if not self.IsEnabled():
+            return
+        key  = event.GetKeyCode()
+        char = chr(key) if 32 <= key < 127 else None
+
+        if key < 32 or event.ControlDown():
+            event.Skip()
+            return
+        if char is None:
+            return
+
+        current = self._ctrl.GetValue()
+        insert_pos = self._ctrl.GetInsertionPoint()
+        sel_from, sel_to = self._ctrl.GetSelection()
+        has_selection = sel_from != sel_to
+        after_replace = current[:sel_from] + current[sel_to:] if has_selection else current
+
+        if char == "-":
+            effective_pos = sel_from if has_selection else insert_pos
+            if effective_pos == 0 and not after_replace.startswith("-"):
+                event.Skip()
+            return
+        if char == ".":
+            if "." not in after_replace:
+                event.Skip()
+            return
+        if char.isdigit():
+            event.Skip()
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+
+        bg, fg, placeholder_fg, dis_bg, dis_fg, error_bg = self._resolve_scheme()
+
+        # Parent background
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+
+        # Field background
+        if not self.IsEnabled():
+            field_bg = dis_bg
+        elif self._error:
+            field_bg = error_bg
+        else:
+            field_bg = bg
+        gc.SetBrush(wx.Brush(field_bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRoundedRectangle(0, 0, w, h, self._corner_radius)
+
+        if self._editing:
+            return
+
+        # Text
+        x_pad = 6
+        font = self._font if self._font is not None else self.GetFont()
+        ph_font = self._placeholder_font if self._placeholder_font is not None else font
+
+        if self._value:
+            text_fg = dis_fg if not self.IsEnabled() else (fg if not self._limit_error else error_bg)
+            gc.SetFont(font, text_fg)
+            text_w, text_h = gc.GetTextExtent(self._value)
+            tx = (w - text_w) / 2 if self._centered else x_pad
+            gc.DrawText(self._value, tx, (h - text_h) / 2)
+        elif self._placeholder and self.IsEnabled():
+            gc.SetFont(ph_font, placeholder_fg)
+            text_w, text_h = gc.GetTextExtent(self._placeholder)
+            tx = (w - text_w) / 2 if self._centered else x_pad
+            gc.DrawText(self._placeholder, tx, (h - text_h) / 2)

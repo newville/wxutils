@@ -21,13 +21,13 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
 from .colors import (COLORS, GUI_COLORS, GUIColors,
                      get_color, set_color, DARK_THEME,
                      register_darkdetect, use_darkdetect,
-                     default_color_scheme, default_disabled_scheme, default_check_scheme,
-                     ColorScheme, DisabledColorScheme, CheckedColorScheme)
+                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme,
+                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme)
 
-from .base import EnableControl
+from .base import EnableBase, EnableControl, EnablePanel
 
 from .buttons import Button, ToggleButton, BitmapButton, FlatButton
-from .inputs import FlatCheckBox
+from .inputs import FlatCheckBox, FlatTextCtrl
 from .choice import Choice, YesNo
 from .dates import hms, DateTimeCtrl
 from .dialogs import (OkCancel, FileOpen, FileSave, SelectWorkdir,
