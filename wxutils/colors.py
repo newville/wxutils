@@ -573,6 +573,11 @@ def set_color(widget, colorname, bg=None):
         widget.onDarkTheme = partial(on_dark, widget)
         register_darkdetect(widget.onDarkTheme)
 
+def is_dark_theme() -> bool:
+    """Return True if the current palette is dark. Always reflects live state."""
+    return IS_DARK
+
+
 def get_color(name='text', dark=None):
     """get dark-mode-aware color by name
     Arguments
