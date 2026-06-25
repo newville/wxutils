@@ -279,7 +279,10 @@ class FlatWaitDialog(wx.Dialog):
         if parent:
             parent.Enable(True)
             parent.Raise()
-        self.Destroy()
+        if self.IsModal():
+            self.EndModal(wx.ID_OK)
+        else:
+            self.Destroy()
 
     def _on_key(self, event: wx.KeyEvent) -> None:
         if event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_ESCAPE) and self._ok_btn.IsEnabled():
