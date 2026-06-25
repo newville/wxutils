@@ -28,6 +28,7 @@ IconScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (idle_bg, hover_bg, press
 RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_fill, accent, inactive_ring)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
+DialogScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
 
 
 def dark_theme_linux():
@@ -730,3 +731,14 @@ def default_splitter_scheme():
         max(0, min(255, base.Blue() + offset * 2)),
     )
     return (sash, hover)
+
+
+def default_dialog_scheme() -> DialogScheme:
+    """Return a DialogScheme based on the current light/dark palette."""
+    bg = wx.Colour(*get_color('bg'))
+    fg = wx.Colour(*get_color('pt_fg'))
+    fg_secondary = wx.Colour(*get_color('graytext'))
+    sep = wx.Colour(*get_color('info_bg'))
+    btn_scheme = default_color_scheme()
+    disabled_scheme = default_disabled_scheme()
+    return (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
