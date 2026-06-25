@@ -23,6 +23,7 @@ CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_b
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
 SplitterScheme = tuple[wx.Colour, wx.Colour]  # (sash, sash_hover)
 ToggleScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (off_colour, off_hover, on_colour, on_hover)
+ProgressScheme = tuple[wx.Colour, wx.Colour]  # (track_bg, fill_bg)
 IconScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (idle_bg, hover_bg, press_bg)
 RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_fill, accent, inactive_ring)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
@@ -696,6 +697,13 @@ def default_toggle_scheme() -> ToggleScheme:
         min(on.Blue() + 30, 255),
     )
     return (off, off_hover, on, on_hover)
+
+
+def default_progress_scheme():
+    """Return a (track_bg, fill_bg) ProgressScheme based on the current light/dark palette."""
+    track = wx.Colour(*get_color('info_bg'))
+    fill = wx.Colour(*get_color('highight'))
+    return (track, fill)
 
 
 def default_radio_scheme() -> RadioDotScheme:
