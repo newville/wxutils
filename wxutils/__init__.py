@@ -21,12 +21,12 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
 from .colors import (COLORS, GUI_COLORS, GUIColors,
                      get_color, set_color, DARK_THEME, is_dark_theme,
                      register_darkdetect, use_darkdetect,
-                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme, default_combo_scheme, default_scrollbar_scheme, default_splitter_scheme, default_radio_scheme,
-                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme, ComboScheme, ScrollBarScheme, SplitterScheme, RadioDotScheme)
+                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme, default_combo_scheme, default_scrollbar_scheme, default_splitter_scheme, default_radio_scheme, default_toggle_scheme,
+                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme, ComboScheme, ScrollBarScheme, SplitterScheme, RadioDotScheme, ToggleScheme)
 
 from .base import EnableBase, EnableControl, EnablePanel
 
-from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioButton
+from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioButton, FlatToggleButton
 from .inputs import FlatCheckBox, FlatTextCtrl, FlatCombo
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 from .splitter import FlatSplitter

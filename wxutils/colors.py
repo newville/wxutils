@@ -22,6 +22,7 @@ DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
 CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
 SplitterScheme = tuple[wx.Colour, wx.Colour]  # (sash, sash_hover)
+ToggleScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (off_colour, off_hover, on_colour, on_hover)
 RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_fill, accent, inactive_ring)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
@@ -665,6 +666,19 @@ def default_scrollbar_scheme():
         max(0, min(255, track.Blue() + offset * 2)),
     )
     return (track, thumb, thumb_hover)
+
+
+def default_toggle_scheme() -> ToggleScheme:
+    """Return a (off_colour, off_hover, on_colour, on_hover) tuple for FlatToggleButton."""
+    off = wx.Colour(*get_color('pt_fg'))
+    off_hover = wx.Colour(*get_color('graytext'))
+    on = wx.Colour(*get_color('highight'))
+    on_hover = wx.Colour(
+        min(on.Red() + 30, 255),
+        min(on.Green() + 30, 255),
+        min(on.Blue() + 30, 255),
+    )
+    return (off, off_hover, on, on_hover)
 
 
 def default_radio_scheme() -> RadioDotScheme:
