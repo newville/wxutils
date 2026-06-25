@@ -32,6 +32,7 @@ DialogScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.C
 TabScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
 MenuBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, btn_hover_bg, btn_active_bg, btn_fg, btn_disabled_fg, sep_colour, popup_bg, popup_hover_bg, popup_fg, popup_secondary_fg, popup_sep)
 SyntaxScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (editor_bg, editor_fg, gutter_bg, gutter_fg, sel_bg, keyword_fg, keyword2_fg, string_fg, comment_fg, number_fg, operator_fg, decorator_fg, defname_fg)
+TableScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (header_bg, border_color, label_color)
 
 
 def dark_theme_linux():
@@ -794,3 +795,11 @@ def default_python_scheme() -> SyntaxScheme:
     return (editor_bg, editor_fg, gutter_bg, gutter_fg, sel_bg,
             keyword_fg, kw2_fg, string_fg, comment_fg,
             number_fg, oper_fg, deco_fg, defname_fg)
+
+
+def default_table_scheme() -> TableScheme:
+    """Return a TableScheme tuple based on the current light/dark palette."""
+    header_bg = wx.Colour(*get_color('info_bg'))
+    border_color = wx.Colour(*get_color('hline'))
+    label_color = wx.Colour(*get_color('pt_fg'))
+    return (header_bg, border_color, label_color)
