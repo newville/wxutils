@@ -3,7 +3,7 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl
-from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, default_radio_scheme, default_toggle_scheme, ColorScheme, DisabledColorScheme, RadioDotScheme, ToggleScheme
+from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, default_radio_scheme, default_toggle_scheme, default_icon_scheme, ColorScheme, DisabledColorScheme, RadioDotScheme, ToggleScheme, IconScheme
 
 
 class Button(wx.Button):
@@ -457,3 +457,154 @@ class FlatToggleButton(EnableControl):
         self.ProcessEvent(evt)
         event.Skip()
 
+
+class FlatIconButton(EnableControl):
+    """Flat icon button with hover/press background states.
+
+    parent: parent wx window
+    draw_fn: callable(gc: wx.GraphicsContext, size: int) that draws the icon
+    icon_size: icon pixel size (default 20); widget is icon_size + 8 square
+    tooltip: optional tooltip string
+    action: optional callback accepting a wx.CommandEvent
+    icon_scheme: optional three-color tuple (idle_bg, hover_bg, press_bg)
+    corner_radius: background rounded-rectangle corner radius (default 4)
+    """
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        draw_fn: Callable,
+        icon_size: int = 20,
+        tooltip: str = "",
+        action: Optional[Callable[[wx.CommandEvent], None]] = None,
+        icon_scheme: Optional[IconScheme] = None,
+        corner_radius: int = 4,
+        **kws,
+    ) -> None:
+        sz = icon_size + 8
+        super().__init__(parent, size=wx.Size(sz, sz), style=wx.BORDER_NONE, **kws)
+        self._draw_fn = draw_fn
+        self._icon_size = icon_size
+        self._corner_radius = corner_radius
+        self._hovered = False
+        self._pressed = False
+        self._custom_scheme = icon_scheme
+        self._resolve_colors()
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        if tooltip:
+            self.SetToolTip(tooltip)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, self._on_size)
+        self.Bind(wx.EVT_ENTER_WINDOW, self._on_enter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave)
+        self.Bind(wx.EVT_LEFT_DOWN, self._on_press)
+        self.Bind(wx.EVT_LEFT_UP, self._on_release)
+        if action is not None:
+            self.SetAction(action)
+        if icon_scheme is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def SetAction(self, action: Callable[[wx.CommandEvent], None]) -> None:
+        """Bind action to EVT_BUTTON."""
+        self.Bind(wx.EVT_BUTTON, action)
+
+    def RemoveAction(self, action: Callable[[wx.CommandEvent], None]) -> None:
+        """Unbind a previously set action."""
+        self.Unbind(wx.EVT_BUTTON, handler=action)
+
+    def SetDrawFn(self, draw_fn: Callable) -> None:
+        """Replace the icon draw function and repaint."""
+        self._draw_fn = draw_fn
+        self.Refresh()
+
+    def SetColorScheme(self, icon_scheme: IconScheme) -> None:
+        """Replace the active color scheme and repaint."""
+        self._custom_scheme = icon_scheme
+        self._resolve_colors()
+        self.Refresh()
+
+    def set_hovered(self, hovered: bool) -> None:
+        """Externally drive the hover state (useful for overlay parents)."""
+        if hovered != self._hovered:
+            self._hovered = hovered
+            if not hovered:
+                self._pressed = False
+            self.Refresh()
+
+    def _resolve_colors(self) -> None:
+        scheme = self._custom_scheme if self._custom_scheme is not None else default_icon_scheme()
+        self._idle_bg, self._hover_bg, self._press_bg = scheme
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        self._resolve_colors()
+        wx.CallAfter(self.Refresh)
+
+    def _on_size(self, event: wx.SizeEvent) -> None:
+        self.Refresh()
+        event.Skip()
+
+    def DoGetBestSize(self) -> wx.Size:
+        sz = self._icon_size + 8
+        return wx.Size(sz, sz)
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+        enabled = self.IsEnabled()
+
+        if not enabled:
+            bg = self._idle_bg
+        elif self._pressed:
+            bg = self._press_bg
+        elif self._hovered:
+            bg = self._hover_bg
+        else:
+            bg = self._idle_bg
+
+        parent_bg = self._idle_bg
+        gc.SetBrush(wx.Brush(parent_bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+
+        gc.SetBrush(wx.Brush(bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRoundedRectangle(0, 0, w, h, self._corner_radius)
+
+        gc.SetAntialiasMode(wx.ANTIALIAS_DEFAULT)
+        offset = (w - self._icon_size) / 2
+        gc.Translate(offset, offset)
+        if not enabled:
+            gc.BeginLayer(0.35)
+        self._draw_fn(gc, self._icon_size)
+        if not enabled:
+            gc.EndLayer()
+
+    def _on_enter(self, event: wx.MouseEvent) -> None:
+        self._hovered = True
+        self.Refresh()
+        event.Skip()
+
+    def _on_leave(self, event: wx.MouseEvent) -> None:
+        self._hovered = False
+        self._pressed = False
+        self.Refresh()
+        event.Skip()
+
+    def _on_press(self, event: wx.MouseEvent) -> None:
+        if not self.IsEnabled():
+            return
+        self._pressed = True
+        self.Refresh()
+        event.Skip()
+
+    def _on_release(self, event: wx.MouseEvent) -> None:
+        if not self.IsEnabled():
+            return
+        if self._pressed:
+            self._pressed = False
+            self.Refresh()
+            evt = wx.CommandEvent(wx.wxEVT_BUTTON, self.GetId())
+            evt.SetEventObject(self)
+            self.ProcessEvent(evt)
+        event.Skip()

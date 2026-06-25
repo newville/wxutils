@@ -1,5 +1,9 @@
+import math
+
 import wx
 from wx.lib.embeddedimage import PyEmbeddedImage
+
+from .colors import get_color, is_dark_theme
 
 
 RAW_ICONS = {
@@ -43,3 +47,258 @@ for old, new in aliases.items():
 def get_icon(name):
     if name in RAW_ICONS:
         return wx.Bitmap(PyEmbeddedImage(RAW_ICONS[name]).GetImage())
+
+
+def _icon_fg() -> wx.Colour:
+    return wx.Colour(*get_color('pt_fg'))
+
+
+def _icon_accent() -> wx.Colour:
+    return wx.Colour(*get_color('highight'))
+
+
+def _pen(s: float, colour: wx.Colour | None = None) -> wx.Pen:
+    return wx.Pen(colour or _icon_fg(), max(1, int(s * 0.1)))
+
+
+def draw_plus(gc: wx.GraphicsContext, s: int) -> None:
+    """Plus / add icon."""
+    cx, cy, arm = s / 2, s / 2, s * 0.3
+    gc.SetPen(_pen(s))
+    gc.StrokeLine(cx - arm, cy, cx + arm, cy)
+    gc.StrokeLine(cx, cy - arm, cx, cy + arm)
+
+
+def draw_cross(gc: wx.GraphicsContext, s: int) -> None:
+    """Cross / close / remove icon."""
+    m = s * 0.22
+    gc.SetPen(_pen(s))
+    gc.StrokeLine(m, m, s - m, s - m)
+    gc.StrokeLine(s - m, m, m, s - m)
+
+
+def draw_check(gc: wx.GraphicsContext, s: int) -> None:
+    """Checkmark icon."""
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    p = gc.CreatePath()
+    p.MoveToPoint(s * 0.18, s * 0.52)
+    p.AddLineToPoint(s * 0.42, s * 0.74)
+    p.AddLineToPoint(s * 0.82, s * 0.28)
+    gc.StrokePath(p)
+
+
+def draw_chevron_left(gc: wx.GraphicsContext, s: int) -> None:
+    """Left-pointing chevron."""
+    cx, cy, hw, hh = s * 0.55, s * 0.5, s * 0.18, s * 0.28
+    p = gc.CreatePath()
+    p.MoveToPoint(cx + hw, cy - hh)
+    p.AddLineToPoint(cx - hw, cy)
+    p.AddLineToPoint(cx + hw, cy + hh)
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.StrokePath(p)
+
+
+def draw_chevron_right(gc: wx.GraphicsContext, s: int) -> None:
+    """Right-pointing chevron."""
+    cx, cy, hw, hh = s * 0.45, s * 0.5, s * 0.18, s * 0.28
+    p = gc.CreatePath()
+    p.MoveToPoint(cx - hw, cy - hh)
+    p.AddLineToPoint(cx + hw, cy)
+    p.AddLineToPoint(cx - hw, cy + hh)
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.StrokePath(p)
+
+
+def draw_chevron_up(gc: wx.GraphicsContext, s: int) -> None:
+    """Up-pointing chevron."""
+    cx, cy, hw, hh = s * 0.5, s * 0.55, s * 0.28, s * 0.18
+    p = gc.CreatePath()
+    p.MoveToPoint(cx - hw, cy + hh)
+    p.AddLineToPoint(cx, cy - hh)
+    p.AddLineToPoint(cx + hw, cy + hh)
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.StrokePath(p)
+
+
+def draw_chevron_down(gc: wx.GraphicsContext, s: int) -> None:
+    """Down-pointing chevron."""
+    cx, cy, hw, hh = s * 0.5, s * 0.45, s * 0.28, s * 0.18
+    p = gc.CreatePath()
+    p.MoveToPoint(cx - hw, cy - hh)
+    p.AddLineToPoint(cx, cy + hh)
+    p.AddLineToPoint(cx + hw, cy - hh)
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.StrokePath(p)
+
+
+def draw_refresh(gc: wx.GraphicsContext, s: int) -> None:
+    """Circular refresh / reset icon."""
+    cx, cy, r = s * 0.5, s * 0.5, s * 0.32
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    path = gc.CreatePath()
+    path.AddArc(cx, cy, r, math.radians(30), math.radians(330), True)
+    gc.StrokePath(path)
+    ang = math.radians(30)
+    tx, ty = cx + r * math.cos(ang), cy + r * math.sin(ang)
+    head = s * 0.12
+    path2 = gc.CreatePath()
+    path2.MoveToPoint(tx - head, ty)
+    path2.AddLineToPoint(tx, ty - head)
+    path2.AddLineToPoint(tx + head * 0.4, ty + head * 0.7)
+    gc.StrokePath(path2)
+
+
+def draw_arrow_up(gc: wx.GraphicsContext, s: int) -> None:
+    """Upward arrow / apply / update icon."""
+    cx = s * 0.5
+    stem_top, stem_bot = s * 0.22, s * 0.78
+    stem_w, head_w = s * 0.1, s * 0.28
+    fg = _icon_fg()
+    gc.SetBrush(wx.Brush(fg))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    stem = gc.CreatePath()
+    stem.AddRectangle(cx - stem_w / 2, stem_top + s * 0.14, stem_w, stem_bot - stem_top - s * 0.14)
+    gc.FillPath(stem)
+    arrow = gc.CreatePath()
+    arrow.MoveToPoint(cx, stem_top)
+    arrow.AddLineToPoint(cx - head_w / 2, stem_top + s * 0.22)
+    arrow.AddLineToPoint(cx + head_w / 2, stem_top + s * 0.22)
+    arrow.CloseSubpath()
+    gc.FillPath(arrow)
+
+
+def draw_arrow_down(gc: wx.GraphicsContext, s: int) -> None:
+    """Downward arrow icon."""
+    cx = s * 0.5
+    stem_top, stem_bot = s * 0.22, s * 0.78
+    stem_w, head_w = s * 0.1, s * 0.28
+    fg = _icon_fg()
+    gc.SetBrush(wx.Brush(fg))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    stem = gc.CreatePath()
+    stem.AddRectangle(cx - stem_w / 2, stem_top, stem_w, stem_bot - stem_top - s * 0.14)
+    gc.FillPath(stem)
+    arrow = gc.CreatePath()
+    arrow.MoveToPoint(cx, stem_bot)
+    arrow.AddLineToPoint(cx - head_w / 2, stem_bot - s * 0.22)
+    arrow.AddLineToPoint(cx + head_w / 2, stem_bot - s * 0.22)
+    arrow.CloseSubpath()
+    gc.FillPath(arrow)
+
+
+def draw_cog(gc: wx.GraphicsContext, s: int) -> None:
+    """Gear / settings icon."""
+    cx, cy = s / 2.0, s / 2.0
+    outer_r, inner_r = s * 0.38, s * 0.22
+    tooth_n = 8
+    tooth_depth = s * 0.09
+    half_angle = math.pi / tooth_n * 0.55
+    path = gc.CreatePath()
+    for i in range(tooth_n * 2):
+        angle = i * math.pi / tooth_n
+        r = outer_r + tooth_depth if i % 2 == 0 else outer_r
+        x = cx + r * math.cos(angle - half_angle)
+        y = cy + r * math.sin(angle - half_angle)
+        if i == 0:
+            path.MoveToPoint(x, y)
+        else:
+            path.AddLineToPoint(x, y)
+        path.AddLineToPoint(cx + r * math.cos(angle + half_angle), cy + r * math.sin(angle + half_angle))
+    path.CloseSubpath()
+    fg = _icon_fg()
+    gc.SetBrush(wx.Brush(fg))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    gc.FillPath(path)
+    hole = gc.CreatePath()
+    hole.AddCircle(cx, cy, inner_r)
+    # use the parent background colour
+    bg = wx.Colour(*get_color('bg'))
+    gc.SetBrush(wx.Brush(bg))
+    gc.FillPath(hole)
+
+
+def draw_folder(gc: wx.GraphicsContext, s: int) -> None:
+    """Folder icon with an upward arrow."""
+    m, tab_w, tab_h, r = s * 0.12, s * 0.38, s * 0.16, s * 0.08
+    accent = _icon_accent()
+    body = gc.CreatePath()
+    body.AddRoundedRectangle(m, m + tab_h, s - 2 * m, s - 2 * m - tab_h, r)
+    gc.SetBrush(wx.Brush(wx.Colour(accent.Red(), accent.Green(), accent.Blue(), 200)))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    gc.FillPath(body)
+    tab = gc.CreatePath()
+    tab.AddRoundedRectangle(m, m, tab_w, tab_h + r, r * 0.8)
+    gc.FillPath(tab)
+    cx, cy = s * 0.62, s * 0.56
+    aw, ah = s * 0.22, s * 0.22
+    arrow = gc.CreatePath()
+    arrow.MoveToPoint(cx, cy - ah * 0.5)
+    arrow.AddLineToPoint(cx, cy + ah * 0.3)
+    arrow.MoveToPoint(cx - aw * 0.45, cy - ah * 0.04)
+    arrow.AddLineToPoint(cx, cy - ah * 0.5)
+    arrow.AddLineToPoint(cx + aw * 0.45, cy - ah * 0.04)
+    bg = wx.Colour(*get_color('bg'))
+    gc.SetPen(wx.Pen(bg, max(1, int(s * 0.1))))
+    gc.StrokePath(arrow)
+
+
+def draw_folder_open(gc: wx.GraphicsContext, s: int) -> None:
+    """Open folder / browse directory icon."""
+    m, r = s * 0.1, s * 0.07
+    accent = _icon_accent()
+    body = gc.CreatePath()
+    body.AddRoundedRectangle(m, m + s * 0.18, s - 2 * m, s - 2 * m - s * 0.18, r)
+    gc.SetBrush(wx.Brush(wx.Colour(accent.Red(), accent.Green(), accent.Blue(), 200)))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    gc.FillPath(body)
+    tab = gc.CreatePath()
+    tab.AddRoundedRectangle(m, m, s * 0.38, s * 0.18 + r, r * 0.8)
+    gc.FillPath(tab)
+    bg = wx.Colour(*get_color('bg'))
+    gc.SetPen(wx.Pen(bg, max(1, int(s * 0.09))))
+    cx, cy, aw = s * 0.62, s * 0.6, s * 0.18
+    path = gc.CreatePath()
+    path.MoveToPoint(cx - aw, cy)
+    path.AddLineToPoint(cx + aw, cy)
+    gc.StrokePath(path)
+
+
+def draw_search(gc: wx.GraphicsContext, s: int) -> None:
+    """Magnifying glass / search icon."""
+    cx, cy, r = s * 0.42, s * 0.42, s * 0.24
+    gc.SetPen(_pen(s))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.DrawEllipse(cx - r, cy - r, r * 2, r * 2)
+    x1 = cx + r * math.cos(math.radians(45))
+    y1 = cy + r * math.sin(math.radians(45))
+    gc.StrokeLine(x1, y1, x1 + s * 0.18, y1 + s * 0.18)
+
+
+def draw_trash(gc: wx.GraphicsContext, s: int) -> None:
+    """Trash / delete icon."""
+    fg = _icon_fg()
+    gc.SetBrush(wx.Brush(fg))
+    gc.SetPen(wx.TRANSPARENT_PEN)
+    m, w, top = s * 0.18, s * 0.64, s * 0.28
+    body = gc.CreatePath()
+    body.AddRoundedRectangle(m, top, w, s * 0.56, s * 0.06)
+    gc.FillPath(body)
+    # lid
+    gc.SetPen(_pen(s, fg))
+    gc.SetBrush(wx.TRANSPARENT_BRUSH)
+    gc.StrokeLine(m - s * 0.06, top, m + w + s * 0.06, top)
+    gc.StrokeLine(s * 0.38, top, s * 0.38, s * 0.2)
+    gc.StrokeLine(s * 0.62, top, s * 0.62, s * 0.2)
+    gc.StrokeLine(s * 0.38, s * 0.2, s * 0.62, s * 0.2)
+    # lines inside body
+    bg = wx.Colour(*get_color('bg'))
+    gc.SetPen(wx.Pen(bg, max(1, int(s * 0.08))))
+    for dx in (-s * 0.14, 0, s * 0.14):
+        gc.StrokeLine(s * 0.5 + dx, top + s * 0.1, s * 0.5 + dx, top + s * 0.42)
+

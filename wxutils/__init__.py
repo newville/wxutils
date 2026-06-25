@@ -21,12 +21,12 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
 from .colors import (COLORS, GUI_COLORS, GUIColors,
                      get_color, set_color, DARK_THEME, is_dark_theme,
                      register_darkdetect, use_darkdetect,
-                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme, default_combo_scheme, default_scrollbar_scheme, default_splitter_scheme, default_radio_scheme, default_toggle_scheme,
-                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme, ComboScheme, ScrollBarScheme, SplitterScheme, RadioDotScheme, ToggleScheme)
+                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme, default_combo_scheme, default_scrollbar_scheme, default_splitter_scheme, default_radio_scheme, default_toggle_scheme, default_icon_scheme,
+                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme, ComboScheme, ScrollBarScheme, SplitterScheme, RadioDotScheme, ToggleScheme, IconScheme)
 
 from .base import EnableBase, EnableControl, EnablePanel
 
-from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioButton, FlatToggleButton
+from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioButton, FlatToggleButton, FlatIconButton
 from .inputs import FlatCheckBox, FlatTextCtrl, FlatCombo
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 from .splitter import FlatSplitter
@@ -39,7 +39,11 @@ from .text import SimpleText, TextCtrl, LabeledTextCtrl, HyperText
 from .filechecklist import FileCheckList, FileDropTarget
 from .listbox import EditableListBox
 from .gridpanel import GridPanel, RowPanel
-from .icons import get_icon
+from .icons import (get_icon,
+                    draw_plus, draw_cross, draw_check,
+                    draw_chevron_left, draw_chevron_right, draw_chevron_up, draw_chevron_down,
+                    draw_refresh, draw_arrow_up, draw_arrow_down,
+                    draw_cog, draw_folder, draw_folder_open, draw_search, draw_trash)
 from .floats import (make_steps, set_float, FloatCtrl, NumericCombo,
                      FloatSpin, FloatSpinWithPin)
 

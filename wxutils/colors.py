@@ -23,6 +23,7 @@ CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_b
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
 SplitterScheme = tuple[wx.Colour, wx.Colour]  # (sash, sash_hover)
 ToggleScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (off_colour, off_hover, on_colour, on_hover)
+IconScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (idle_bg, hover_bg, press_bg)
 RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_fill, accent, inactive_ring)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
@@ -666,6 +667,22 @@ def default_scrollbar_scheme():
         max(0, min(255, track.Blue() + offset * 2)),
     )
     return (track, thumb, thumb_hover)
+
+
+def default_icon_scheme() -> IconScheme:
+    """Return a (idle_bg, hover_bg, press_bg) tuple for FlatIconButton."""
+    idle = wx.Colour(*get_color('bg'))
+    hover = wx.Colour(
+        min(idle.Red() + 20, 255) if is_dark_theme() else max(idle.Red() - 20, 0),
+        min(idle.Green() + 20, 255) if is_dark_theme() else max(idle.Green() - 20, 0),
+        min(idle.Blue() + 20, 255) if is_dark_theme() else max(idle.Blue() - 20, 0),
+    )
+    press = wx.Colour(
+        min(idle.Red() + 38, 255) if is_dark_theme() else max(idle.Red() - 38, 0),
+        min(idle.Green() + 38, 255) if is_dark_theme() else max(idle.Green() - 38, 0),
+        min(idle.Blue() + 38, 255) if is_dark_theme() else max(idle.Blue() - 38, 0),
+    )
+    return (idle, hover, press)
 
 
 def default_toggle_scheme() -> ToggleScheme:
