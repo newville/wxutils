@@ -31,6 +31,7 @@ ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Co
 DialogScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
 TabScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
 MenuBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, btn_hover_bg, btn_active_bg, btn_fg, btn_disabled_fg, sep_colour, popup_bg, popup_hover_bg, popup_fg, popup_secondary_fg, popup_sep)
+SyntaxScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (editor_bg, editor_fg, gutter_bg, gutter_fg, sel_bg, keyword_fg, keyword2_fg, string_fg, comment_fg, number_fg, operator_fg, decorator_fg, defname_fg)
 
 
 def dark_theme_linux():
@@ -773,3 +774,23 @@ def default_menu_bar_scheme() -> MenuBarScheme:
     popup_sep = wx.Colour(*get_color('info_bg'))
     return (bar_bg, btn_hover_bg, btn_active_bg, btn_fg, btn_disabled_fg,
             sep_colour, popup_bg, popup_hover_bg, popup_fg, popup_secondary_fg, popup_sep)
+
+
+def default_python_scheme() -> SyntaxScheme:
+    """Return a SyntaxScheme tuple based on the current light/dark palette."""
+    editor_bg  = wx.Colour(*get_color('bg'))
+    editor_fg  = wx.Colour(*get_color('text'))
+    gutter_bg  = wx.Colour(*get_color('nb_area'))
+    gutter_fg  = wx.Colour(*get_color('graytext'))
+    sel_bg     = wx.Colour(*get_color('highight'))
+    keyword_fg = wx.Colour(*get_color('title_blue'))
+    kw2_fg     = wx.Colour(*get_color('nb_text'))
+    string_fg  = wx.Colour(*get_color('title_red'))
+    comment_fg = wx.Colour(*get_color('title_green'))
+    number_fg  = wx.Colour(*get_color('hline'))
+    oper_fg    = wx.Colour(*get_color('pt_fg'))
+    deco_fg    = wx.Colour(*get_color('title'))
+    defname_fg = wx.Colour(*get_color('nb_activetext'))
+    return (editor_bg, editor_fg, gutter_bg, gutter_fg, sel_bg,
+            keyword_fg, kw2_fg, string_fg, comment_fg,
+            number_fg, oper_fg, deco_fg, defname_fg)
