@@ -30,6 +30,7 @@ ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
 DialogScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
 TabScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
+MenuBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, btn_hover_bg, btn_active_bg, btn_fg, btn_disabled_fg, sep_colour, popup_bg, popup_hover_bg, popup_fg, popup_secondary_fg, popup_sep)
 
 
 def dark_theme_linux():
@@ -755,3 +756,20 @@ def default_tab_scheme() -> TabScheme:
     underline = wx.Colour(*get_color('highight'))
     sep = wx.Colour(*get_color('info_bg'))
     return (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
+
+
+def default_menu_bar_scheme() -> MenuBarScheme:
+    """Return a MenuBarScheme based on the current light/dark palette."""
+    bar_bg = wx.Colour(*get_color('bg'))
+    btn_hover_bg = wx.Colour(*get_color('nb_area'))
+    btn_active_bg = wx.Colour(*get_color('info_bg'))
+    btn_fg = wx.Colour(*get_color('graytext'))
+    btn_disabled_fg = wx.Colour(*get_color('graytext'))
+    sep_colour = wx.Colour(*get_color('info_bg'))
+    popup_bg = wx.Colour(*get_color('nb_area'))
+    popup_hover_bg = wx.Colour(*get_color('highight'))
+    popup_fg = wx.Colour(*get_color('pt_fg'))
+    popup_secondary_fg = wx.Colour(*get_color('graytext'))
+    popup_sep = wx.Colour(*get_color('info_bg'))
+    return (bar_bg, btn_hover_bg, btn_active_bg, btn_fg, btn_disabled_fg,
+            sep_colour, popup_bg, popup_hover_bg, popup_fg, popup_secondary_fg, popup_sep)
