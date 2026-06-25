@@ -3,11 +3,8 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl, EnablePanel
-from .colors import (
-    register_darkdetect,
-    default_check_scheme, default_disabled_scheme, default_text_scheme, default_combo_scheme,
-    CheckedColorScheme, DisabledColorScheme, TextScheme, ComboScheme,
-)
+from .colors import register_darkdetect
+from .themes import get_theme
 
 
 class FlatCheckBox(EnableControl):
@@ -30,7 +27,7 @@ class FlatCheckBox(EnableControl):
         label: str,
         value: Optional[bool] = False,
         action: Optional[Callable[[bool], None]] = None,
-        check_scheme: Optional[CheckedColorScheme] = None,
+        check_scheme = None,
         disabled_scheme=None,
         box_size: Optional[int] = 13,
         font: Optional[wx.Font] = None,
@@ -89,13 +86,13 @@ class FlatCheckBox(EnableControl):
         self.InvalidateBestSize()
         self.Refresh()
 
-    def SetCheckScheme(self, check_scheme: CheckedColorScheme) -> None:
+    def SetCheckScheme(self, check_scheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = check_scheme
         self._resolve_colors()
         self.Refresh()
 
-    def SetDisabledScheme(self, disabled_scheme: DisabledColorScheme) -> None:
+    def SetDisabledScheme(self, disabled_scheme) -> None:
         """Replace the disabled color scheme and repaint."""
         self._custom_disabled = disabled_scheme
         self._resolve_colors()
@@ -105,12 +102,18 @@ class FlatCheckBox(EnableControl):
         if self._custom_scheme is not None:
             self._box_bg, self._hover_bg, self._check_color, self._label_fg = self._custom_scheme
         else:
-            self._box_bg, self._hover_bg, self._check_color, self._label_fg = default_check_scheme()
+            theme = get_theme()
+            self._box_bg = theme.bright_black
+            self._hover_bg = theme.blue
+            self._check_color = theme.blue
+            self._label_fg = theme.foreground
 
         if self._custom_disabled is not None:
             self._disabled_bg, self._disabled_fg = self._custom_disabled
         else:
-            self._disabled_bg, self._disabled_fg = default_disabled_scheme()
+            theme = get_theme()
+            self._disabled_bg = theme.bright_black
+            self._disabled_fg = theme.white
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
@@ -219,7 +222,7 @@ class FlatTextCtrl(EnablePanel):
         centered: bool = False,
         font: Optional[wx.Font] = None,
         placeholder_font: Optional[wx.Font] = None,
-        text_scheme: Optional[TextScheme] = None,
+        text_scheme = None,
         corner_radius: int = 2,
         size: wx.Size = wx.DefaultSize,
     ) -> None:
@@ -260,8 +263,11 @@ class FlatTextCtrl(EnablePanel):
         self._ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_kill)
 
 
-    def _resolve_scheme(self) -> TextScheme:
-        return self._text_scheme if self._text_scheme is not None else default_text_scheme()
+    def _resolve_scheme(self):
+        if self._text_scheme is not None:
+            return self._text_scheme
+        theme = get_theme()
+        return (theme.black, theme.foreground, theme.white, theme.bright_black, theme.white, theme.red)
 
     def _apply_scheme(self) -> None:
         bg, fg, _, _, _, _ = self._resolve_scheme()
@@ -283,7 +289,7 @@ class FlatTextCtrl(EnablePanel):
         self._ctrl.SetHint(text)
         self.Refresh()
 
-    def SetTextScheme(self, scheme: TextScheme) -> None:
+    def SetTextScheme(self, scheme) -> None:
         """Replace the color scheme and repaint."""
         self._text_scheme = scheme
         self._apply_scheme()
@@ -696,7 +702,7 @@ class FlatCombo(EnablePanel):
         selection: int = 0,
         choice_colours: dict[str, wx.Colour] | None = None,
         font: Optional[wx.Font] = None,
-        combo_scheme: Optional[ComboScheme] = None,
+        combo_scheme = None,
         size: wx.Size = wx.DefaultSize,
         corner_radius: int = 4,
         row_height: int = 26,
@@ -754,7 +760,7 @@ class FlatCombo(EnablePanel):
         self.InvalidateBestSize()
         self.Refresh()
 
-    def SetComboScheme(self, scheme: ComboScheme) -> None:
+    def SetComboScheme(self, scheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = scheme
         self._resolve_colors()
@@ -774,18 +780,20 @@ class FlatCombo(EnablePanel):
         return wx.Size(max_w + 40, 28)
 
     def _resolve_colors(self) -> None:
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_combo_scheme()
-        (
-            self._bg,
-            self._hover_bg,
-            self._fg,
-            self._border,
-            self._arrow,
-            self._disabled_bg,
-            self._disabled_fg,
-            self._popup_bg,
-            self._popup_hover,
-        ) = scheme
+        if self._custom_scheme is not None:
+            (self._bg, self._hover_bg, self._fg, self._border, self._arrow,
+             self._disabled_bg, self._disabled_fg, self._popup_bg, self._popup_hover) = self._custom_scheme
+        else:
+            theme = get_theme()
+            self._bg = theme.bright_black
+            self._hover_bg = theme.bright_black
+            self._fg = theme.foreground
+            self._border = theme.bright_black
+            self._arrow = theme.white
+            self._disabled_bg = theme.bright_black
+            self._disabled_fg = theme.white
+            self._popup_bg = theme.black
+            self._popup_hover = theme.bright_black
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()

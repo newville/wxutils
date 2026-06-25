@@ -1,13 +1,13 @@
 import wx
 from typing import Callable, Optional
 
-from .colors import MenuBarScheme, default_menu_bar_scheme
+from .themes import get_theme
 
 
 class _FlatMenuDropdown(wx.PopupTransientWindow):
     """Dropdown for FlatMenuBar. Supports None separator entries."""
 
-    def __init__(self, parent: wx.Window, items: list[Optional[str]], shortcuts: list[Optional[str]], on_select: Callable[[int], None], scheme: MenuBarScheme) -> None:
+    def __init__(self, parent: wx.Window, items: list[Optional[str]], shortcuts: list[Optional[str]], on_select: Callable[[int], None], scheme) -> None:
         super().__init__(parent, flags=wx.BORDER_SIMPLE | wx.PU_CONTAINS_CONTROLS)
         self._items = items
         self._shortcuts = shortcuts
@@ -124,7 +124,7 @@ class _FlatMenuButton(wx.Control):
         self._height = height
         self._hovered = False
         self._active = False
-        self._scheme: Optional[MenuBarScheme] = None
+        self._scheme = None
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_PAINT, self._on_paint)
         self.Bind(wx.EVT_SIZE, lambda e: (self.Refresh(), e.Skip()))
@@ -132,7 +132,7 @@ class _FlatMenuButton(wx.Control):
         self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave)
         self.Bind(wx.EVT_LEFT_DOWN, self._on_press)
 
-    def SetScheme(self, scheme: MenuBarScheme) -> None:
+    def SetScheme(self, scheme) -> None:
         self._scheme = scheme
         self.Refresh()
 
@@ -153,7 +153,12 @@ class _FlatMenuButton(wx.Control):
         return result
 
     def _on_paint(self, _: wx.PaintEvent) -> None:
-        s = self._scheme if self._scheme is not None else default_menu_bar_scheme()
+        if self._scheme is not None:
+            s = self._scheme
+        else:
+            theme = get_theme()
+            s = (theme.background, theme.bright_black, theme.bright_black, theme.white, theme.white,
+                 theme.bright_black, theme.black, theme.bright_black, theme.foreground, theme.white, theme.bright_black)
         dc = wx.AutoBufferedPaintDC(self)
         gc = wx.GraphicsContext.Create(dc)
         w, h = self.GetClientSize()
@@ -212,7 +217,7 @@ class FlatMenuBar(wx.Panel):
         self,
         parent: wx.Window,
         height: int = 28,
-        scheme: Optional[MenuBarScheme] = None,
+        scheme = None,
     ) -> None:
         super().__init__(parent, size=(-1, height), style=wx.BORDER_NONE)
         self._height = height
@@ -225,15 +230,19 @@ class FlatMenuBar(wx.Panel):
         self.Bind(wx.EVT_PAINT, self._on_paint)
         self._apply_scheme()
 
-    def _scheme(self) -> MenuBarScheme:
-        return self._custom_scheme if self._custom_scheme is not None else default_menu_bar_scheme()
+    def _scheme(self):
+        if self._custom_scheme is not None:
+            return self._custom_scheme
+        theme = get_theme()
+        return (theme.background, theme.bright_black, theme.bright_black, theme.white, theme.white,
+                theme.bright_black, theme.black, theme.bright_black, theme.foreground, theme.white, theme.bright_black)
 
     def _apply_scheme(self) -> None:
         s = self._scheme()
         for btn, _, _, _ in self._menus:
             btn.SetScheme(s)
 
-    def SetColorScheme(self, scheme: MenuBarScheme) -> None:
+    def SetColorScheme(self, scheme) -> None:
         """Replace the colour scheme at runtime."""
         self._custom_scheme = scheme
         self._apply_scheme()

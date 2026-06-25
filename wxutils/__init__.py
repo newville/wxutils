@@ -18,11 +18,9 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
 
-from .colors import (COLORS, GUI_COLORS, GUIColors,
-                     get_color, set_color, DARK_THEME, is_dark_theme,
-                     register_darkdetect, use_darkdetect,
-                     default_color_scheme, default_disabled_scheme, default_check_scheme, default_text_scheme, default_combo_scheme, default_scrollbar_scheme, default_splitter_scheme, default_radio_scheme, default_toggle_scheme, default_icon_scheme, default_progress_scheme, default_dialog_scheme, default_tab_scheme, default_menu_bar_scheme, default_python_scheme, default_table_scheme,
-                     ColorScheme, DisabledColorScheme, CheckedColorScheme, TextScheme, ComboScheme, ScrollBarScheme, SplitterScheme, RadioDotScheme, ToggleScheme, IconScheme, ProgressScheme, DialogScheme, TabScheme, MenuBarScheme, SyntaxScheme, TableScheme)
+from .colors import COLORS, GUI_COLORS, GUIColors, get_color, set_color, DARK_THEME, is_dark_theme, register_darkdetect, use_darkdetect
+
+from .themes import ColorTheme, set_theme, get_theme, light_theme, dark_theme
 
 from .base import EnableBase, EnableControl, EnablePanel
 

@@ -1,7 +1,8 @@
 import wx
 from typing import Optional
 
-from .colors import register_darkdetect, default_splitter_scheme, SplitterScheme
+from .colors import register_darkdetect
+from .themes import get_theme
 
 
 class FlatSplitter(wx.SplitterWindow):
@@ -11,7 +12,7 @@ class FlatSplitter(wx.SplitterWindow):
         self,
         parent: wx.Window,
         orientation: int = wx.SPLIT_VERTICAL,
-        splitter_scheme: Optional[SplitterScheme] = None,
+        splitter_scheme = None,
     ) -> None:
         super().__init__(parent, style=wx.SP_LIVE_UPDATE)
         self._custom_scheme = splitter_scheme
@@ -32,15 +33,19 @@ class FlatSplitter(wx.SplitterWindow):
         if splitter_scheme is None:
             register_darkdetect(self._on_dark_theme)
 
-    def SetSplitterScheme(self, scheme: SplitterScheme) -> None:
+    def SetSplitterScheme(self, scheme) -> None:
         self._custom_scheme = scheme
         self._resolve_colors()
         self._overlay.SetBackgroundColour(self._sash)
         self._overlay.Refresh()
 
     def _resolve_colors(self) -> None:
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_splitter_scheme()
-        self._sash, self._sash_hover = scheme
+        if self._custom_scheme is not None:
+            self._sash, self._sash_hover = self._custom_scheme
+        else:
+            theme = get_theme()
+            self._sash = theme.bright_black
+            self._sash_hover = theme.blue
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()

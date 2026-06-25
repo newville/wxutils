@@ -2,7 +2,8 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnablePanel
-from .colors import register_darkdetect, default_scrollbar_scheme, ScrollBarScheme
+from .colors import register_darkdetect
+from .themes import get_theme
 
 
 class _ScrollBarBase(EnablePanel):
@@ -16,7 +17,7 @@ class _ScrollBarBase(EnablePanel):
         thickness: int,
         corner_radius: int,
         min_thumb: int,
-        scrollbar_scheme: Optional[ScrollBarScheme],
+        scrollbar_scheme = None,
     ) -> None:
         super().__init__(parent, style=wx.BORDER_NONE, size=size)
         self._on_scroll = on_scroll
@@ -54,14 +55,19 @@ class _ScrollBarBase(EnablePanel):
         """True when the thumb does not fill the full track."""
         return self._thumb_size < 1.0
 
-    def SetScrollBarScheme(self, scheme: ScrollBarScheme) -> None:
+    def SetScrollBarScheme(self, scheme) -> None:
         self._custom_scheme = scheme
         self._resolve_colors()
         self.Refresh()
 
     def _resolve_colors(self) -> None:
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_scrollbar_scheme()
-        self._track_colour, self._thumb_colour, self._thumb_hover_colour = scheme
+        if self._custom_scheme is not None:
+            self._track_colour, self._thumb_colour, self._thumb_hover_colour = self._custom_scheme
+        else:
+            theme = get_theme()
+            self._track_colour = theme.black
+            self._thumb_colour = theme.bright_black
+            self._thumb_hover_colour = theme.white
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
@@ -140,7 +146,7 @@ class FlatScrollBar(_ScrollBarBase):
         thickness: int = 8,
         corner_radius: int = 4,
         min_thumb: int = 20,
-        scrollbar_scheme: Optional[ScrollBarScheme] = None,
+        scrollbar_scheme = None,
     ) -> None:
         super().__init__(
             parent, on_scroll,
@@ -177,7 +183,7 @@ class FlatHScrollBar(_ScrollBarBase):
         thickness: int = 8,
         corner_radius: int = 4,
         min_thumb: int = 20,
-        scrollbar_scheme: Optional[ScrollBarScheme] = None,
+        scrollbar_scheme = None,
     ) -> None:
         super().__init__(
             parent, on_scroll,

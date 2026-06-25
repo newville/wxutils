@@ -3,7 +3,8 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl
-from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, default_radio_scheme, default_toggle_scheme, default_icon_scheme, ColorScheme, DisabledColorScheme, RadioDotScheme, ToggleScheme, IconScheme
+from .colors import register_darkdetect
+from .themes import get_theme
 
 
 class Button(wx.Button):
@@ -69,8 +70,8 @@ class FlatButton(EnableControl):
         parent: wx.Window,
         label: str,
         action: Optional[Callable[[wx.CommandEvent], None]] = None,
-        color_scheme: Optional[ColorScheme] = None,
-        disabled_scheme: Optional[DisabledColorScheme] = None,
+        color_scheme = None,
+        disabled_scheme = None,
         font: Optional[wx.Font] = None,
         corner_radius: int = 4,
         **kws,
@@ -82,8 +83,8 @@ class FlatButton(EnableControl):
         self._font = font
         self._corner_radius = corner_radius
 
-        self._custom_scheme: Optional[ColorScheme] = color_scheme
-        self._custom_disabled: Optional[DisabledColorScheme] = disabled_scheme
+        self._custom_scheme = color_scheme
+        self._custom_disabled = disabled_scheme
 
         self._resolve_colors()
 
@@ -112,13 +113,13 @@ class FlatButton(EnableControl):
         """Unbind a previously set action."""
         self.Unbind(wx.EVT_BUTTON, handler=action)
 
-    def SetColorScheme(self, color_scheme: ColorScheme) -> None:
+    def SetColorScheme(self, color_scheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = color_scheme
         self._resolve_colors()
         self.Refresh()
 
-    def SetDisabledScheme(self, disabled_scheme: DisabledColorScheme) -> None:
+    def SetDisabledScheme(self, disabled_scheme) -> None:
         """Replace the disabled color scheme and repaint."""
         self._custom_disabled = disabled_scheme
         self._resolve_colors()
@@ -130,18 +131,22 @@ class FlatButton(EnableControl):
         self.Refresh()
 
     def _resolve_colors(self) -> None:
-        """Compute the active color tuples from the scheme or the palette."""
+        """Compute the active color tuples from the scheme or the active theme."""
+        theme = get_theme()
         if self._custom_scheme is not None:
             self._idle_bg, self._hover_bg, self._press_bg, self._idle_fg, self._hover_fg = self._custom_scheme
         else:
-            scheme = default_color_scheme()
-            self._idle_bg, self._hover_bg, self._press_bg, self._idle_fg, self._hover_fg = scheme
+            self._idle_bg = theme.bright_black
+            self._hover_bg = theme.white
+            self._press_bg = theme.blue
+            self._idle_fg = theme.foreground
+            self._hover_fg = theme.foreground
 
         if self._custom_disabled is not None:
             self._disabled_bg, self._disabled_fg = self._custom_disabled
         else:
-            ds = default_disabled_scheme()
-            self._disabled_bg, self._disabled_fg = ds
+            self._disabled_bg = theme.bright_black
+            self._disabled_fg = theme.white
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         """Registered with darkdetect; rebuilds default colors on theme change."""
@@ -236,7 +241,7 @@ class FlatRadioButton(EnableControl):
         parent: wx.Window,
         value: bool = False,
         tooltip: str = "",
-        radio_scheme: Optional[RadioDotScheme] = None,
+        radio_scheme = None,
         dot_size: int = 16,
     ) -> None:
         pad = 8
@@ -270,8 +275,14 @@ class FlatRadioButton(EnableControl):
         self._callback = callback
 
     def _resolve_colors(self) -> None:
-        scheme = self._scheme if self._scheme is not None else default_radio_scheme()
-        self._bg, self._ring_fill, self._accent, self._inactive = scheme
+        if self._scheme is not None:
+            self._bg, self._ring_fill, self._accent, self._inactive = self._scheme
+        else:
+            theme = get_theme()
+            self._bg = theme.background
+            self._ring_fill = theme.bright_black
+            self._accent = theme.blue
+            self._inactive = theme.white
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
@@ -339,7 +350,7 @@ class FlatToggleButton(EnableControl):
         label: str,
         value: bool = False,
         action: Optional[Callable[[wx.CommandEvent], None]] = None,
-        toggle_scheme: Optional[ToggleScheme] = None,
+        toggle_scheme = None,
         font: Optional[wx.Font] = None,
         corner_radius: int = 4,
         **kws,
@@ -387,15 +398,22 @@ class FlatToggleButton(EnableControl):
         self._label = label
         self.Refresh()
 
-    def SetColorScheme(self, toggle_scheme: ToggleScheme) -> None:
+    def SetColorScheme(self, toggle_scheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = toggle_scheme
         self._resolve_colors()
         self.Refresh()
 
     def _resolve_colors(self) -> None:
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_toggle_scheme()
-        self._off, self._off_hover, self._on, self._on_hover = scheme
+        if self._custom_scheme is not None:
+            self._off, self._off_hover, self._on, self._on_hover = self._custom_scheme
+        else:
+            theme = get_theme()
+            self._off = theme.white
+            self._off_hover = theme.bright_black
+            self._on = theme.blue
+            on = theme.bright_blue
+            self._on_hover = on
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
@@ -477,7 +495,7 @@ class FlatIconButton(EnableControl):
         icon_size: int = 20,
         tooltip: str = "",
         action: Optional[Callable[[wx.CommandEvent], None]] = None,
-        icon_scheme: Optional[IconScheme] = None,
+        icon_scheme = None,
         corner_radius: int = 4,
         **kws,
     ) -> None:
@@ -517,7 +535,7 @@ class FlatIconButton(EnableControl):
         self._draw_fn = draw_fn
         self.Refresh()
 
-    def SetColorScheme(self, icon_scheme: IconScheme) -> None:
+    def SetColorScheme(self, icon_scheme) -> None:
         """Replace the active color scheme and repaint."""
         self._custom_scheme = icon_scheme
         self._resolve_colors()
@@ -532,8 +550,13 @@ class FlatIconButton(EnableControl):
             self.Refresh()
 
     def _resolve_colors(self) -> None:
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_icon_scheme()
-        self._idle_bg, self._hover_bg, self._press_bg = scheme
+        if self._custom_scheme is not None:
+            self._idle_bg, self._hover_bg, self._press_bg = self._custom_scheme
+        else:
+            theme = get_theme()
+            self._idle_bg = theme.background
+            self._hover_bg = theme.bright_black
+            self._press_bg = theme.blue
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()

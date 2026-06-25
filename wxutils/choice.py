@@ -1,7 +1,7 @@
 import wx
 from typing import Optional
 
-from .colors import DialogScheme, default_dialog_scheme
+from .themes import get_theme
 from .buttons import FlatButton
 
 
@@ -85,10 +85,18 @@ class FlatMessageDialog(wx.Dialog):
         title: str,
         ok_label: str = 'OK',
         wrap: int = 380,
-        scheme: Optional[DialogScheme] = None,
+        scheme=None,
     ) -> None:
         super().__init__(parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
-        s = scheme if scheme is not None else default_dialog_scheme()
+        theme = get_theme()
+        s = scheme if scheme is not None else (
+            theme.background, 
+            theme.foreground, 
+            theme.white, 
+            theme.bright_black, 
+            (theme.bright_black, theme.bright_black, theme.blue, theme.foreground, theme.foreground), 
+            (theme.bright_black, theme.white)
+        )
         self.SetBackgroundColour(s[0])
 
         outer = wx.BoxSizer(wx.VERTICAL)
@@ -143,10 +151,18 @@ class FlatConfirmDialog(wx.Dialog):
         no_label: str = 'No',
         yes_scheme=None,
         wrap: int = 380,
-        scheme: Optional[DialogScheme] = None,
+        scheme=None,
     ) -> None:
         super().__init__(parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
-        s = scheme if scheme is not None else default_dialog_scheme()
+        theme = get_theme()
+        s = scheme if scheme is not None else (
+            theme.background,
+            theme.foreground,
+            theme.white,
+            theme.bright_black,
+            (theme.bright_black, theme.bright_black, theme.blue, theme.foreground, theme.foreground),
+            (theme.bright_black, theme.white)
+        )
         self.SetBackgroundColour(s[0])
 
         outer = wx.BoxSizer(wx.VERTICAL)
@@ -213,14 +229,22 @@ class FlatWaitDialog(wx.Dialog):
         ok_label: str = 'OK',
         title_colour: Optional[wx.Colour] = None,
         wrap: int = 400,
-        scheme: Optional[DialogScheme] = None,
+        scheme=None,
     ) -> None:
         super().__init__(
             parent,
             title=title,
             style=wx.DEFAULT_DIALOG_STYLE & ~wx.CLOSE_BOX,
         )
-        s = scheme if scheme is not None else default_dialog_scheme()
+        theme = get_theme()
+        s = scheme if scheme is not None else (
+            theme.background,
+            theme.foreground,
+            theme.white,
+            theme.bright_black,
+            (theme.bright_black, theme.bright_black, theme.blue, theme.foreground, theme.foreground),
+            (theme.bright_black, theme.white)
+        )
         self.SetBackgroundColour(s[0])
 
         outer = wx.BoxSizer(wx.VERTICAL)

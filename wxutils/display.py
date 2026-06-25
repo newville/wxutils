@@ -1,7 +1,8 @@
 import wx
 from typing import Optional
 
-from .colors import register_darkdetect, get_color, is_dark_theme, default_disabled_scheme, default_progress_scheme, ProgressScheme, TabScheme, default_tab_scheme
+from .colors import register_darkdetect, get_color, is_dark_theme
+from .themes import get_theme
 
 
 
@@ -105,7 +106,9 @@ class StatusField(wx.Control):
         return self._value
 
     def _resolve_colors(self) -> None:
-        dis_bg, dis_fg = default_disabled_scheme()
+        theme = get_theme()
+        dis_bg = theme.bright_black
+        dis_fg = theme.white
         self._bg = self._custom_bg if self._custom_bg is not None else dis_bg
         self._fg = self._custom_fg if self._custom_fg is not None else dis_fg
 
@@ -117,8 +120,11 @@ class StatusField(wx.Control):
         dc = wx.AutoBufferedPaintDC(self)
         gc = wx.GraphicsContext.Create(dc)
         w, h = self.GetClientSize()
-        gc.SetBrush(wx.Brush(self._bg))
+        # paint the full rect with the parent bg so rounded corners are clean
+        gc.SetBrush(wx.Brush(self.GetParent().GetBackgroundColour()))
         gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+        gc.SetBrush(wx.Brush(self._bg))
         gc.DrawRoundedRectangle(0, 0, w, h, self._corner_radius)
         if not self._value:
             return
@@ -142,10 +148,10 @@ class FlatProgressBar(wx.Panel):
         parent: wx.Window,
         height: int = 28,
         corner_radius: int = 4,
-        progress_scheme: Optional[ProgressScheme] = None,
+        progress_scheme = None,
     ) -> None:
         super().__init__(parent, size=(-1, height), style=wx.BORDER_NONE)
-        self._custom_scheme: Optional[ProgressScheme] = progress_scheme
+        self._custom_scheme = progress_scheme
         self._corner_radius = corner_radius
         self._fraction: float = 0.0
         self._label: str = ""
@@ -183,7 +189,7 @@ class FlatProgressBar(wx.Panel):
         self._elapsed = ""
         self.Refresh()
 
-    def SetColorScheme(self, scheme: ProgressScheme) -> None:
+    def SetColorScheme(self, scheme) -> None:
         """Replace the track/fill colours at runtime."""
         self._custom_scheme = scheme
         self.Refresh()
@@ -194,7 +200,8 @@ class FlatProgressBar(wx.Panel):
         w, h = self.GetClientSize()
         r = self._corner_radius
 
-        scheme = self._custom_scheme if self._custom_scheme is not None else default_progress_scheme()
+        theme = get_theme()
+        scheme = self._custom_scheme if self._custom_scheme is not None else (theme.black, theme.blue)
         track_bg = scheme[0]
         fill_bg = scheme[1]
 
@@ -245,7 +252,7 @@ class FlatProgressBar(wx.Panel):
 class _FlatTabBar(wx.Control):
     """Tab strip for FlatTabbedPanel."""
 
-    def __init__(self, parent: wx.Window, height: int, scheme: Optional[TabScheme]) -> None:
+    def __init__(self, parent: wx.Window, height: int, scheme = None) -> None:
         super().__init__(parent, style=wx.BORDER_NONE)
         self._height = height
         self._custom_scheme = scheme
@@ -273,8 +280,11 @@ class _FlatTabBar(wx.Control):
     def SetOnSelect(self, callback) -> None:
         self._on_select = callback
 
-    def _scheme(self) -> TabScheme:
-        return self._custom_scheme if self._custom_scheme is not None else default_tab_scheme()
+    def _scheme(self):
+        if self._custom_scheme is not None:
+            return self._custom_scheme
+        theme = get_theme()
+        return (theme.background, theme.bright_black, theme.black, theme.foreground, theme.white, theme.blue, theme.bright_black)
 
     def _tab_rects(self) -> list[tuple[int, int, int, int]]:
         dc = wx.ClientDC(self)
@@ -363,7 +373,7 @@ class FlatTabbedPanel(wx.Panel):
     scheme: optional TabScheme; defaults to palette colors at paint time
     """
 
-    def __init__(self, parent: wx.Window, tab_height: int = 30, scheme: Optional[TabScheme] = None) -> None:
+    def __init__(self, parent: wx.Window, tab_height: int = 30, scheme = None) -> None:
         super().__init__(parent, style=wx.BORDER_NONE)
         self._custom_scheme = scheme
         self._tab_bar = _FlatTabBar(self, tab_height, scheme)
@@ -388,7 +398,7 @@ class FlatTabbedPanel(wx.Panel):
             self.SetBackgroundColour(bg)
             self._content.SetBackgroundColour(bg)
 
-    def SetColorScheme(self, scheme: TabScheme) -> None:
+    def SetColorScheme(self, scheme) -> None:
         """Replace the color scheme at runtime and repaint."""
         self._custom_scheme = scheme
         self._tab_bar._custom_scheme = scheme
@@ -422,7 +432,16 @@ class FlatTabbedPanel(wx.Panel):
         return self._pages[idx][1]
 
     def _on_content_paint(self, _: wx.PaintEvent) -> None:
-        s = self._custom_scheme if self._custom_scheme is not None else default_tab_scheme()
+        theme = get_theme()
+        s = self._custom_scheme if self._custom_scheme is not None else (
+            theme.background,
+            theme.bright_black,
+            theme.black,
+            theme.foreground,
+            theme.white,
+            theme.blue,
+            theme.bright_black
+        )
         dc = wx.AutoBufferedPaintDC(self._content)
         dc.SetBackground(wx.Brush(s[0]))
         dc.Clear()

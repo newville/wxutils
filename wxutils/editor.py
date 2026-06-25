@@ -2,7 +2,7 @@ import wx
 import wx.stc as stc
 from typing import Callable, Optional
 
-from .colors import SyntaxScheme, default_python_scheme, default_color_scheme, default_disabled_scheme
+from .themes import get_theme
 from .buttons import FlatButton
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 
@@ -11,7 +11,7 @@ _MONO_FACE = "Consolas" if wx.Platform == "__WXMSW__" else "Menlo"
 
 def apply_python_highlighting(
     ed: stc.StyledTextCtrl,
-    scheme: SyntaxScheme,
+    scheme,
     font_size: int,
     mono_face: str,
 ) -> None:
@@ -91,7 +91,7 @@ class FlatScriptEditorDialog(wx.Frame):
         title: str = "Script Editor",
         font_size: int = 11,
         mono_face: Optional[str] = None,
-        syntax_scheme: Optional[SyntaxScheme] = None,
+        syntax_scheme = None,
         btn_scheme=None,
         scrollbar_scheme=None,
         save_label: str = "Save",
@@ -106,7 +106,7 @@ class FlatScriptEditorDialog(wx.Frame):
         self._mono_face = mono_face if mono_face is not None else _MONO_FACE
         self._on_save_cb: Optional[Callable[[str], None]] = None
 
-        editor_bg = self._syntax_scheme[0] if self._syntax_scheme is not None else default_python_scheme()[0]
+        editor_bg = self._syntax_scheme[0] if self._syntax_scheme is not None else get_theme().black
         self.SetBackgroundColour(editor_bg)
 
         self._container = wx.Panel(self, style=wx.BORDER_NONE)
@@ -141,8 +141,11 @@ class FlatScriptEditorDialog(wx.Frame):
         self._status_label = wx.StaticText(self, label="")
         self._status_label.SetBackgroundColour(editor_bg)
 
-        s = btn_scheme if btn_scheme is not None else default_color_scheme()
-        dis = default_disabled_scheme()
+        theme = get_theme()
+        s = btn_scheme if btn_scheme is not None else (
+            theme.bright_black, theme.bright_black, theme.blue, theme.foreground, theme.foreground
+        )
+        dis = (theme.bright_black, theme.white)
         self._save_btn = FlatButton(self, save_label, color_scheme=s, disabled_scheme=dis)
         self._save_btn.SetMinSize((-1, 28))
         self._save_btn.SetAction(self._on_save_clicked)
@@ -169,8 +172,13 @@ class FlatScriptEditorDialog(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
 
     def _setup_editor(self) -> None:
-        s = self._syntax_scheme if self._syntax_scheme is not None else default_python_scheme()
-        self._syntax_scheme = s
+        if self._syntax_scheme is None:
+            theme = get_theme()
+            self._syntax_scheme = (
+                theme.black, theme.foreground, theme.background, theme.bright_black, theme.selection_bg,
+                theme.magenta, theme.cyan, theme.green, theme.bright_black, theme.yellow, theme.foreground, theme.blue, theme.cyan
+            )
+        s = self._syntax_scheme
         ed = self._editor
         editor_bg, editor_fg = s[0], s[1]
         sel_bg = s[4]

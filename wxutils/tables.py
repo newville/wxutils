@@ -1,7 +1,8 @@
 import wx
 from typing import Optional
 
-from .colors import get_color, ScrollBarScheme, default_scrollbar_scheme, TableScheme, default_table_scheme
+from .colors import get_color
+from .themes import get_theme
 from .scrollbars import FlatScrollBar
 
 
@@ -21,7 +22,7 @@ class FlatTableHeader(wx.Panel):
         labels: list[str],
         proportions: list[int],
         height: Optional[int] = None,
-        scheme: Optional[TableScheme] = None,
+        scheme = None,
     ) -> None:
         h = height if height is not None else self._default_height(parent)
         super().__init__(parent, size=(-1, h), style=wx.BORDER_NONE)
@@ -39,8 +40,11 @@ class FlatTableHeader(wx.Panel):
         _, fh = dc.GetTextExtent("Ag")
         return max(28, fh + 14)
 
-    def _scheme(self) -> TableScheme:
-        return self._custom_scheme if self._custom_scheme is not None else default_table_scheme()
+    def _scheme(self):
+        if self._custom_scheme is not None:
+            return self._custom_scheme
+        theme = get_theme()
+        return (theme.bright_black, theme.bright_black, theme.foreground)
 
     def _col_widths(self, total: int) -> list[int]:
         total_parts = sum(self._proportions)
@@ -92,7 +96,7 @@ class FlatTableRow(wx.Panel):
         parent: wx.Window,
         proportions: list[int],
         height: Optional[int] = None,
-        scheme: Optional[TableScheme] = None,
+        scheme = None,
     ) -> None:
         h = height if height is not None else self._default_height(parent)
         super().__init__(parent, size=(-1, h), style=wx.BORDER_NONE)
@@ -122,8 +126,11 @@ class FlatTableRow(wx.Panel):
         _, fh = dc.GetTextExtent("Ag")
         return max(28, fh + 10)
 
-    def _scheme(self) -> TableScheme:
-        return self._custom_scheme if self._custom_scheme is not None else default_table_scheme()
+    def _scheme(self):
+        if self._custom_scheme is not None:
+            return self._custom_scheme
+        theme = get_theme()
+        return (theme.bright_black, theme.bright_black, theme.foreground)
 
     def _col_widths(self, total: int) -> list[int]:
         total_parts = sum(self._proportions)
@@ -186,7 +193,7 @@ class FlatScrolledPanel(wx.Panel):
         parent: wx.Window,
         scroll_step: int = 28,
         bg: Optional[wx.Colour] = None,
-        scrollbar_scheme: Optional[ScrollBarScheme] = None,
+        scrollbar_scheme = None,
         header: Optional[wx.Window] = None,
     ) -> None:
         super().__init__(parent, style=wx.BORDER_NONE)
