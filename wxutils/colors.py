@@ -22,6 +22,7 @@ DisabledColorScheme = tuple[wx.Colour, wx.Colour]  # (disabled_bg, disabled_fg)
 CheckedColorScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (box_bg, hover_bg, check_color, label_fg)
 TextScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, placeholder_fg, disabled_bg, disabled_fg, error_bg)
 SplitterScheme = tuple[wx.Colour, wx.Colour]  # (sash, sash_hover)
+RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_fill, accent, inactive_ring)
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
 
@@ -664,6 +665,15 @@ def default_scrollbar_scheme():
         max(0, min(255, track.Blue() + offset * 2)),
     )
     return (track, thumb, thumb_hover)
+
+
+def default_radio_scheme() -> RadioDotScheme:
+    """Return a (bg, ring_fill, accent, inactive_ring) tuple for FlatRadioButton."""
+    bg = wx.Colour(*get_color('bg'))
+    ring_fill = wx.Colour(*get_color('info_bg'))
+    accent = wx.Colour(*get_color('highight'))
+    inactive_ring = wx.Colour(*get_color('pt_fg'))
+    return (bg, ring_fill, accent, inactive_ring)
 
 
 def default_splitter_scheme():

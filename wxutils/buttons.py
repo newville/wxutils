@@ -3,7 +3,7 @@ import wx
 from typing import Callable, Optional
 
 from .base import EnableControl
-from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, ColorScheme, DisabledColorScheme
+from .colors import register_darkdetect, default_color_scheme, default_disabled_scheme, default_radio_scheme, ColorScheme, DisabledColorScheme, RadioDotScheme
 
 
 class Button(wx.Button):
@@ -219,3 +219,104 @@ class FlatButton(EnableControl):
             evt = wx.CommandEvent(wx.wxEVT_BUTTON, self.GetId())
             evt.SetEventObject(self)
             self.ProcessEvent(evt)
+
+
+class FlatRadioButton(EnableControl):
+    """Flat custom-painted radio button with optional theme.
+
+    parent: parent wx window
+    value: initial selected state (default False)
+    tooltip: optional tooltip string
+    radio_scheme: optional four-color tuple (bg, ring_fill, accent, inactive_ring)
+    dot_size: diameter of the dot in pixels (default 16)
+    """
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        value: bool = False,
+        tooltip: str = "",
+        radio_scheme: Optional[RadioDotScheme] = None,
+        dot_size: int = 16,
+    ) -> None:
+        pad = 8
+        super().__init__(parent, size=wx.Size(dot_size + pad, dot_size + pad), style=wx.BORDER_NONE)
+        self._value = value
+        self._hovered = False
+        self._size = dot_size
+        self._scheme = radio_scheme
+        self._callback: Optional[Callable[[], None]] = None
+        self._resolve_colors()
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        if tooltip:
+            self.SetToolTip(tooltip)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, lambda e: (self.Refresh(), e.Skip()))
+        self.Bind(wx.EVT_LEFT_UP, self._on_click)
+        self.Bind(wx.EVT_ENTER_WINDOW, self._on_enter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave)
+        if radio_scheme is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def SetValue(self, value: bool) -> None:
+        if value != self._value:
+            self._value = value
+            self.Refresh()
+
+    def GetValue(self) -> bool:
+        return self._value
+
+    def SetAction(self, callback: Callable[[], None]) -> None:
+        self._callback = callback
+
+    def _resolve_colors(self) -> None:
+        scheme = self._scheme if self._scheme is not None else default_radio_scheme()
+        self._bg, self._ring_fill, self._accent, self._inactive = scheme
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        self._resolve_colors()
+        wx.CallAfter(self.Refresh)
+
+    def _on_enter(self, event: wx.MouseEvent) -> None:
+        self._hovered = True
+        self.Refresh()
+        event.Skip()
+
+    def _on_leave(self, event: wx.MouseEvent) -> None:
+        self._hovered = False
+        self.Refresh()
+        event.Skip()
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetClientSize()
+
+        gc.SetBrush(wx.Brush(self._bg))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+
+        cx, cy = w / 2, h / 2
+        r = self._size / 2
+        ring_colour = self._accent if (self._value or self._hovered) else self._inactive
+        gc.SetPen(wx.Pen(ring_colour, 2))
+        gc.SetBrush(wx.Brush(self._ring_fill))
+        gc.DrawEllipse(cx - r, cy - r, self._size, self._size)
+
+        if self._value:
+            inner = self._size * 0.45
+            gc.SetPen(wx.TRANSPARENT_PEN)
+            gc.SetBrush(wx.Brush(self._accent))
+            gc.DrawEllipse(cx - inner / 2, cy - inner / 2, inner, inner)
+
+    def _on_click(self, event: wx.MouseEvent) -> None:
+        if not self._value:
+            self._value = True
+            self.Refresh()
+            evt = wx.CommandEvent(wx.wxEVT_RADIOBUTTON, self.GetId())
+            evt.SetEventObject(self)
+            self.ProcessEvent(evt)
+            if self._callback is not None:
+                self._callback()
+        event.Skip()
+
