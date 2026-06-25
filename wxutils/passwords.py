@@ -6,8 +6,11 @@ from base64 import b64encode
 from hashlib import pbkdf2_hmac
 
 
-from wxutils import (Button, GridPanel, HLine,
-                     SimpleText, TextCtrl, get_icon)
+from .buttons import Button
+from .gridpanel import GridPanel
+from .utils import HLine
+from .text import SimpleText, TextCtrl
+from .icons import get_icon
 
 def b64(inp):
     "base64 endcode a bytes array"
