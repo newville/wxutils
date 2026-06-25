@@ -29,6 +29,7 @@ RadioDotScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, ring_
 ScrollBarScheme = tuple[wx.Colour, wx.Colour, wx.Colour]  # (track, thumb, thumb_hover)
 ComboScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, hover_bg, fg, border, arrow, disabled_bg, disabled_fg, popup_bg, popup_hover)
 DialogScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
+TabScheme = tuple[wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour, wx.Colour]  # (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
 
 
 def dark_theme_linux():
@@ -742,3 +743,15 @@ def default_dialog_scheme() -> DialogScheme:
     btn_scheme = default_color_scheme()
     disabled_scheme = default_disabled_scheme()
     return (bg, fg, fg_secondary, sep, btn_scheme, disabled_scheme)
+
+
+def default_tab_scheme() -> TabScheme:
+    """Return a TabScheme based on the current light/dark palette."""
+    bar_bg = wx.Colour(*get_color('bg'))
+    active_bg = wx.Colour(*get_color('info_bg'))
+    hover_bg = wx.Colour(*get_color('nb_area'))
+    active_fg = wx.Colour(*get_color('pt_fg'))
+    inactive_fg = wx.Colour(*get_color('graytext'))
+    underline = wx.Colour(*get_color('highight'))
+    sep = wx.Colour(*get_color('info_bg'))
+    return (bar_bg, active_bg, hover_bg, active_fg, inactive_fg, underline, sep)
