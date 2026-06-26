@@ -132,6 +132,7 @@ def register_darkdetect(callable):
        sees a change in Dark Mode
     """
     global _DD_OBJECTS
+    use_darkdetect()
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
 
@@ -561,6 +562,11 @@ def set_color(widget, colorname, bg=None):
             wx.CallAfter(wid.Refresh)
         widget.onDarkTheme = partial(on_dark, widget)
         register_darkdetect(widget.onDarkTheme)
+
+def is_dark_theme() -> bool:
+    """Return True if the current palette is dark. Always reflects live state."""
+    return IS_DARK
+
 
 def get_color(name='text', dark=None):
     """get dark-mode-aware color by name

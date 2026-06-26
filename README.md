@@ -101,3 +101,106 @@ against an existing hash.  Methods in this module include
   existing hash.
 * `PasswordSetDialog` a dialog to set a Password, checking that
   password rules are satisfied.
+
+
+## flat widgets
+
+The `Flat*` family is a set of theme-aware widgets that look consistent across platforms. 
+All colors are resolved at paint time from the active `ColorTheme`, so switching the theme 
+causes every widget to repaint correctly without re-initialization.
+
+The flat widgets available are:
+
+* ``FlatButton`` a push simple button.
+  Accepts an optional ``color_scheme`` 5-tuple ``(idle_bg, hover_bg,
+  press_bg, idle_fg, hover_fg)`` and ``disabled_scheme`` 2-tuple ``(bg, fg)``
+  to override the theme for that instance.  Use ``SetAction(fn)`` to bind
+  a click handler.
+
+* ``FlatIconButton`` a square button that draws a vector icon supplied as
+  a ``draw_fn(gc, size)`` callable.  Built-in draw functions: ``draw_plus``,
+  ``draw_cross``, ``draw_refresh``, ``draw_cog``, ``draw_folder``,
+  ``draw_folder_open``, ``draw_search``, ``draw_trash``,
+  ``draw_chevron_left``, ``draw_chevron_right``, ``draw_arrow_up``.
+
+* ``FlatToggleButton`` a two-state toggle that fires ``wx.EVT_TOGGLEBUTTON``.
+  ``GetValue()`` returns the current bool state.
+
+* ``FlatRadioButton`` a circular radio dot.
+
+* ``FlatCheckBox`` a themed check box.  ``SetAction(fn)`` receives the new
+  ``bool`` value on every change.
+
+* ``FlatTextCtrl`` a text field with placeholder text, optional float-only
+  restriction (``SetRestrictToFloat(True)``), centered mode, and an error
+  highlight (``SetError(True)``).
+
+* ``FlatCombo`` a themed drop-down selector.  ``SetAction(fn)`` receives the
+  selected string.
+
+* ``FlatScrollBar`` and ``FlatHScrollBar`` thin vertical and horizontal
+  scrollbars.  The ``on_scroll`` callback receives a float position in
+  ``[0, 1]``.  Call ``Update(pos, size)`` to move the thumb programmatically.
+
+* ``FlatSplitter`` a resizable themed split pane.  Accepts an ``orientation`` 
+  parameter (``wx.SPLIT_VERTICAL`` by default).
+
+* ``FlatProgressBar`` a labeled progress bar.  ``Update(fraction, label,
+  sublabel)`` sets progress.  ``SetElapsed(seconds)`` shows a formatted
+  elapsed time; ``ClearElapsed()`` hides it.  ``Reset()`` returns to zero.
+
+* ``FlatTabbedPanel`` a themed tab bar.  Add pages with
+  ``AddPage(title, panel)`` and switch with ``SetSelection(index)``.
+
+* ``FlatMenuBar`` a fully painted menu bar.  ``AppendMenu(title, items,
+  shortcuts, callbacks)`` adds a dropdown (``None`` entries become
+  separators).  ``AppendAction(title, callback)`` adds a single-action item.
+
+* ``FlatTableHeader``, ``FlatTableRow``, ``FlatScrolledPanel`` a scrollable
+  table with a fixed header.
+
+* ``FlatScriptEditorDialog`` a syntax-highlighted Python editor in a
+  resizable frame.
+
+* ``FlatMessageDialog``, ``FlatConfirmDialog``, ``FlatWaitDialog`` themed
+  modal dialogs.
+
+* ``SectionDivider`` a horizontal rule with a centered label, useful for
+  grouping widgets in a panel.
+
+* ``StatusField`` a read-only display box with centered text.
+
+
+## color themes
+
+All Flat widgets resolve their colors from a global ``ColorTheme`` at paint
+time.  Switching the theme causes every widget in the application to repaint
+correctly without re-initialization.
+
+``ColorTheme`` is a dataclass with terminal-style color fields — the same
+layout used by terminal emulator themes: ``foreground``, ``background``,
+``cursor_fg``, ``cursor_bg``, ``selection_fg``, ``selection_bg``, and the
+standard 8 normal + 8 bright colors.
+
+Two built-in themes are provided, `light_theme()` and `dark_theme()`.
+
+By default wxutils selects the appropriate built-in automatically based on
+the OS setting via `darkdetect`.  To override, call ``set_theme()`` once
+after ``wx.App()`` is created and before any widgets are constructed:
+
+```
+from wxutils import set_theme, dark_theme
+set_theme(dark_theme())
+```
+
+To supply a custom theme, construct a ``ColorTheme`` with all fields and
+pass it to ``set_theme()``.  ``get_theme()`` returns the currently active
+theme anywhere in your code.
+
+Every Flat widget also accepts an optional per-instance scheme parameter
+that overrides the theme colors for that widget only.  When the scheme is
+``None`` (the default) the widget falls back to ``get_theme()`` at every
+paint, so theme switches automatically.  The shape of each scheme
+tuple is documented in the widget's constructor.
+
+
