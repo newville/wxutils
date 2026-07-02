@@ -514,6 +514,9 @@ class _FlatComboPopup(wx.PopupTransientWindow):
         self.Bind(wx.EVT_LEFT_DOWN, self._on_left_down)
         self.Bind(wx.EVT_LEFT_UP, self._on_left_up)
         self.Bind(wx.EVT_MOUSEWHEEL, self._on_wheel)
+        self._hover_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_hover_tick, self._hover_timer)
+        self._hover_timer.Start(16)
 
     def popup_below(self, screen_pt: wx.Point, min_width: int) -> None:
         dc = wx.ClientDC(self)
@@ -636,6 +639,20 @@ class _FlatComboPopup(wx.PopupTransientWindow):
         else:
             event.Skip()
 
+    def _on_hover_tick(self, _: wx.TimerEvent) -> None:
+        """Poll actual mouse position to update hover. Bypasses event routing issues."""
+        screen_pt = wx.GetMousePosition()
+        client_pt = self.ScreenToClient(screen_pt)
+        x, y = client_pt.x, client_pt.y
+        w, h = self.GetClientSize()
+        if 0 <= x <= w and 0 <= y <= h:
+            idx = self._row_at(x, y)
+        else:
+            idx = -1
+        if idx != self._hover_index:
+            self._hover_index = idx
+            self.Refresh()
+
     def _on_left_up(self, event: wx.MouseEvent) -> None:
         if self._sb_dragging:
             if self.HasCapture():
@@ -646,6 +663,7 @@ class _FlatComboPopup(wx.PopupTransientWindow):
         idx = self._row_at(x, y)
         if idx >= 0 and not self._dismissed:
             self._dismissed = True
+            self._hover_timer.Stop()
             self.Dismiss()
             wx.CallAfter(self._on_select, idx)
 
