@@ -117,7 +117,7 @@ class FlatCheckBox(EnableControl):
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
-        wx.CallAfter(self.Refresh)
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def DoGetBestSize(self) -> wx.Size:
         """Report the natural size to the sizer: left maring + box + gap + label text + right maring."""
@@ -815,7 +815,7 @@ class FlatCombo(EnablePanel):
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
-        wx.CallAfter(self.Refresh)
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def _on_enter(self, event: wx.MouseEvent) -> None:
         self._hovered = True

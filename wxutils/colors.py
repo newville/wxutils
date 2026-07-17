@@ -136,6 +136,7 @@ def register_darkdetect(callable):
     if callable not in _DD_OBJECTS:
         _DD_OBJECTS.append(callable)
 
+
 COLORS_LIGHT = {}
 COLORS_DARK = {}
 
