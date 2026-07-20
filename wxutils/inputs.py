@@ -262,6 +262,12 @@ class FlatTextCtrl(EnablePanel):
         self._ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_enter)
         self._ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_kill)
 
+        if text_scheme is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def _on_dark_theme(self, _is_dark: bool = True) -> None:
+        self._apply_scheme()
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def _resolve_scheme(self):
         if self._text_scheme is not None:
