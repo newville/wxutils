@@ -266,8 +266,12 @@ class FlatTextCtrl(EnablePanel):
             register_darkdetect(self._on_dark_theme)
 
     def _on_dark_theme(self, _is_dark: bool = True) -> None:
-        self._apply_scheme()
-        wx.CallAfter(lambda: self and self.Refresh())
+        def _update():
+            if self:
+                self._apply_scheme()
+                self._ctrl.Refresh()
+                self.Refresh()
+        wx.CallAfter(_update)
 
     def _resolve_scheme(self):
         if self._text_scheme is not None:
@@ -373,6 +377,7 @@ class FlatTextCtrl(EnablePanel):
         self._editing = True
         self._ctrl.SetValue(self._value)
         self._reposition_ctrl()
+        self._apply_scheme()
         self._ctrl.Show()
         self._ctrl.SetFocus()
         self._ctrl.SelectAll()
