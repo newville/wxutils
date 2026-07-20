@@ -277,7 +277,7 @@ class FlatTextCtrl(EnablePanel):
         if self._text_scheme is not None:
             return self._text_scheme
         theme = get_theme()
-        return (theme.black, theme.foreground, theme.white, theme.bright_black, theme.white, theme.red)
+        return (theme.bright_black, theme.foreground, theme.white, theme.background, theme.white, theme.red)
 
     def _apply_scheme(self) -> None:
         bg, fg, _, _, _, _ = self._resolve_scheme()
