@@ -151,7 +151,7 @@ class FlatButton(EnableControl):
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         """Registered with darkdetect; rebuilds default colors on theme change."""
         self._resolve_colors()
-        wx.CallAfter(self.Refresh)
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def _on_size(self, event: wx.SizeEvent) -> None:
         self.Refresh()
