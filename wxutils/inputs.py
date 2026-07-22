@@ -265,7 +265,7 @@ class FlatTextCtrl(EnablePanel):
         if text_scheme is None:
             register_darkdetect(self._on_dark_theme)
 
-    def _on_dark_theme(self, _is_dark: bool = True) -> None:
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
         def _update():
             if self:
                 self._apply_scheme()

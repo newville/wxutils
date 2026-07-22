@@ -134,6 +134,89 @@ class StatusField(wx.Control):
         gc.DrawText(self._value, (w - tw) / 2, (h - th) / 2)
 
 
+class FlatPanel(wx.Panel):
+    """Theme-aware wx.Panel that paints its background from the active theme on every repaint."""
+
+    def __init__(self, parent: wx.Window, **kws) -> None:
+        super().__init__(parent, style=wx.BORDER_NONE, **kws)
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        register_darkdetect(self._on_dark_theme)
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        dc.SetBackground(wx.Brush(get_theme().background))
+        dc.Clear()
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        wx.CallAfter(lambda: self and self.Refresh())
+
+
+class FlatLabel(wx.Control):
+    """Flat-painted static text label, theme-aware.
+
+    parent: parent window
+    label: display text
+    font: optional wx.Font, falls back to system font
+    fg: optional wx.Colour override for text, otherwise uses theme foreground
+    """
+
+    def __init__(
+        self,
+        parent: wx.Window,
+        label: str = "",
+        font: Optional[wx.Font] = None,
+        fg: Optional[wx.Colour] = None,
+        **kws,
+    ) -> None:
+        super().__init__(parent, style=wx.BORDER_NONE, **kws)
+        self._label = label
+        self._font = font
+        self._custom_fg = fg
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, lambda e: (self.Refresh(), e.Skip()))
+        if fg is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def SetLabel(self, label: str) -> None:
+        self._label = label
+        self.InvalidateBestSize()
+        self.Refresh()
+
+    def GetLabel(self) -> str:
+        return self._label
+
+    def SetFont(self, font: wx.Font) -> bool:
+        self._font = font
+        self.InvalidateBestSize()
+        self.Refresh()
+        return True
+
+    def DoGetBestSize(self) -> wx.Size:
+        dc = wx.ClientDC(self)
+        dc.SetFont(self._font or self.GetFont())
+        tw, th = dc.GetTextExtent(self._label or " ")
+        return wx.Size(tw + 8, th + 4)
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        wx.CallAfter(lambda: self and self.Refresh())
+
+    def _on_paint(self, _: wx.PaintEvent) -> None:
+        dc = wx.AutoBufferedPaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        t = get_theme()
+        w, h = self.GetClientSize()
+        gc.SetBrush(wx.Brush(t.background))
+        gc.SetPen(wx.TRANSPARENT_PEN)
+        gc.DrawRectangle(0, 0, w, h)
+        fg = self._custom_fg or t.foreground
+        font = self._font or self.GetFont()
+        gc.SetFont(gc.CreateFont(font, fg))
+        _, th = gc.GetTextExtent(self._label)
+        gc.DrawText(self._label, 4, (h - th) / 2)
+
+
 class FlatProgressBar(wx.Panel):
     """Flat progress bar with optional text overlay and elapsed time.
 
