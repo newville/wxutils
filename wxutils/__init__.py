@@ -28,7 +28,7 @@ from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioBu
 from .inputs import FlatCheckBox, FlatTextCtrl, FlatCombo
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 from .splitter import FlatSplitter
-from .display import StatusField, SectionDivider, FlatProgressBar, FlatTabbedPanel
+from .display import StatusField, SectionDivider, FlatPanel, FlatLabel, FlatProgressBar, FlatTabbedPanel
 from .tables import FlatTableHeader, FlatTableRow, FlatScrolledPanel
 from .menubar import FlatMenuBar
 from .editor import FlatScriptEditorDialog, apply_python_highlighting

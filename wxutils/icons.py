@@ -226,10 +226,10 @@ def draw_cog(gc: wx.GraphicsContext, s: int) -> None:
 def draw_folder(gc: wx.GraphicsContext, s: int) -> None:
     """Folder icon with an upward arrow."""
     m, tab_w, tab_h, r = s * 0.12, s * 0.38, s * 0.16, s * 0.08
-    accent = _icon_accent()
+    fg = _icon_fg()
     body = gc.CreatePath()
     body.AddRoundedRectangle(m, m + tab_h, s - 2 * m, s - 2 * m - tab_h, r)
-    gc.SetBrush(wx.Brush(wx.Colour(accent.Red(), accent.Green(), accent.Blue(), 200)))
+    gc.SetBrush(wx.Brush(fg))
     gc.SetPen(wx.TRANSPARENT_PEN)
     gc.FillPath(body)
     tab = gc.CreatePath()
@@ -251,10 +251,10 @@ def draw_folder(gc: wx.GraphicsContext, s: int) -> None:
 def draw_folder_open(gc: wx.GraphicsContext, s: int) -> None:
     """Open folder / browse directory icon."""
     m, r = s * 0.1, s * 0.07
-    accent = _icon_accent()
+    fg = _icon_fg()
     body = gc.CreatePath()
     body.AddRoundedRectangle(m, m + s * 0.18, s - 2 * m, s - 2 * m - s * 0.18, r)
-    gc.SetBrush(wx.Brush(wx.Colour(accent.Red(), accent.Green(), accent.Blue(), 200)))
+    gc.SetBrush(wx.Brush(fg))
     gc.SetPen(wx.TRANSPARENT_PEN)
     gc.FillPath(body)
     tab = gc.CreatePath()

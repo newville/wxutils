@@ -117,7 +117,7 @@ class FlatCheckBox(EnableControl):
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
-        wx.CallAfter(self.Refresh)
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def DoGetBestSize(self) -> wx.Size:
         """Report the natural size to the sizer: left maring + box + gap + label text + right maring."""
@@ -262,12 +262,22 @@ class FlatTextCtrl(EnablePanel):
         self._ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_enter)
         self._ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_kill)
 
+        if text_scheme is None:
+            register_darkdetect(self._on_dark_theme)
+
+    def _on_dark_theme(self, is_dark: bool = True) -> None:
+        def _update():
+            if self:
+                self._apply_scheme()
+                self._ctrl.Refresh()
+                self.Refresh()
+        wx.CallAfter(_update)
 
     def _resolve_scheme(self):
         if self._text_scheme is not None:
             return self._text_scheme
         theme = get_theme()
-        return (theme.black, theme.foreground, theme.white, theme.bright_black, theme.white, theme.red)
+        return (theme.bright_black, theme.foreground, theme.white, theme.background, theme.white, theme.red)
 
     def _apply_scheme(self) -> None:
         bg, fg, _, _, _, _ = self._resolve_scheme()
@@ -367,6 +377,7 @@ class FlatTextCtrl(EnablePanel):
         self._editing = True
         self._ctrl.SetValue(self._value)
         self._reposition_ctrl()
+        self._apply_scheme()
         self._ctrl.Show()
         self._ctrl.SetFocus()
         self._ctrl.SelectAll()
@@ -815,7 +826,7 @@ class FlatCombo(EnablePanel):
 
     def _on_dark_theme(self, is_dark: bool = True) -> None:
         self._resolve_colors()
-        wx.CallAfter(self.Refresh)
+        wx.CallAfter(lambda: self and self.Refresh())
 
     def _on_enter(self, event: wx.MouseEvent) -> None:
         self._hovered = True
