@@ -10,10 +10,7 @@ import darkdetect
 WINDOWS_STARTMODE = None
 
 # use jeepney for dark detection on linux
-try:
-    import jeepney
-except ImportError:
-    jeepney = None
+jeepney = None
 
 
 def dark_theme_linux():
