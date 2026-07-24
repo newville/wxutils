@@ -371,8 +371,8 @@ class NumericCombo(wx.ComboBox):
     def add_choice(self, val, select=True):
         if val not in self.choices:
             self.choices.append(val)
-            self.choices.sort()
-        self.choices.reverse()
+        self.choices.sort()
+        # self.choices.reverse()
         self.Clear()
         self.AppendItems([self.fmt % x for x in self.choices])
         if select:
