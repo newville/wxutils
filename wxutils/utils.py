@@ -7,9 +7,11 @@ mostly simplified wrappers around existing widgets.
 import os
 import sys
 from traceback import format_tb
+from pathlib import Path
 import wx
 from  wx.lib.dialogs import ScrolledMessageDialog
 
+from pyshortcuts import uname
 from .colors import set_color
 
 RIGHT = RCEN = wx.ALIGN_RIGHT
@@ -17,6 +19,36 @@ LEFT  = LCEN = wx.ALIGN_LEFT
 CEN   = CCEN = wx.ALIGN_CENTER
 LTEXT = wx.ST_NO_AUTORESIZE|wx.ALIGN_CENTER
 FRAMESTYLE = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL
+
+def SetAppDisplayName(appname: str) -> None:
+    """
+    Set application display name, including trying to set
+    the BundleName on MacOS so that it shows in the menubar
+    """
+    wx.GetApp().SetAppDisplayName(appname)
+    if uname == 'darwin':
+        try:
+            from Foundation import NSBundle
+            info = NSBundle.mainBundle().infoDictionary()
+            if info is not None:
+                info["CFBundleName"] = appname
+        except Exception:
+            pass
+
+def SetDockIcon(iconpath: str | Path) -> None:
+    """
+    set 'dock' icon for macos
+    """
+    if uname == 'darwin':
+        if isinstance(iconpath, str):
+            iconpath = Path(iconpath)
+        print(iconpath, iconpath.exists())
+        if iconpath.exists():
+            from AppKit import NSApplication, NSImage, NSData
+            icon_bytes = iconpath.read_bytes()
+            ns_data = NSData.dataWithBytes_length_(icon_bytes, len(icon_bytes))
+            ns_image = NSImage.alloc().initWithData_(ns_data)
+            NSApplication.sharedApplication().setApplicationIconImage_(ns_image)
 
 def SetTip(wid, tip=''):
     wid.SetToolTip(tip)

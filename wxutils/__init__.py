@@ -9,26 +9,31 @@ import sys
 import wx
 
 if sys.platform.lower() == 'darwin':
-    wx.PyApp.IsDisplayAvailable = lambda _: True
+    wx.PyApp.IosDisplayAvailable = lambda _: True
 
 from . import utils
 
 from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     set_widget_value, get_widget_value,
                     show_wxsizes, SetTip, Font, HLine, Check, MenuItem, Popup,
-                    RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE)
+                    RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE,
+                    SetAppDisplayName, SetDockIcon)
 
-from .colors import COLORS, GUI_COLORS, GUIColors, get_color, set_color, DARK_THEME, is_dark_theme, register_darkdetect, use_darkdetect
+
+from .colors import (COLORS, GUI_COLORS, GUIColors, get_color, set_color,
+                     DARK_THEME, is_dark_theme, register_darkdetect, use_darkdetect)
 
 from .themes import ColorTheme, set_theme, get_theme, light_theme, dark_theme
 
 from .base import EnableBase, EnableControl, EnablePanel
 
-from .buttons import Button, ToggleButton, BitmapButton, FlatButton, FlatRadioButton, FlatToggleButton, FlatIconButton
+from .buttons import (Button, ToggleButton, BitmapButton, FlatButton,
+                      FlatRadioButton, FlatToggleButton, FlatIconButton)
 from .inputs import FlatCheckBox, FlatTextCtrl, FlatCombo
 from .scrollbars import FlatScrollBar, FlatHScrollBar
 from .splitter import FlatSplitter
-from .display import StatusField, SectionDivider, FlatPanel, FlatLabel, FlatProgressBar, FlatTabbedPanel
+from .display import (StatusField, SectionDivider, FlatPanel, FlatLabel,
+                      FlatProgressBar, FlatTabbedPanel)
 from .tables import FlatTableHeader, FlatTableRow, FlatScrolledPanel
 from .menubar import FlatMenuBar
 from .editor import FlatScriptEditorDialog, apply_python_highlighting
