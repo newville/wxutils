@@ -6,6 +6,7 @@ mostly simplified wrappers around existing widgets.
 """
 import os
 import sys
+from contextlib import suppress
 from traceback import format_tb
 from pathlib import Path
 import wx
@@ -27,13 +28,13 @@ def SetAppDisplayName(appname: str) -> None:
     """
     wx.GetApp().SetAppDisplayName(appname)
     if uname == 'darwin':
-        try:
+        with suppress(Exception):
             from Foundation import NSBundle
             info = NSBundle.mainBundle().infoDictionary()
             if info is not None:
                 info["CFBundleName"] = appname
-        except Exception:
-            pass
+                info["CFBundleDisplayName"] = appname
+
 
 def SetDockIcon(iconpath: str | Path) -> None:
     """
@@ -42,13 +43,14 @@ def SetDockIcon(iconpath: str | Path) -> None:
     if uname == 'darwin':
         if isinstance(iconpath, str):
             iconpath = Path(iconpath)
-        print(iconpath, iconpath.exists())
         if iconpath.exists():
-            from AppKit import NSApplication, NSImage, NSData
-            icon_bytes = iconpath.read_bytes()
-            ns_data = NSData.dataWithBytes_length_(icon_bytes, len(icon_bytes))
-            ns_image = NSImage.alloc().initWithData_(ns_data)
-            NSApplication.sharedApplication().setApplicationIconImage_(ns_image)
+            with suppress(Exception):
+                from AppKit import NSApplication, NSImage, NSData
+                icon_bytes = iconpath.read_bytes()
+                ns_data = NSData.dataWithBytes_length_(icon_bytes, len(icon_bytes))
+                ns_image = NSImage.alloc().initWithData_(ns_data)
+                NSApplication.sharedApplication().setApplicationIconImage_(ns_image)
+
 
 def SetTip(wid, tip=''):
     wid.SetToolTip(tip)
