@@ -19,6 +19,8 @@ from .utils import (gcd, ExceptionPopup, set_sizer, pack, panel_pack,
                     RIGHT, LEFT, CEN , LCEN, RCEN, CCEN, LTEXT, FRAMESTYLE,
                     SetAppDisplayName, SetDockIcon)
 
+from .application import AppConfig, WxApplication
+from .shortcuts import add_shortcut_arguments, create_shortcut, handle_shortcut_arguments
 
 from .colors import (COLORS, GUI_COLORS, GUIColors, get_color, set_color,
                      DARK_THEME, is_dark_theme, register_darkdetect, use_darkdetect)
