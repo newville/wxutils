@@ -76,6 +76,17 @@ class WxApplication(wx.App):
 
         self.MainLoop()
 
+    def _set_window_icon(self, window):
+        """Set the frame and taskbar icon."""
+        if uname == "win":
+            icon = self.app_config.icon_path("ico")
+            bitmap_type = wx.BITMAP_TYPE_ICO
+        else:
+            icon = self.app_config.icon_path("png")
+            bitmap_type = wx.BITMAP_TYPE_PNG
+
+        window.SetIcon(wx.Icon(str(icon), bitmap_type))
+
     def _configure_windows(self):
         """Configures Windows identity and DPI awareness."""
         if uname != "win":
