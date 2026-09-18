@@ -41,3 +41,28 @@ def create_shortcut(app_config, public=False, folder=None):
         folder=folder,
         **platform_opts,
     )
+
+
+def add_shortcut_arguments(parser):
+    """Adds shortcut options to an argument parser."""
+    group = parser.add_argument_group("shortcut options")
+    group.add_argument("-m", "--make-icon", action="store_true", help="create an application shortcut")
+    group.add_argument("-p", "--public", action="store_true", help="create the shortcut for all users")
+    group.add_argument("-f", "--folder", nargs="?", help="optional shortcut subfolder")
+    return parser
+
+
+def handle_shortcut_arguments(parser, args, app_config):
+    """Handles the shortcut arguments and returns true if a shortcut was created."""
+    if args.public and not args.make_icon:
+        parser.error("-p/--public requires -m/--make-icon flag")
+
+    if args.folder and not args.make_icon:
+        parser.error("-f/--folder requires -m/--make-icon flag")
+
+    if not args.make_icon:
+        return False
+
+    create_shortcut(app_config, public=args.public, folder=args.folder)
+
+    return True
