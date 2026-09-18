@@ -9,8 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import wx
+import wx.lib.mixins.inspection
 from pyshortcuts import uname
 
+from .colors import use_darkdetect
+from .shortcuts import add_shortcut_arguments
 from .utils import SetAppDisplayName, SetDockIcon
 
 
@@ -50,7 +53,7 @@ class AppConfig:
         return icon
 
 
-class WxApplication(wx.App):
+class WxApplication(wx.App, wx.lib.mixins.inspection.InspectionMixin):
     """Configures and runs a wx application."""
 
     def __init__(self, app_config: AppConfig, *args, **kwargs):
@@ -64,6 +67,8 @@ class WxApplication(wx.App):
 
         if uname == "darwin":
             SetDockIcon(self.app_config.icon_path("icns"))
+
+        use_darkdetect()
 
         return True
 
@@ -111,3 +116,11 @@ class WxApplication(wx.App):
                 NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
 
         window.Raise()
+
+
+def add_application_arguments(parser):
+    """Adds shortcut options to an argument parser."""
+    parser.add_argument("-i", "--inspect", action="store_true", default=False, help="enable wxInspect")
+    add_shortcut_arguments(parser)
+    return parser
+
