@@ -12,8 +12,7 @@ from pathlib import Path
 
 from pyshortcuts import make_shortcut, uname
 
-
-def create_shortcut(app_config, public=False, folder=None):
+def create_shortcut(app_config, public=False, folder=None, desktop=None, macos_app=True):
     """Create a platform-native application shortcut."""
     extension = {"darwin": "icns", "win": "ico"}.get(uname, "png")
     icon = app_config.icon_path(extension)
@@ -26,10 +25,8 @@ def create_shortcut(app_config, public=False, folder=None):
     if not script.is_file():
         raise FileNotFoundError(f"Application launcher was not found: {script}!")
 
-    platform_opts = {}
-    if uname == "darwin":
-        platform_opts["macos_app"] = True
-        platform_opts["desktop"] = False
+    if desktop is None:
+        desktop = (uname != 'darwin')
 
     return make_shortcut(
         str(script),
@@ -39,7 +36,8 @@ def create_shortcut(app_config, public=False, folder=None):
         terminal=False,
         public=public,
         folder=folder,
-        **platform_opts,
+        desktop=desktop,
+        macos_app=(uname=='darwin'))
     )
 
 
