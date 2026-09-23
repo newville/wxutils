@@ -27,6 +27,8 @@ def create_shortcut(app_config, public=False, folder=None, desktop=None, macos_a
 
     if desktop is None:
         desktop = (uname != 'darwin')
+    if folder is not None:
+        desktop = True
 
     return make_shortcut(
         str(script),
@@ -38,7 +40,6 @@ def create_shortcut(app_config, public=False, folder=None, desktop=None, macos_a
         folder=folder,
         desktop=desktop,
         macos_app=(uname=='darwin'))
-    )
 
 
 def add_shortcut_arguments(parser):
@@ -50,7 +51,7 @@ def add_shortcut_arguments(parser):
     return parser
 
 
-def handle_shortcut_arguments(parser, args, app_config):
+def handle_shortcut_arguments(parser, args, app_config, desktop=None):
     """Handles the shortcut arguments and returns true if a shortcut was created."""
     if args.public and not args.make_icon:
         parser.error("-p/--public requires -m/--make-icon flag")
@@ -61,6 +62,6 @@ def handle_shortcut_arguments(parser, args, app_config):
     if not args.make_icon:
         return False
 
-    create_shortcut(app_config, public=args.public, folder=args.folder)
+    create_shortcut(app_config, public=args.public, folder=args.folder, desktop=desktop)
 
     return True
