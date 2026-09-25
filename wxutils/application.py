@@ -66,15 +66,29 @@ class WxApplication(wx.App, wx.lib.mixins.inspection.InspectionMixin):
         SetAppDisplayName(self.app_config.name)
 
         if uname == "darwin":
-            SetDockIcon(self.app_config.icon_path("icns"))
+            self._set_darwin_dock_icon()
 
         use_darkdetect()
 
         return True
 
+    def _set_darwin_dock_icon(self):
+        """Set the dock icon using the installed app bundle so it matches Finder."""
+        bundle_name = f"{self.app_config.name}.app"
+        for location in (Path.home() / "Applications", Path("/Applications")):
+            bundle_path = location / bundle_name
+            if bundle_path.exists():
+                with suppress(Exception):
+                    from AppKit import NSApplication, NSWorkspace
+                    icon = NSWorkspace.sharedWorkspace().iconForFile_(str(bundle_path))
+                    NSApplication.sharedApplication().setApplicationIconImage_(icon)
+                    return
+        SetDockIcon(self.app_config.icon_path("icns"))
+
     def run(self, window):
         """Displays the main application window and starts the main event loop."""
-        self._set_window_icon(window)
+        if uname != "darwin":
+            self._set_window_icon(window)
         self.SetTopWindow(window)
         window.Show()
         wx.CallAfter(self._activate_window, window)
