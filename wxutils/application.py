@@ -25,6 +25,7 @@ class AppConfig:
     assets: str
     description: str | None = None
     application_id: str | None = None
+    icon_name: str | None = None
 
     @property
     def slug(self):
@@ -45,7 +46,9 @@ class AppConfig:
 
     def icon_path(self, extension):
         """Returns a validated platform specific icon."""
-        icon = self.assets_path / f"{self.slug}.{extension}"
+        if self.icon_name is None:
+            self.icon_name = self.slug
+        icon = self.assets_path / f"{self.icon_name}.{extension}"
 
         if not icon.is_file():
             raise FileNotFoundError(f"Application icon was not found: {icon}.")
@@ -137,4 +140,3 @@ def add_application_arguments(parser):
     parser.add_argument("-i", "--inspect", action="store_true", default=False, help="enable wxInspect")
     add_shortcut_arguments(parser)
     return parser
-
