@@ -20,7 +20,6 @@ from .utils import SetAppDisplayName, SetDockIcon
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     """Configuration for a wx application."""
-
     name: str
     assets: str
     description: str | None = None
@@ -46,9 +45,10 @@ class AppConfig:
 
     def icon_path(self, extension):
         """Returns a validated platform specific icon."""
+        icon_name = self.icon_name
         if self.icon_name is None:
-            self.icon_name = self.slug
-        icon = self.assets_path / f"{self.icon_name}.{extension}"
+            icon_name = self.slug
+        icon = self.assets_path / f"{icon_name}.{extension}"
 
         if not icon.is_file():
             raise FileNotFoundError(f"Application icon was not found: {icon}.")
