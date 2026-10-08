@@ -2,18 +2,200 @@ import atexit
 import subprocess
 import wx
 
+from dataclasses import dataclass
+from typing import Optional
+
+
 from packaging import version as pkg_version
 from functools import partial
 from pyshortcuts import uname
 import darkdetect
 
+DARK_THEME = False
 WINDOWS_STARTMODE = None
+_DD_TIMER = None
+_DD_OBJECTS = []
 
 # use jeepney for dark detection on linux
 jeepney = None
 
+_COLOR_DATA = [  #  NAME,   LIGHT_RGBA,         DARK_RGBA
+('text',            (  0,   0,   0, 216), (255, 255, 255, 216)),
+('text_bg',         (255, 255, 255, 255), ( 50,  50 , 50, 255)),
+('text_invalid',    (240,   0,  10, 255), (240,   0,  10, 255)),
+('text_invalid_bg', (253, 253,  90, 255), (220, 220,  60, 255)),
+('bg',              (240, 240, 230, 255), ( 20,  20,  20, 255)),
+('hyperlink',       (  0,   0,  60, 255), (200, 200, 255, 255)),
+('nb_active',       (254, 254, 195, 255), (120, 120, 180, 255)),
+('nb_area',         (250, 250, 245, 255), ( 60,  60,  80, 255)),
+('nb_text',         ( 10,  10, 180, 255), (220, 240, 245, 255)),
+('nb_activetext',   ( 80,  10,  10, 255), (255, 245, 245, 255)),
+('title',           ( 80,  10,  10, 255), (240, 120, 120, 255)),
+('title_red',       (120,  10,  10, 255), (240, 120, 120, 255)),
+('title_green',     ( 10, 120,  10, 255), (120, 240, 120, 255)),
+('title_blue',      ( 10,  10, 210, 255), (120, 120, 250, 255)),
+('pvname',          ( 10,  10,  80, 255), ( 10,  10,  80, 255)),
+('list_bg',         (255, 255, 250, 255), ( 25,  25,  25, 255)),
+('list_fg',         (  5,   5,  25, 255), (  5,   5, 125, 255)),
+('hline',           ( 80,  80, 200, 255), (220, 220, 250, 255)),
+('button_bg',       (252, 252, 245, 255), (100, 100,  80, 255)),
+('pt_frame_bg',     (253, 253, 250, 255), ( 10,  10,  10, 255)),
+('pt_fg',           ( 20,  20, 120, 255), (180, 200, 250, 255)),
+('pt_bg',           (253, 253, 250, 255), ( 10,  10,  10, 255)),
+('pt_fgsel',        (200,   0,   0, 255), (250, 180, 200, 255)),
+('pt_bgsel',        (250, 250, 200, 255), ( 30,  20,  80, 255)),
+('window',          (255, 255, 255, 255), ( 23,  23,  23, 255)),
+('info_bg',         (231, 231, 231, 255), ( 38,  38,  38, 255)),
+('graytext',        (  0,   0,   0,  63), (255, 255, 255,  63)),
+('highight',        (165, 205, 255, 255), ( 49,  79, 120, 255)),
+('highlight_text',  (  0,   0,   0, 255), (255, 255, 255, 255)),
+('btn_highight',    (255, 255, 255, 255), (255, 255, 255,  25)),
+('hotlight',        (  9,  79, 209, 255), ( 53, 134, 255, 255)),
+]
 
-def dark_theme_linux():
+
+
+@dataclass
+class ColorTheme:
+    """Terminal-style color theme that drives all flat widget colors.
+
+    Modelled on the standard 16-color palette so any theme
+    (Tokyo Night, Solarized, Dracula, ...) maps directly.
+
+    Widgets mappings, e.g.:
+      background       -> widget surface
+      bright_black     -> elevated surface, disabled bg, border
+      foreground       -> primary text
+      white            -> secondary text
+      blue             -> accent / highlight / selection
+      bright_blue      -> accent hover
+      red              -> danger / error
+      green            -> success / progress fill
+      bright_black     -> comment fg in editor
+      ...
+    """
+
+    # base
+    foreground: wx.Colour
+    background: wx.Colour
+
+    # cursor (also used for inverted text in selections)
+    cursor_fg: wx.Colour
+    cursor_bg: wx.Colour
+
+    # selection
+    selection_fg: wx.Colour
+    selection_bg: wx.Colour
+
+    # normal
+    black: wx.Colour
+    red: wx.Colour
+    green: wx.Colour
+    yellow: wx.Colour
+    blue: wx.Colour
+    magenta: wx.Colour
+    cyan: wx.Colour
+    white: wx.Colour
+
+    # bright
+    bright_black: wx.Colour
+    bright_red: wx.Colour
+    bright_green: wx.Colour
+    bright_yellow: wx.Colour
+    bright_blue: wx.Colour
+    bright_magenta: wx.Colour
+    bright_cyan: wx.Colour
+    bright_white: wx.Colour
+
+    def as_dict(self):
+        return self.__dict__
+
+    def add_color(self, name, col):
+        if isinstance(col, (tuple, list)):
+            col = wx.Colour(*col)
+        setattr(self, name, col)
+
+
+def light_theme() -> ColorTheme:
+    """Built-in light ColorTheme."""
+    theme = ColorTheme(
+        foreground=wx.Colour(30, 30, 30, 255),
+        background=wx.Colour(240, 240, 230, 255),
+        cursor_fg=wx.Colour(240, 240, 230, 255),
+        cursor_bg=wx.Colour(30, 30, 30, 255),
+        selection_fg=wx.Colour(30, 30, 30, 255),
+        selection_bg=wx.Colour(165, 205, 255, 255),
+        black=wx.Colour(255, 255, 255, 255),
+        red=wx.Colour(200, 30, 30, 255),
+        green=wx.Colour(10, 140, 10, 255),
+        yellow=wx.Colour(160, 120, 10, 255),
+        blue=wx.Colour(70, 100, 220, 255),
+        magenta=wx.Colour(120, 0, 120, 255),
+        cyan=wx.Colour(0, 100, 160, 255),
+        white=wx.Colour(150, 150, 140, 255),
+        bright_black=wx.Colour(215, 215, 205, 255),
+        bright_red=wx.Colour(200, 30, 30, 255),
+        bright_green=wx.Colour(30, 160, 30, 255),
+        bright_yellow=wx.Colour(200, 160, 40, 255),
+        bright_blue=wx.Colour(100, 130, 240, 255),
+        bright_magenta=wx.Colour(140, 30, 140, 255),
+        bright_cyan=wx.Colour(0, 130, 190, 255),
+        bright_white=wx.Colour(255, 255, 255, 255))
+    for name, light, dark in _COLOR_DATA:
+        theme.add_color(name, light)
+    return theme
+
+
+def dark_theme() -> ColorTheme:
+    """Built-in dark ColorTheme."""
+    theme = ColorTheme(
+        foreground=wx.Colour(255, 255, 255, 255),
+        background=wx.Colour(20, 20, 20, 255),
+        cursor_fg=wx.Colour(20, 20, 20, 255),
+        cursor_bg=wx.Colour(255, 255, 255, 255),
+        selection_fg=wx.Colour(255, 255, 255, 255),
+        selection_bg=wx.Colour(49, 79, 120, 255),
+        black=wx.Colour(15, 16, 30, 255),
+        red=wx.Colour(240, 120, 120, 255),
+        green=wx.Colour(120, 240, 120, 255),
+        yellow=wx.Colour(224, 175, 104, 255),
+        blue=wx.Colour(120, 120, 250, 255),
+        magenta=wx.Colour(187, 154, 247, 255),
+        cyan=wx.Colour(125, 207, 255, 255),
+        white=wx.Colour(169, 177, 214, 255),
+        bright_black=wx.Colour(65, 72, 104, 255),
+        bright_red=wx.Colour(247, 118, 142, 255),
+        bright_green=wx.Colour(158, 206, 106, 255),
+        bright_yellow=wx.Colour(224, 175, 104, 255),
+        bright_blue=wx.Colour(53, 134, 255, 255),
+        bright_magenta=wx.Colour(187, 154, 247, 255),
+        bright_cyan=wx.Colour(125, 207, 255, 255),
+        bright_white=wx.Colour(192, 202, 245, 255))
+    for name, light, dark in _COLOR_DATA:
+        theme.add_color(name, dark)
+    return theme
+
+
+_ACTIVE_THEME: Optional[ColorTheme] = None
+
+THEME_LIGHT = light_theme()
+THEME_DARK  = dark_theme()
+COLORS_LIGHT = THEME_LIGHT.as_dict()
+COLORS_DARK = THEME_DARK.as_dict()
+
+def set_theme(theme: ColorTheme) -> None:
+    """Set the global ColorTheme used by all flat widgets."""
+    global _ACTIVE_THEME
+    _ACTIVE_THEME = theme
+
+def get_theme() -> ColorTheme:
+    """Return the active ColorTheme."""
+    global _ACTIVE_THEME, DARK_THEME
+    if _ACTIVE_THEME is not None:
+        return _ACTIVE_THEME
+    return dark_theme() if DARK_THEME else light_theme()
+
+def get_darkmode_linux():
     global jeepney
     if jeepney is not None:
         # Using the freedesktop portals for checking dark mode
@@ -50,12 +232,12 @@ def dark_theme_linux():
     # finally, give up
     return 'Light'
 
-def dark_theme_windows():
+def get_darkmode_windows():
     global WINDOWS_STARTMODE
-    theme = darkdetect.theme()
+    dd_theme = darkdetect.theme()
 
     if WINDOWS_STARTMODE is None:
-        WINDOWS_STARTMODE = theme
+        WINDOWS_STARTMODE = dd_theme
 
     # for wxPython < 4.3.0, we have to force light mode
     if pkg_version.parse(wx.__version__) < pkg_version.parse('4.3.0'):
@@ -70,35 +252,33 @@ def dark_theme_windows():
 
     # but for 4.3.0, we need to maintain the starting mode,
     # and probably set Dark mode
-    if theme == 'Dark':
+    if dd_theme == 'Dark':
         try:
             app.MSWEnableDarkMode(app.DarkMode_Always)
         except Exception:
             pass
     return WINDOWS_STARTMODE
 
-dark_theme = darkdetect.theme
+get_darkmode = darkdetect.theme
 if uname == 'linux':
-    dark_theme = dark_theme_linux
+    get_darkmode = get_darkmode_linux
 elif uname == 'win':
-    dark_theme = dark_theme_windows
+    get_darkmode = get_darkmode_windows
 
-_DD_TIMER = None
-_DD_OBJECTS = []
-IS_DARK = DARK_THEME = (dark_theme() == 'Dark')
+DARK_THEME = (get_darkmode() == 'Dark')
 
 def onDarkTheme(event=None, **kws):
-    global _DD_OBJECTS, IS_DARK, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
-    now_dark = (dark_theme() == 'Dark')
-    if now_dark != IS_DARK:
-        IS_DARK = DARK_THEME = now_dark
-        COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
+    global _DD_OBJECTS, DARK_THEME, COLORS, COLORS_LIGHT, COLORS_DARK
+    now_dark = (get_darkmode() == 'Dark')
+    if now_dark != DARK_THEME:
+        DARK_THEME = now_dark
+        COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
         for cb in _DD_OBJECTS[:]:
             try:
                 if not callable(cb):
                     _DD_OBJECTS.remove(cb)
                 else:
-                    cb(is_dark=IS_DARK)
+                    cb(is_dark=DARK_THEME)
             except RuntimeError:
                 _DD_OBJECTS.remove(cb)
             except Exception:
@@ -134,42 +314,6 @@ def register_darkdetect(callable):
         _DD_OBJECTS.append(callable)
 
 
-COLORS_LIGHT = {}
-COLORS_DARK = {}
-
-_COLOR_DATA = [  #  NAME,   LIGHT_RGBA,         DARK_RGBA
-('text',            (  0,   0,   0, 216), (255, 255, 255, 216)),
-('text_bg',         (255, 255, 255, 255), ( 50,  50 , 50, 255)),
-('text_invalid',    (240,   0,  10, 255), (240,   0,  10, 255)),
-('text_invalid_bg', (253, 253,  90, 255), (220, 220,  60, 255)),
-('bg',              (240, 240, 230, 255), ( 20,  20,  20, 255)),
-('hyperlink',       (  0,   0,  60, 255), (200, 200, 255, 255)),
-('nb_active',       (254, 254, 195, 255), (120, 120, 180, 255)),
-('nb_area',         (250, 250, 245, 255), ( 60,  60,  80, 255)),
-('nb_text',         ( 10,  10, 180, 255), (220, 240, 245, 255)),
-('nb_activetext',   ( 80,  10,  10, 255), (255, 245, 245, 255)),
-('title',           ( 80,  10,  10, 255), (240, 120, 120, 255)),
-('title_red',       (120,  10,  10, 255), (240, 120, 120, 255)),
-('title_green',     ( 10, 120,  10, 255), (120, 240, 120, 255)),
-('title_blue',      ( 10,  10, 210, 255), (120, 120, 250, 255)),
-('pvname',          ( 10,  10,  80, 255), ( 10,  10,  80, 255)),
-('list_bg',         (255, 255, 250, 255), ( 25,  25,  25, 255)),
-('list_fg',         (  5,   5,  25, 255), (  5,   5, 125, 255)),
-('hline',           ( 80,  80, 200, 255), (220, 220, 250, 255)),
-('button_bg',       (252, 252, 245, 255), (100, 100,  80, 255)),
-('pt_frame_bg',     (253, 253, 250, 255), ( 10,  10,  10, 255)),
-('pt_fg',           ( 20,  20, 120, 255), (180, 200, 250, 255)),
-('pt_bg',           (253, 253, 250, 255), ( 10,  10,  10, 255)),
-('pt_fgsel',        (200,   0,   0, 255), (250, 180, 200, 255)),
-('pt_bgsel',        (250, 250, 200, 255), ( 30,  20,  80, 255)),
-('window',          (255, 255, 255, 255), ( 23,  23,  23, 255)),
-('info_bg',         (231, 231, 231, 255), ( 38,  38,  38, 255)),
-('graytext',        (  0,   0,   0,  63), (255, 255, 255,  63)),
-('highight',        (165, 205, 255, 255), ( 49,  79, 120, 255)),
-('highlight_text',  (  0,   0,   0, 255), (255, 255, 255, 255)),
-('btn_highight',    (255, 255, 255, 255), (255, 255, 255,  25)),
-('hotlight',        (  9,  79, 209, 255), ( 53, 134, 255, 255)),
-]
 
 def add_named_color(name, lightcolor, darkcolor):
     """add a named color for light and dark modes
@@ -180,7 +324,7 @@ def add_named_color(name, lightcolor, darkcolor):
     darkcolor  wx.Colour or tuple   RGB or RGBA values for dark-mode color
 
     """
-    global COLORS_LIGHT, COLORS_DARK
+    global COLORS_LIGHT, COLORS_DARK, THEME_LIGHT, THEME_DARK
     if isinstance(lightcolor, (list, tuple)):
         if len(lightcolor) == 3:
             lightcolor = (lightcolor[0], lightcolor[1], lightcolor[2], 255)
@@ -189,13 +333,15 @@ def add_named_color(name, lightcolor, darkcolor):
         if len(darkcolor) == 3:
             darkcolor = (darkcolor[0], darkcolor[1], darkcolor[2], 255)
         # darkcolor = wx.Colour(darkcolor)
+    THEME_LIGHT.add_color(name, lightcolor)
+    THEME_DARK.add_color(name, darkcolor)
     COLORS_LIGHT[name] = lightcolor
     COLORS_DARK[name] = darkcolor
 
 for cname, clight, cdark in _COLOR_DATA:
     add_named_color(cname, clight, cdark)
 
-COLORS = COLORS_DARK if IS_DARK else COLORS_LIGHT
+COLORS = COLORS_DARK if DARK_THEME else COLORS_LIGHT
 
 X11_COLORS = {'aliceblue': (240,248,255), 'antiquewhite': (250,235,215),
               'antiquewhite1': (255,239,219), 'antiquewhite2': (238,223,204),
@@ -563,7 +709,7 @@ def set_color(widget, colorname, bg=None):
 
 def is_dark_theme() -> bool:
     """Return True if the current palette is dark. Always reflects live state."""
-    return IS_DARK
+    return DARK_THEME
 
 
 def get_color(name='text', dark=None):
@@ -574,11 +720,11 @@ def get_color(name='text', dark=None):
     dark   bool or None, force dark or light mode, use None as 'auto' [None]
 
     """
-    global  IS_DARK
+    global DARK_THEME
     if isinstance(name, wx.Colour):
         return name
     if dark is None:
-        dark = IS_DARK
+        dark = DARK_THEME
     if name not in COLORS_DARK:
         name = 'text'
     return COLORS_DARK[name] if dark else COLORS_LIGHT[name]
